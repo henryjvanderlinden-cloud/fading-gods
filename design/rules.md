@@ -111,6 +111,11 @@ A settlement past 150 converts up to 3 tiles a year within radius 1 (radius 2 pa
 800) to reckoned ground, **up to a lifetime budget of 30 tiles**, after which it
 stops permanently and is marked *spent*.
 
+The year's allowance is now clamped to what remains of the budget as well as to
+the yearly rate. Until the harness asserted it, a settlement sitting on 28 or 29
+spent tiles would take a full three more and overshoot its lifetime limit — a
+small bug in a rule A-14 calls load-bearing, and invisible without a test.
+
 **[load-bearing]** The budget exists because without it a settlement's output is
 quadratic in time — the reckoning radius grows with population — while blessing is
 linear. Over 20 turns that gap is survivable. Over 40 it is decisive, and no other
@@ -135,6 +140,17 @@ your stones, and defensive geometry matters.
 Stones were originally designed as weapons. Measured, that version made the
 magical player *lose* — the action cost exceeded the damage. As passive engines
 they work, because they are the only compounding thing the magical side owns.
+
+**A stone's ground can be taken.** Bless and Quicken overwrite the other side's
+blessing and neither excludes a tile with a stone standing on it, so a rival can
+bless the ground out from under your stone and silence it. Undocumented until
+now, and rare: 1% of stones end that way.
+
+**What actually kills stones is farmland.** Of 194 stones raised over 60 games,
+178 — **92%** — end under reckoned ground, and that is permanent, because
+reckoned ground is impassable and so cannot be blessed back. Clearance can also
+be aimed at a stone's tile deliberately, which nothing in this document says and
+nobody decided. See OP-16.
 
 ---
 
@@ -172,8 +188,12 @@ longer move a hill.
 | Work | Needs | Effect | Cost |
 |---|---|---|---|
 | Clearance | strength 5 | Reckon 3 tiles at once within 2 of a town | 10% of the town |
-| Send a colony | strength 7 | Found a settlement 3 tiles out, on any ground, ignoring the blessing requirement | 33% |
+| Send a colony | strength 7 | Found a settlement 3 tiles out, on any ground, ignoring the blessing requirement | 35% |
 | Raise a levy | strength 9 | An army forms and marches | 45% |
+
+The colony cost is 35%, not the 33% recorded here previously — the code has
+always multiplied by 0.65. Corrected against the source rather than the other way
+round, since 35% is what every measurement in §10 was taken with.
 
 The costs are not decoration. Without them Cities won 82–90% of games.
 
@@ -228,15 +248,72 @@ playing each other, and no amount of number-tuning fixes that.
 
 ## 10. Current balance
 
-Measured over ~40 games per matchup at 40 turns, against the Cities doctrine:
+**These numbers replace the previous table, which was measured against a
+simulator that is no longer in the repository and was never this game.** See
+`architecture/architecture.md`. Everything below comes from `sim/matrix.js`,
+which imports the same engine files `game/index.html` loads. Reproduce with
+`node sim/matrix.js 40 40`.
 
-| Playing | Wins |
+40 games per matchup, 40 turns, seeds 0–39.
+
+### Against the Cities doctrine
+
+| Playing | Wins | Previously claimed |
+|---|---|---|
+| Cities (mirror) | 57% | ~53–61% |
+| Mixed | 43% | ~47–50% |
+| Haunt (pure blessing) | 13% | ~42–56% |
+| Bands | 8% | ~33% |
+
+### Every matchup, mean win rate
+
+| Playing | Mean |
 |---|---|
-| Bands | ~33% |
-| Haunt (pure blessing) | ~42–56% |
-| Mixed | ~47–50% |
-| Cities (mirror) | ~53–61% |
+| Cities | 78% |
+| Mixed | 49% |
+| Haunt | 40% |
+| Bands | 24% |
 
-Everything within roughly 30 points, with no strategy dominant and hybrids viable.
-This is the healthiest the design has been. It is also produced by a greedy
-one-ply AI, which is the largest caveat attached to any of these numbers.
+**The spread between strongest and weakest doctrine is 54 points, not 30.** No
+strategy dominant is not true: Cities wins every matchup it plays except its own
+mirror. Mixed is genuinely middling, which is the one part of the old table that
+survived. The magical extremes are not viable, and OP-06 — *does an ascetic
+strategy ever win?* — now has a much sharper answer than it had.
+
+The old caveat still stands and matters more than before: all of this is a greedy
+one-ply AI playing both seats (OP-01).
+
+### Turn order
+
+Unmeasured until now, and large. **Bless overwrites the other side's blessing**,
+so when both powers bless contested ground in the same year, whoever acts second
+keeps it. In the build, you always act first.
+
+Mirror matches, same doctrine in both seats, win rate for the first seat:
+
+| Doctrine | Acting first | Acting second | Swing |
+|---|---|---|---|
+| Cities | 57% | 53% | 5 |
+| Mixed | 55% | 38% | 18 |
+| Bands | 35% | 68% | 33 |
+| Haunt | 28% | 68% | 40 |
+
+A blessing doctrine gains roughly 35 points by acting second, and the human seat
+never does. Some meaningful part of the Bands and Haunt collapse above is turn
+order rather than doctrine. See OP-17.
+
+### Interference
+
+The A-05 diagnostic — score against a live Cities rival versus against Passive on
+the same seeds:
+
+| Playing | Live | Alone | Interference |
+|---|---|---|---|
+| Cities | 84.2 | 181.4 | 54% |
+| Mixed | 74.4 | 178.3 | 58% |
+| Haunt | 63.5 | 172.1 | 63% |
+| Bands | 54.0 | 174.3 | 69% |
+
+Comfortably above the 31–39% previously recorded at this map size. Whatever else
+is wrong, the two powers are unambiguously playing each other, which A-05 called
+the single most important measured result in the project.
