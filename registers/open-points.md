@@ -86,8 +86,21 @@ The generator makes blob islands with smoothed noise. It has never been checked 
 whether it produces chokepoints, isthmuses, or interesting asymmetries — all of
 which matter now that terrain can be created and destroyed.
 
-**Settled by:** generating fifty maps and looking at them. Possibly seed control so
-a good map can be replayed.
+**One asymmetry is now measured, and it is not interesting, it is just unfair.**
+With turn order neutralised (OP-17), the left-hand seat still finishes **+4.0 ±
+1.4 points ahead** over 1,160 mirror games — the same doctrine in both seats, so
+the only remaining difference is where the two powers come down. Nearly three
+standard errors, so it is real. Small beside the 30 points turn order was worth,
+but it is a thumb on the scale nobody put there.
+
+Likely cause: the exclusion falloff in `gen()` is `c/1.9` from the left edge and
+`(COLS-1-c)/1.9` from the right, on a 14-wide grid whose odd rows are offset half
+a hex to the right. The two sides are not mirror images.
+
+**Settled by:** generating fifty maps and looking at them. Then a fairness check
+that is now cheap — `sim/order.js <doctrine> years` on a few hundred games, with
+the margin expected to be zero. Seed control already exists, so a good map can be
+replayed.
 
 ## OP-08 · low · Twenty turns or forty?
 
@@ -360,10 +373,51 @@ The swing is two effects, not one, and they partly cancel:
 Any rule that only addresses one of the two relocates the advantage rather than
 removing it, which is exactly what the contested rule did.
 
-**Settled by:** the remaining candidate is alternating who acts first from year
-to year, which is the only option that averages both effects instead of trading
-one for the other. An early look put it at 20% against the as-built 23% on the
-same measure, but the noise floor on a 25-game mirror is around 11% and that
-gap is not yet distinguishable from it. It wants a few hundred games before
-anyone believes it. Failing that, the honest fix is simultaneous resolution,
-which the game has nowhere else and which is not a small change.
+### The third candidate works. Alternate the order year by year.
+
+Run properly this time — `sim/order.js`, 300 mirror games per cell, ~3,500 games
+in total. The statistic is the **mean score margin, p0 minus p1**, not the win
+rate: a win rate throws away the size of every result and needs thousands of
+games to see a ten-point effect. Zero is fair.
+
+| Doctrine | You first | Rival first | Seat swing | Alternating |
+|---|---|---|---|---|
+| Cities | +13.0 ± 3.0 | −1.9 ± 3.2 | 14.9 | +5.2 ± 2.9 |
+| Bands | −6.5 ± 3.3 | +10.1 ± 3.2 | 16.6 | +6.6 ± 3.2 |
+| Mixed | +3.1 ± 2.3 | −1.1 ± 2.4 | 4.2 | +2.9 ± 2.2 |
+| Haunt | −16.8 ± 2.6 | +14.1 ± 2.7 | **30.9** | **+0.8 ± 2.7** |
+
+Note the sign. Cities does *better* going first — first pick of open country —
+while Bands and Haunt do better going second, from the overwrite. The two
+effects are real, opposed, and of similar size, which is why every rule that
+addressed only one of them made things worse.
+
+Alternating removes the turn-order effect: a mean of 9.7 points across the four,
+and for Haunt, the worst case, 30.9 points collapse to 0.8 ± 2.7 —
+indistinguishable from zero. Re-run on a fresh seed block (900–939) it held at
+−1.2 ± 2.5.
+
+**Adopt it.** It is the only candidate that averages both effects rather than
+trading one for the other, and unlike simultaneous resolution it needs no new
+concept — the two of you simply do not always move in the same order.
+
+**What it costs.** A rule change with an interface consequence, which is why it
+is not already in. In a rival-first year the rival must move *before* you, so
+the build needs a phase it does not currently have: resolve the rival, draw it,
+then let the player act. `endYear()` currently runs the rival and the world
+together. The engine change is small; the honest part is that the player has to
+be able to see it happen, and the chronicle should probably say whose year it
+was.
+
+### What is left over, and it is not turn order
+
+With the order alternating, p0 still ends **+4.0 ± 1.4 points ahead** across
+1,160 mirror games — nearly three standard errors, so real. That is the *starting
+positions*, not the order: p0 begins on the left of the valley and p1 on the
+right, and the generator has never been asked whether those two halves are worth
+the same. It is small next to the 30 points turn order was worth, and it belongs
+to OP-07 rather than here.
+
+**Settled by:** wiring alternating order into the engine and the build, then
+re-running `node sim/order.js report` to confirm the effect stays gone once a
+human is in the loop rather than a doctrine.

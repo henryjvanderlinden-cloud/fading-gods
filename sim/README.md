@@ -45,6 +45,26 @@ same order a browser would, and plays a full forty-year game by clicking the
 actual buttons. This is the only check that catches the renderer and the engine
 disagreeing. It needs `npm i jsdom` and skips cleanly without it.
 
+## order.js
+
+Answers OP-17: does the seat you sit in decide the game? Mirror matches, same
+doctrine in both seats, so the only differences are the starting positions and
+who acts first.
+
+```
+node sim/order.js <doctrine> <regime> <games> [turns] [seed0]
+node sim/order.js report
+```
+
+Regimes are `p0`, `p1`, `years`. Results accumulate in `/tmp/fg-order.json`
+across runs, so a long measurement can be taken in chunks; `report` prints the
+table. Set `FG_ORDER_OUT` to keep several experiments apart.
+
+The statistic is the **mean score margin, p0 minus p1**, with a standard error —
+not the win rate. A win rate discards the size of every result and needs
+thousands of games to resolve a ten-point effect; the margin uses all of it. Zero
+is fair.
+
 ## harness.js
 
 `playGame`, `match`, `interference`. Import it directly for one-off questions
