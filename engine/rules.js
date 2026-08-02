@@ -124,12 +124,10 @@ function foundBlock(k, who, free) {
 }
 const canFound = (k, who, free) => !foundBlock(k, who, free);
 
-// How much ground a Bless here would actually take. Under the contested rule
-// (OP-17), ground the other power took *this year* is worth nothing to take,
-// because taking it sends the tile to neither of you — so it does not count.
-// Only the second power to act each year ever sees a non-empty claim list,
-// which is a real asymmetry of information rather than a cheat: it can see what
-// changed. The interface owes the player the same sight.
+// How much ground a Bless here would actually take. The FG.CONTEST branch is a
+// rejected A-17 candidate, kept behind its toggle: under it, ground the other
+// power took this year is worth nothing to take, because taking it sends the
+// tile to neither of you.
 function blessGain(k, who) {
  const claims = FG.G.claims || {};
  const other = 1 << (1 - who);

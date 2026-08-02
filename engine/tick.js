@@ -19,7 +19,7 @@ function stoneTick() {
  }));
 }
 
-// OP-17. Ground both powers asserted this year goes to neither, and reverts to
+// A-17. Ground both powers asserted this year goes to neither, and reverts to
 // wild. A tile with a stone on it is the exception: it goes to the stone's
 // owner, so defending your own holy ground works whatever the turn order, and
 // nobody's defence hands the attacker the tile.

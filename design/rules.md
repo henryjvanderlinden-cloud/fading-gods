@@ -298,9 +298,14 @@ Mirror matches, same doctrine in both seats, win rate for the first seat:
 | Bands | 35% | 68% | 33 |
 | Haunt | 28% | 68% | 40 |
 
-A blessing doctrine gains roughly 35 points by acting second, and the human seat
-never does. Some meaningful part of the Bands and Haunt collapse above is turn
-order rather than doctrine. See OP-17.
+A blessing doctrine gains by acting second and the human seat never does — but
+the effect was measured properly and **the order is staying as it is**. See A-17
+for why, and for the three fixes that were built and rejected.
+
+What changed instead is how doctrine strength is reported. Measured with the
+seeds split evenly between both orders, so the seat advantage cancels: Cities
+50%, Haunt 22%, Mixed 37%, Bands 8%. Turn order was worth about half of Haunt's
+deficit and nothing at all to Bands.
 
 ### Interference
 

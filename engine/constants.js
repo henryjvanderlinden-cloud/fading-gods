@@ -46,14 +46,14 @@ FG.resetTune = function () {
 // walls are slow going (cost 3) rather than impassable
 FG.SOFT = false;
 
-// OP-17, first candidate fix. Ground both powers take in the same year goes to
-// neither. Measured worse than the problem: mean turn-order swing rose from 24
+// A-17, first candidate fix — rejected. Ground both powers take in the same
+// year goes to neither. Measured worse than the problem: mean turn-order swing rose from 24
 // to 41 points, because it converts a second-mover advantage into a larger
 // first-mover one. Off by default, kept so the result can be re-checked.
 FG.CONTEST = false;
 
-// OP-17, second candidate fix. Bless and Quicken take only wild ground and can
-// never take the other power's blessing. Removes the overwrite that causes the
+// A-17, second candidate fix — rejected. Bless and Quicken take only wild
+// ground and can never take the other power's blessing. Removes the overwrite that causes the
 // turn-order swing at its source, and settles OP-16 as a side effect: if
 // blessing cannot take their ground, it cannot take the ground under their
 // stone either.

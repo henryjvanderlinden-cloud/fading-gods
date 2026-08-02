@@ -1,4 +1,4 @@
-// Fading Gods — OP-17. Does the seat you sit in decide the game?
+// Fading Gods — A-17. Does the seat you sit in decide the game?
 //
 //   node sim/order.js <doctrine> <regime> <games> [turns]
 //   node sim/order.js report
@@ -50,7 +50,7 @@ if (process.argv[2] === "report") {
  const pad = (s, n) => String(s).padEnd(n);
  const rp = (s, n) => String(s).padStart(n);
 
- console.log("\nOP-17 — mean score margin, p0 minus p1, mirror matches");
+ console.log("\nA-17 — mean score margin, p0 minus p1, mirror matches");
  console.log("zero is fair. +/- is one standard error.\n");
  console.log(pad("doctrine", 10) + REG.map(r => rp(r[1], 20)).join("") + rp("order worth", 14));
  console.log("-".repeat(84));

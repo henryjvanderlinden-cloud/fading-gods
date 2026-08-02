@@ -20,7 +20,7 @@ function playGame(you, them, seed, tune, first) {
  const turns = FG.TUNE.turns.v;
  for (let i = 0; i < turns; i++) {
   // "years" alternates who moves first from one year to the next, within a
-  // single game — the third candidate fix for OP-17.
+  // single game — the third A-17 candidate. Measured fair, rejected on mechanism.
   if (first === "years" ? (i % 2 === 1) : first === "p1") {
    FG.aiTurn(1);
    FG.aiTurn(0);

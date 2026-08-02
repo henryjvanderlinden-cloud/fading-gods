@@ -17,7 +17,7 @@ FG.say = function (x, cls) {
 };
 
 // A power *taking* ground this year — recorded only when the tile actually
-// changes hands, not when a power re-blesses what it already holds. See OP-17.
+// changes hands, not when a power re-blesses what it already holds. See A-17.
 //
 // The broader version, where merely asserting ground counted, was tried and was
 // much worse: it made every overlap mutually destructive, and since the greedy

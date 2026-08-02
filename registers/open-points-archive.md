@@ -129,3 +129,54 @@ open points came out of the exercise: OP-16 and OP-17. The Python is deleted.
 **The lesson worth keeping:** a second implementation of the rules does not drift
 slowly and visibly. It stops being updated, keeps producing plausible numbers, and
 nothing announces it.
+
+## A-17 · Should turn order be changed? — **settled: no. Measure around it.**
+
+The effect is real. Mirror matches, same doctrine in both seats, mean score
+margin p0 minus p1 over ~3,500 games:
+
+| Doctrine | You first | Rival first | Seat swing | Alternating |
+|---|---|---|---|---|
+| Cities | +13.0 ± 3.0 | −1.9 ± 3.2 | 14.9 | +5.2 ± 2.9 |
+| Bands | −6.5 ± 3.3 | +10.1 ± 3.2 | 16.6 | +6.6 ± 3.2 |
+| Mixed | +3.1 ± 2.3 | −1.1 ± 2.4 | 4.2 | +2.9 ± 2.2 |
+| Haunt | −16.8 ± 2.6 | +14.1 ± 2.7 | **30.9** | **+0.8 ± 2.7** |
+
+It is two opposed effects of similar size: first pick of open country favours
+acting first, and the blessing overwrite favours acting second. Cities wants to
+go first; Bands and Haunt want to go second.
+
+Three fixes were built and measured. Two failed outright — contested ground and
+wild-only blessing, both in `rejected.md`. The third, alternating the order year
+by year, made the numbers fair.
+
+**It was still rejected, on the mechanism rather than the numbers.** Alternating
+does not alternate anything a player would recognise as turn order: because the
+world resolves at the end of each year, flipping the order means somebody acts,
+the world ticks, and then that same somebody acts again. A double move at every
+changeover — roughly twenty per side over forty years, not an edge case but a
+constant rhythm. The fairness measurement was real and the mechanism producing it
+was close to coincidence: two biases cancelling on average while the sequence
+stayed lumpy. Paying for that with a phase the interface does not have was not
+worth it.
+
+**What was done instead: change the measurement, not the game.** The build keeps
+its fixed order, and doctrine strength is reported with the seeds split evenly
+between both orders — `first: "alternate"` in `sim/harness.js`, which costs
+nothing and was already there.
+
+That decontaminates the one thing the confound was actually blocking:
+
+| Playing, against Cities | As built | Seeds split |
+|---|---|---|
+| Cities | 60% | 50% |
+| Bands | 8% | **8%** |
+| Mixed | 38% | 37% |
+| Haunt | 10% | 22% |
+
+Turn order was worth about half of Haunt's deficit and **none** of Bands'. Bands
+is weak on its own account, which is what OP-06 needed to know.
+
+**Worth remembering if it comes back:** the residual +4.0 ± 1.4 point advantage
+to the left-hand seat is *not* turn order and does not go away with any of this.
+It is the map, and it moved to OP-07.

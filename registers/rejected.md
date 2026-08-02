@@ -124,7 +124,7 @@ is still one of the best ideas produced and deserves a home somewhere.
 ## Contested ground reverting to wild
 
 **What:** ground both powers bless in the same year goes to neither, to remove
-the advantage the second mover gets from overwriting fresh blessing (OP-17).
+the advantage the second mover gets from overwriting fresh blessing (A-17).
 
 **Why out:** measured worse than the problem. Mean turn-order swing across the
 four doctrines went from 24% to **41%**, because it converts a second-mover
@@ -138,6 +138,28 @@ OP-01 and not the rule.
 
 **Do not revive as:** "contested ground, but only for tiles neither side held
 before." That is the version that was measured.
+
+## Alternating the turn order year by year
+
+**What:** flip who acts first from one year to the next, so the seat advantage
+averages out over a game (A-17).
+
+**Why out:** not on the numbers — it worked. Haunt's 30.9-point seat swing fell
+to 0.8 ± 2.7 over ~3,500 games. It is out on the **mechanism**. The world
+resolves at the end of each year, so flipping the order means a power acts, the
+world ticks, and then that same power acts again — a double move at every
+changeover, roughly twenty per side over forty years. That is a constant rhythm,
+not an edge case, and the fairness it produced was two opposed biases cancelling
+on average while the sequence stayed lumpy. It also needs a phase the interface
+does not have.
+
+**Done instead:** left the game alone and changed the measurement. Doctrine
+strength is reported with the seeds split evenly between both orders, which costs
+nothing and decontaminates the only thing the confound was blocking. See A-17.
+
+**Do not revive as:** "alternate, but resolve the world between the two halves of
+the year." That is a second world tick per year and a much larger change than the
+problem justifies.
 
 ## Contiguity scoring as the default
 

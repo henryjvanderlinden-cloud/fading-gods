@@ -16,7 +16,7 @@ a time is useful because the whole thing takes about a minute.
 
 ```
 node sim/matrix.js 40 40 cities    # the headline table, ~20s
-node sim/matrix.js 40 40 order     # turn-order sensitivity — see OP-17
+node sim/matrix.js 40 40 order     # turn-order sensitivity — see A-17
 node sim/matrix.js 12 20 all       # quick look while tuning
 ```
 
@@ -47,7 +47,7 @@ disagreeing. It needs `npm i jsdom` and skips cleanly without it.
 
 ## order.js
 
-Answers OP-17: does the seat you sit in decide the game? Mirror matches, same
+Answered A-17: does the seat you sit in decide the game? Mirror matches, same
 doctrine in both seats, so the only differences are the starting positions and
 who acts first.
 
@@ -80,20 +80,20 @@ console.log(m.win, m.bless, m.reck);
 build.
 
 `opts.first` decides who acts first each year, which matters more than it sounds
-(OP-17):
+(A-17):
 
 | Value | Meaning |
 |---|---|
 | `"p0"` | The build's own order — you act, then the rival. Default. |
 | `"p1"` | The rival acts first. |
 | `"alternate"` | Splits the seeds: half each way. The fairer measure of a doctrine. |
-| `"years"` | Flips the order from one year to the next *within* a game. This is the third candidate fix for OP-17 and wants a few hundred games before its effect is distinguishable from noise. |
+| `"years"` | Flips the order from one year to the next *within* a game. Measured fair and **rejected anyway** — because the world resolves at each year end, flipping the order means somebody acts, the world ticks, then that same power acts again. A double move at every changeover. See A-17. |
 
 Rule toggles are set directly on `FG` and are not reset between games, so set
 them before a run and put them back afterwards:
 
 ```js
-FG.CONTEST = true;           // OP-17 candidate — contested ground goes to neither
-FG.BLESS_WILD_ONLY = true;   // OP-17 candidate — bless never takes their ground
+FG.CONTEST = true;           // rejected A-17 candidate — contested ground goes to neither
+FG.BLESS_WILD_ONLY = true;   // rejected A-17 candidate — bless never takes their ground
 FG.SOFT = true;              // walls cost 3 rather than blocking
 ```

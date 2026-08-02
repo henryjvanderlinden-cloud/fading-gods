@@ -63,22 +63,35 @@ Cities and 24% across all matchups; Haunt, the pure-blessing line, wins 13% and
 40%. The old figures of 33% and 42–56% came from a simulator that was not this
 game. Cities wins 78% of everything it plays.
 
-The central dilemma is currently decorative. Two things must be separated before
-tuning anything, because they are confounded:
+The central dilemma is currently decorative. Two things confounded it. One is now
+resolved, and it turned out to matter for only one of the two magical doctrines.
 
-- **Turn order** (OP-17) is worth roughly 35 points to a blessing doctrine, and
-  the human seat always has the bad side of it.
-- **The one-ply AI** (OP-01) plays blessing badly in a way it does not play
-  founding badly — greedy tile-count maximisation is close to correct for Cities
-  and visibly wrong for Bands, which needs to split at the right moment rather
-  than the most immediately profitable one.
+**Turn order is dealt with** — see A-17. Measured with the seeds split evenly
+between both orders, so the seat advantage cancels:
 
-**Settled by:** fixing OP-17 and OP-01 first, then re-running the matrix, and only
-then tuning. Tuning now would be tuning against the AI's blind spots. If the
-magical side is still at 20% afterwards, the honest options are to accept that the
-viable magical line is *few settlements and many stones* and rename the doctrine,
-or to make blessing worth more, which A-09 shows is the lever that actually moves
-this.
+| Playing, against Cities | As built | Seeds split |
+|---|---|---|
+| Cities | 60% | 50% |
+| Bands | 8% | **8%** |
+| Mixed | 38% | 37% |
+| Haunt | 10% | 22% |
+
+Turn order was worth about half of Haunt's deficit. It was worth **nothing** to
+Bands, which sits at 8% either way. So the two magical doctrines fail for
+different reasons, and only one of them had an excuse.
+
+**The one-ply AI (OP-01) is what remains.** Greedy tile-count maximisation is
+close to correct for Cities and visibly wrong for Bands, which has to split at
+the right moment rather than the most immediately profitable one — and splitting
+is exactly the decision a one-ply chooser cannot see the point of, since it costs
+score now for score later. Bands may be an artefact of its own AI.
+
+**Settled by:** OP-01 first, then re-running the matrix with split seeds, and only
+then tuning. Tuning now would be tuning against the AI's blind spots. If Bands is
+still at 8% with an opponent that can plan two moves, the honest options are to
+accept that the viable magical line is *few settlements and many stones* and
+rename the doctrine, or to make blessing worth more, which A-09 shows is the lever
+that actually moves this.
 
 ## OP-07 · medium · Map generation is unexamined
 
@@ -87,7 +100,7 @@ whether it produces chokepoints, isthmuses, or interesting asymmetries — all o
 which matter now that terrain can be created and destroyed.
 
 **One asymmetry is now measured, and it is not interesting, it is just unfair.**
-With turn order neutralised (OP-17), the left-hand seat still finishes **+4.0 ±
+With turn order neutralised (A-17), the left-hand seat still finishes **+4.0 ±
 1.4 points ahead** over 1,160 mirror games — the same doctrine in both seats, so
 the only remaining difference is where the two powers come down. Nearly three
 standard errors, so it is real. Small beside the 30 points turn order was worth,
@@ -315,109 +328,3 @@ That needs separating from the incidental case:
 **Settled by:** implementing the Bless/Quicken split, which is small, and then
 deciding the Clearance question separately — it is the larger one and it is the
 one the numbers point at.
-
-## OP-17 · high · Acting second is worth 35 points to a blessing doctrine
-
-Bless overwrites the other side's blessing, so when both powers bless contested
-ground in the same year, whoever acts second keeps it. Measured in mirror
-matches: Haunt swings 28% → 68% by moving second, Bands 35% → 68%, Mixed 55% →
-38%, Cities 57% → 53%.
-
-**In the build, you always act first.** The human seat is structurally on the bad
-side of this, and it is worst for exactly the doctrines that are already losing —
-which means OP-06 cannot be answered until this is.
-
-### Two candidate fixes implemented and measured. Both fail.
-
-Mean turn-order swing across the four doctrines, mirror matches, 40 games each:
-
-| Rule | Mean swing |
-|---|---|
-| As built | **24%** |
-| Contested ground goes to neither | **41%** — much worse |
-| Bless takes only wild ground | **26%** — no better |
-
-**Contested ground goes to neither** (`FG.CONTEST`, off by default, kept as a
-toggle). Ground both powers take in the same year reverts to wild. It converts a
-second-mover advantage into a *larger* first-mover one: Haunt went from 28%/68%
-to 88%/8%. Two things were learned building it:
-
-- The first version counted a power merely *asserting* ground, so re-blessing
-  what you already held defended it. That made every overlap mutually
-  destructive and was worse still — swing 83%. Narrowing the claim to tiles that
-  actually change hands helped, but not enough.
-- The greedy AI made it worse in a way that is not the rule's fault. `blessGain`
-  counts taking the other side's blessing, so the second mover walked into the
-  contested zone every year and annihilated its own act. Teaching `blessGain`
-  to discount ground the other power took this year recovered about ten points.
-  That fix is in and is correct regardless of what happens to this rule — but
-  note it implies an interface obligation: if contested ground is ever adopted,
-  **the player must be able to see which ground changed hands this year**, and
-  at present nothing on the map says so.
-
-**Bless takes only wild ground** (`FG.BLESS_WILD_ONLY`, off by default). Removes
-the overwrite entirely, which would also settle OP-16 for free. It does not help,
-and it produces a large number of drawn games, which suggests it makes the board
-less decisive rather than more fair.
-
-### What the failures actually showed
-
-The swing is two effects, not one, and they partly cancel:
-
-- **The overwrite** favours whoever acts *second*, because they take fresh
-  ground that has not yet scored.
-- **First pick of open country** favours whoever acts *first*, and survives even
-  when the overwrite is removed entirely — under wild-only, the first mover
-  still wins nearly twice as often as the second.
-
-Any rule that only addresses one of the two relocates the advantage rather than
-removing it, which is exactly what the contested rule did.
-
-### The third candidate works. Alternate the order year by year.
-
-Run properly this time — `sim/order.js`, 300 mirror games per cell, ~3,500 games
-in total. The statistic is the **mean score margin, p0 minus p1**, not the win
-rate: a win rate throws away the size of every result and needs thousands of
-games to see a ten-point effect. Zero is fair.
-
-| Doctrine | You first | Rival first | Seat swing | Alternating |
-|---|---|---|---|---|
-| Cities | +13.0 ± 3.0 | −1.9 ± 3.2 | 14.9 | +5.2 ± 2.9 |
-| Bands | −6.5 ± 3.3 | +10.1 ± 3.2 | 16.6 | +6.6 ± 3.2 |
-| Mixed | +3.1 ± 2.3 | −1.1 ± 2.4 | 4.2 | +2.9 ± 2.2 |
-| Haunt | −16.8 ± 2.6 | +14.1 ± 2.7 | **30.9** | **+0.8 ± 2.7** |
-
-Note the sign. Cities does *better* going first — first pick of open country —
-while Bands and Haunt do better going second, from the overwrite. The two
-effects are real, opposed, and of similar size, which is why every rule that
-addressed only one of them made things worse.
-
-Alternating removes the turn-order effect: a mean of 9.7 points across the four,
-and for Haunt, the worst case, 30.9 points collapse to 0.8 ± 2.7 —
-indistinguishable from zero. Re-run on a fresh seed block (900–939) it held at
-−1.2 ± 2.5.
-
-**Adopt it.** It is the only candidate that averages both effects rather than
-trading one for the other, and unlike simultaneous resolution it needs no new
-concept — the two of you simply do not always move in the same order.
-
-**What it costs.** A rule change with an interface consequence, which is why it
-is not already in. In a rival-first year the rival must move *before* you, so
-the build needs a phase it does not currently have: resolve the rival, draw it,
-then let the player act. `endYear()` currently runs the rival and the world
-together. The engine change is small; the honest part is that the player has to
-be able to see it happen, and the chronicle should probably say whose year it
-was.
-
-### What is left over, and it is not turn order
-
-With the order alternating, p0 still ends **+4.0 ± 1.4 points ahead** across
-1,160 mirror games — nearly three standard errors, so real. That is the *starting
-positions*, not the order: p0 begins on the left of the valley and p1 on the
-right, and the generator has never been asked whether those two halves are worth
-the same. It is small next to the 30 points turn order was worth, and it belongs
-to OP-07 rather than here.
-
-**Settled by:** wiring alternating order into the engine and the build, then
-re-running `node sim/order.js report` to confirm the effect stays gone once a
-human is in the loop rather than a doctrine.
