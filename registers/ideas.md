@@ -33,7 +33,9 @@ its administration? Recurring every few decades, never the same twice.
 **Temple as life support** — thick walls to stop the noise, ritual cleanliness as
 noise reduction, an inner room. Every strange purity code in the ancient world read
 as engineering. Temples as relay stations: you are present wherever you are still
-housed and still kept.
+housed and still kept. *(Largely absorbed by OP-13. The relay station is a stone
+that already exists, and does not need a second object built for it. What survives
+here that OP-13 does not cover is the purity code read as engineering.)*
 
 **The standing stones at turn one belong to a previous cycle's failed player** —
 generated from a synthetic prior campaign. Costs nothing; the most beautiful object
@@ -54,7 +56,9 @@ elaborate as the belief grows thinner.
 
 **Syncretism as the real war** — a stronger cult does not destroy you, it absorbs
 you. Consort, son, adversary, a saint's day. You survive, renamed, your epics
-rewritten with someone else's name in the first line.
+rewritten with someone else's name in the first line. *(Now also an ending in
+OP-15, which is far cheaper to build than the mechanic and loses less than
+expected. If the ending lands, the mechanic may never be needed.)*
 
 **Schism** — two of your own settlements at uneven strength, one attacks the other,
 and it ends in two liturgies both claiming you and both partly wrong, with you
@@ -84,6 +88,17 @@ the late game.
 **Seasons or bad years** — a lean year that halves growth everywhere. Would create
 natural pauses in the exponential.
 
+**Works that edit the map** — a settlement bridging water, or cutting a road
+through mountain: the settled side undoing terrain the god made, at a price in
+people. *Set aside, and recorded here so the reason is not lost.* As a single
+bridge it is content rather than mechanism, and it deletes the one defensive payoff
+the magical side owns — `design/rules.md` §7, a levy with no road disbands where it
+stands, which is what makes *Drown* and *Raise mountains* worth spending. If it
+comes back it should come back as a **category** — the works can edit the land —
+alongside *stones that can be thrown down*, not as one work. Stated that way it
+does land the arc: early you shape the ground by pointing at it, late they shape it
+with labour.
+
 **Naming** — letting the player name settlements and stones, which is cheap and
 does an enormous amount for attachment in a game about being remembered.
 
@@ -95,7 +110,9 @@ decaying into policy. Partly implemented; could go much further.
 **No true map** — only maps someone drew, reflecting their skill and honesty.
 
 **An end-of-game chronicle** written by a later historian, describing what became
-of the valley, with your name in it or not.
+of the valley, with your name in it or not. *(Now concrete as OP-15, with a draft
+set of endings and the constraint that none of them may ever be scored or shown in
+advance.)*
 
 **Show the year's events as a small illuminated marginalia** rather than a log
 list.

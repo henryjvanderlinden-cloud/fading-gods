@@ -121,6 +121,24 @@ converts it into spreadsheet work. One number, from tiles held.
 in `game/previous/the-founding.html` because the writing-distortion mechanic in it
 is still one of the best ideas produced and deserves a home somewhere.
 
+## Contested ground reverting to wild
+
+**What:** ground both powers bless in the same year goes to neither, to remove
+the advantage the second mover gets from overwriting fresh blessing (OP-17).
+
+**Why out:** measured worse than the problem. Mean turn-order swing across the
+four doctrines went from 24% to **41%**, because it converts a second-mover
+advantage into a larger first-mover one — Haunt moved from 28%/68% to 88%/8%. A
+broader version, where merely re-asserting ground you already held counted as a
+claim, was worse again at 83%.
+
+**Kept as a toggle** — `FG.CONTEST` in `engine/constants.js`, off by default — so
+the result can be re-checked once the AI is better, since part of the effect is
+OP-01 and not the rule.
+
+**Do not revive as:** "contested ground, but only for tiles neither side held
+before." That is the version that was measured.
+
 ## Contiguity scoring as the default
 
 **What:** score only your largest unbroken region.

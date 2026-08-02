@@ -100,3 +100,32 @@ strike strength failed. A lifetime budget was the only fix.
 ## A-15 · Epochs, dealt empires, LLM delegates — **settled: out**
 
 See `registers/rejected.md`.
+
+## A-16 · The two implementations of the rules — **settled: unified**
+
+There is now one engine in `engine/`, loaded by `game/index.html` as script tags
+and by `sim/harness.js` through `engine/load.js`. Classic scripts rather than ES
+modules, so the game still opens by double-clicking. `sim/smoke.js` plays a full
+game through the build's own click handlers in a headless DOM, which is what
+makes "the game and the simulator are the same game" a checked claim rather than
+an intention.
+
+The finding was worse than "they drifted." `balance-sim-reference.py` was an
+18 × 11 map with *haunted* and *cultured* ground, blessing worth 1, 20 turns, and
+no stones, wonders, works, armies, refugee columns, reckoning budget or blessing
+requirement for founding. Every one of those contradicts a decision already
+recorded here — A-05, A-09, A-12, A-14. It was not a copy of the game that had
+drifted. It was the game from several months earlier.
+
+It therefore cannot have produced the balance table that stood in
+`design/rules.md` §10, which also reported a *Haunt* doctrine that the JavaScript
+build has never contained. Those numbers came from a simulator that is not in the
+repository and may never have been committed.
+
+Re-measured against the actual game, the field is not within 30 points, it is
+within 54, and Cities wins 78% of everything. The corrected table is in §10. Two
+open points came out of the exercise: OP-16 and OP-17. The Python is deleted.
+
+**The lesson worth keeping:** a second implementation of the rules does not drift
+slowly and visibly. It stops being updated, keeps producing plausible numbers, and
+nothing announces it.
