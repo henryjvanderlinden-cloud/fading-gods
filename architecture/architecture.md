@@ -2,22 +2,57 @@
 
 ## Where the code is now
 
-One HTML file, about 900 lines, containing markup, CSS, and all game logic in a
-single script block with module-scope mutable state (`G`). No build step, no
-dependencies, opens by double-clicking.
+**One engine, imported by both the game and the simulator.** Steps 1 and 2 of the
+migration below are done.
 
-This is the correct thing to have built. It got from idea to measurable in a day,
-repeatedly. It is also close to the end of its useful life: the state object is
-global, the rules and the renderer are interleaved, and there is no way to run the
-game without a browser.
+```
+engine/          the rules. No DOM, no rendering, no input.
+  constants.js   tunables, intervention lists, seeded randomness
+  hex.js         pointy-top odd-r geometry, neighbour table
+  map.js         terrain generation
+  state.js       createGame, tile access, the chronicle
+  rules.js       movement, legality, targeting, scoring — queries only
+  actions.js     the act and the intervention — the only mutators
+  tick.js        end-of-year resolution
+  ai.js          doctrine weights and the one-ply chooser
+  load.js        Node entry point; the browser uses <script> tags instead
+game/
+  index.html     markup, CSS, and nine script tags
+  ui.js          renderer and input. Owns no rules.
+sim/
+  harness.js     playGame / match / interference
+  matrix.js      the balance matrix
+  smoke.js       engine invariants, plus the real build played in a headless DOM
+```
 
-Separately there is a Python re-implementation of the same rules, used to run a few
-thousand games and produce every balance number in `design/rules.md`. That file is
-here as `balance-sim-reference.py`.
+Still no build step, no dependencies, and it still opens by double-clicking.
+These are **classic scripts, not ES modules**, and deliberately so: modules will
+not load over `file://`, which would have cost the thing that makes playtesting
+cheap. The price is that the engine files share a global `FG` namespace and load
+order matters. That price gets paid back at the TypeScript step, where a build
+step is unavoidable anyway and the conversion is mechanical.
 
-**These two implementations have already drifted.** That is the actual architectural
-problem, and it is worse than it sounds, because it means the tuning was done
-against something that is only *approximately* the game.
+`sim/smoke.js` optionally uses jsdom to load `game/index.html` and play a whole
+game through the actual buttons. It is the only thing that can catch the
+renderer and the engine disagreeing, and it is worth keeping installed.
+
+### What the unification found
+
+The Python re-implementation has been deleted. It is worth recording what it
+actually was, because the honest version of OP-02 is worse than "they drifted":
+
+`balance-sim-reference.py` was an **18 × 11 map** with *haunted* and *cultured*
+ground, blessing worth 1, 20 turns, growth 0.17, and no stones, no wonders, no
+works, no armies, no refugee columns, no reckoning budget and no blessing
+requirement for founding. Every one of those is a decision the design has since
+made and recorded in the archive — A-05, A-09, A-12, A-14. It was not a drifted
+copy of the game. It was the game from several months earlier.
+
+So the balance table in `design/rules.md` §10 could not have come from it. It
+reports a *Haunt* doctrine, which the JavaScript build has never contained
+either. Those numbers came from a simulator that no longer exists in this
+repository, and they have now been replaced with numbers measured against the
+game itself.
 
 ---
 
@@ -101,29 +136,33 @@ fighting it.
 
 ---
 
-## Migration, if and when
+## Migration
 
-Not urgent. The current file still works and still teaches. When it stops:
-
-1. Lift the rules functions out of `index.html` into `engine/` unchanged, still
+1. ~~Lift the rules functions out of `index.html` into `engine/` unchanged, still
    JavaScript. Get the existing UI importing them and confirm the game still plays
-   identically.
-2. Point the simulation harness at the same functions. Delete the Python. Re-run
+   identically.~~ **Done.** Verified by `sim/smoke.js`, which plays a full game
+   through the build's own click handlers in a headless DOM.
+2. ~~Point the simulation harness at the same functions. Delete the Python. Re-run
    the balance matrix — **expect the numbers to move**, and treat the new ones as
-   the real ones.
-3. Add TypeScript and a seeded RNG.
-4. Split the renderer properly.
-
-Step 2 is where the value is. Steps 1, 3, and 4 are housekeeping.
+   the real ones.~~ **Done.** They moved a very long way. See §10 of
+   `design/rules.md`.
+3. Add TypeScript and a seeded RNG. *The seeded RNG was pulled forward into step
+   1 — the harness is worthless without reproducible games — so this step is now
+   only TypeScript, and the build step that comes with it.*
+4. Split the renderer properly. `game/ui.js` is one 300-line function plus
+   wiring; it wants breaking into a state-to-SVG function and an input layer.
 
 ---
 
-## Things worth building once there is an engine
+## Things worth building next
 
-- **Seeded replay** — same map, different strategy. Makes A/B honest.
-- **A test suite over rule legality** — `canFound` has eight conditions and they
-  interact; it will break silently.
-- **A balance CI job** — run 500 games on every commit and fail if any doctrine
-  moves outside a band. Tuning regressions are otherwise invisible.
-- **Headless self-play** for better AI, which is OP-01 and probably the largest
-  outstanding uncertainty in the whole project.
+- ~~**Seeded replay**~~ — done. `FG.createGame({seed})` reproduces a game
+  exactly, and the matrix uses fixed seeds so two runs agree.
+- ~~**A test suite over rule legality**~~ — started. `sim/smoke.js` asserts the
+  reckoning budget, the erasure ratchet, the stone cap, land-state consistency,
+  and that nothing marches through rock. `canFound`'s eight conditions still
+  want tests of their own.
+- **A balance CI job** — `node sim/matrix.js 40 40 cities` in about twenty
+  seconds. Fail the build if a doctrine leaves its band. Nothing stops this now.
+- **Headless self-play** for better AI, which is OP-01 and, now that the numbers
+  are honest, visibly the largest uncertainty in the project.

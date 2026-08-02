@@ -18,12 +18,24 @@ You end the game holding everything you can build, and nothing you can call.
 
 Open `game/index.html` in a browser. No build step, no dependencies, no server.
 
+## Measure it
+
+```
+node sim/matrix.js          # the balance matrix, ~40s
+node sim/smoke.js           # engine invariants, and the real build in a headless DOM
+```
+
+Nothing to install. `sim/smoke.js` will use `jsdom` for the interface checks if
+it is present and skip them if it is not.
+
 ## Repository layout
 
 | Path | What's in it |
 |---|---|
-| `game/` | The current playable build. `index.html` is the latest. |
+| `engine/` | The rules. No DOM, no rendering. Loaded by the game and the simulator alike. |
+| `game/` | The playable build — markup, and a renderer that owns no rules. |
 | `game/previous/` | Earlier prototypes, kept because they test different questions. |
+| `sim/` | Headless harness, balance matrix, and checks. |
 | `design/` | The rules as they currently stand, in full. The source of truth. |
 | `concept/` | What the game is about, and what it should look and feel like. |
 | `registers/` | Live working documents — open points, archive, ideas, rejected. |
@@ -40,6 +52,12 @@ The pattern that has produced everything useful so far:
 Step 2 is not optional. Several ideas that were obviously good in conversation
 turned out to be strictly losing moves when measured — see
 `registers/rejected.md`. The measurement is cheap and the argument is not.
+
+There is now a fourth rule, learned the hard way in A-16: **the simulation has to
+be the game.** For a while it was not, and the balance numbers in the design doc
+were measured against a version of the rules from months earlier. A second
+implementation does not drift visibly — it stops being updated and goes on
+producing plausible numbers. One engine, imported by both.
 
 ## Status
 
