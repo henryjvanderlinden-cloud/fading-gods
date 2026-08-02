@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fading Gods — the founding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;1,300;1,400&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#12181A; --panel:#1A2123; --line:#283134; --line-soft:#20282A;
+  --ink:#D9DACE; --dim:#99A096; --faint:#69706A;
+  --gold:#C8B37E; --iron:#7593A1; --rust:#9B4A44; --moss:#7E9166;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:0 20px 90px;background:var(--ground);color:var(--ink);
+  font-family:'Spectral',Georgia,serif;font-weight:300;font-size:16px;line-height:1.6;
+}
+.wrap{max-width:1120px;margin:0 auto}
+header{padding:36px 0 14px;border-bottom:1px solid var(--line)}
+h1{font-size:28px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:lowercase}
+.sub{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--faint);margin-top:6px}
+.lede{max-width:64ch;color:var(--dim);font-size:15.5px;margin:20px 0 30px}
+
+.cols{display:grid;grid-template-columns:320px 1fr;gap:44px;align-items:start}
+@media(max-width:900px){.cols{grid-template-columns:1fr;gap:30px}}
+
+h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:11px;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 14px;
+  padding-bottom:8px;border-bottom:1px solid var(--line-soft)}
+h2 + h2{margin-top:30px}
+
+.field{margin-bottom:20px}
+.field .lab{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.opt{display:block;padding:7px 10px;border:1px solid var(--line);margin-bottom:4px;
+  cursor:pointer;font-size:14.5px;transition:border-color .12s,background .12s}
+.opt:hover{border-color:var(--dim)}
+.opt.on{border-color:var(--gold);background:var(--panel)}
+.opt .cost{display:block;font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;
+  letter-spacing:.05em;color:var(--rust);margin-top:2px}
+.opt.on .cost{color:var(--rust)}
+.opt .gain{display:block;font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;
+  letter-spacing:.05em;color:var(--faint);margin-top:2px}
+
+button{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:12px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;background:var(--panel);color:var(--ink);
+  border:1px solid var(--dim);padding:11px 22px;cursor:pointer;border-radius:2px}
+button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{border-color:var(--line);font-weight:400;padding:8px 14px;letter-spacing:.1em}
+button:focus-visible,.opt:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.gauges{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--line);margin-bottom:20px}
+.g{flex:1 1 92px;padding:12px 14px 12px 0;min-width:92px}
+.g .l{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--faint)}
+.g .v{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:21px;font-weight:500;line-height:1.3}
+.v.gold{color:var(--gold)} .v.iron{color:var(--iron)} .v.rust{color:var(--rust)} .v.moss{color:var(--moss)}
+
+.chartbox{border:1px solid var(--line-soft);padding:12px 12px 6px;margin-bottom:8px;background:var(--panel)}
+.key{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint);display:flex;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.key i{display:inline-block;width:14px;height:2px;vertical-align:middle;margin-right:5px}
+
+.chron{max-height:420px;overflow-y:auto;padding-right:10px;border-left:1px solid var(--line-soft);
+  padding-left:16px}
+.e{margin:0 0 8px;font-size:15px;color:var(--dim);max-width:70ch}
+.e b{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;font-weight:500;
+  letter-spacing:.1em;color:var(--faint);margin-right:8px}
+.e.big{color:var(--ink);font-size:15.5px}
+.e.good{color:var(--moss)} .e.bad{color:var(--rust)} .e.dream{color:var(--gold);font-style:italic}
+
+.epitaph{border-top:2px solid var(--gold);margin-top:26px;padding-top:22px}
+.epitaph h3{font-size:22px;font-weight:400;letter-spacing:.08em;text-transform:lowercase;margin:0 0 14px}
+.epitaph p{max-width:66ch}
+.scroll{border-left:2px solid var(--iron);padding-left:16px;margin:20px 0;font-style:italic;
+  color:var(--ink);max-width:62ch}
+.tally{display:flex;flex-wrap:wrap;gap:0;margin-top:18px;border-top:1px solid var(--line-soft)}
+.t{flex:1 1 120px;padding:11px 14px 11px 0;min-width:120px}
+.t .l{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--faint)}
+.t .v{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:17px;font-weight:500}
+
+.prev{margin-top:34px;padding-top:18px;border-top:1px solid var(--line)}
+.prev h4{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint);margin:0 0 8px;font-weight:400}
+.prev p{font-size:14.5px;color:var(--dim);max-width:70ch;margin:0}
+.hide{display:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>the founding</h1>
+  <div class="sub">prototype one · two hundred years · one complex</div>
+</header>
+
+<p class="lede">You choose who goes, what they carry, how they will govern themselves,
+where they settle, and whether they keep a house for you. Then you leave, and they
+run for two centuries without you. The only question this prototype asks is whether
+watching that is worth doing.</p>
+
+<div class="cols">
+<div>
+  <h2>the founding</h2>
+
+  <div class="field"><div class="lab">who goes</div><div id="f-cohort"></div></div>
+  <div class="field"><div class="lab">what they carry</div><div id="f-inst"></div></div>
+  <div class="field"><div class="lab">how they will govern</div><div id="f-custom"></div></div>
+  <div class="field"><div class="lab">where</div><div id="f-site"></div></div>
+  <div class="field"><div class="lab">a house for you</div><div id="f-temple"></div></div>
+
+  <div class="row" style="margin-top:24px">
+    <button id="run">Let them go</button>
+    <button id="skip" class="ghost hide">Skip ahead</button>
+  </div>
+</div>
+
+<div>
+  <div class="gauges" id="gauges"></div>
+  <div class="chartbox"><svg id="chart" width="100%" viewBox="0 0 700 220" role="img">
+    <title>Two centuries of one complex</title>
+    <desc>Lines tracking population, wilderness remaining, how audible the founder is, and belief.</desc>
+  </svg></div>
+  <div class="key">
+    <span><i style="background:#D9DACE"></i>people</span>
+    <span><i style="background:#7E9166"></i>wild land</span>
+    <span><i style="background:#C8B37E"></i>you are heard</span>
+    <span><i style="background:#7593A1"></i>belief</span>
+  </div>
+  <h2>the chronicle</h2>
+  <div class="chron" id="chron"><p class="e" style="font-style:italic;color:var(--faint)">Nothing has happened yet.</p></div>
+  <div id="epi"></div>
+  <div id="prev"></div>
+</div>
+</div>
+</div>
+
+<script>
+"use strict";
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);
+t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+const COHORT={
+ rite:{n:"Kin of the old rite",g:"devout, slow to change",belief:1.35,till:.7,arm:.7,rec:.5,tra:.8,rites:1.6},
+ hungry:{n:"The landless and hungry",g:"they will clear anything",belief:.75,till:1.6,arm:1,rec:.6,tra:1,rites:.7},
+ warriors:{n:"Warriors and their households",g:"proud, quick to answer insult",belief:.9,till:.9,arm:1.7,rec:.6,tra:.7,rites:.9},
+ scribes:{n:"Keepers and counters",g:"they write things down",belief:.85,till:.9,arm:.6,rec:1.8,tra:1.1,rites:1}
+};
+const INST={
+ plough:{n:"The plough",gain:"more land worked, faster",cost:null,},
+ marks:{n:"Marks on bark",gain:"they can fix a thing in writing",cost:"the ancestors go quiet"},
+ warband:{n:"A standing warband",gain:"they can defend themselves",cost:"you will not fight beside them"},
+ road:{n:"Road-craft",gain:"reach, trade, news",cost:"the distance-sense fades"},
+ granary:{n:"Granary and tally",gain:"they survive bad years",cost:"no more harvest omens"}
+};
+const CUSTOM={
+ council:{n:"A council of elders",g:"stable, and loud",stab:1.3,noise:11,cap:.9,fisAt:900},
+ eldest:{n:"Rule of the eldest",g:"quiet, and slow",stab:1.1,noise:3,cap:1.15,fisAt:650},
+ strongest:{n:"Rule of the strongest",g:"fast, and brittle",stab:.75,noise:6,cap:1.4,fisAt:1200},
+ lot:{n:"Chosen by lot",g:"hard to capture, hard to steer",stab:.95,noise:5,cap:.5,fisAt:700}
+};
+const SITE={
+ river:{n:"A river valley",g:"rich, and it will fill",fert:1.5,wild:110,rich:1.3,stone:.7,contact:70},
+ vale:{n:"A high wooded vale",g:"poor, and very quiet",fert:.85,wild:190,rich:.85,stone:1,contact:130},
+ coast:{n:"A coastal plain",g:"strangers will come",fert:1.15,wild:120,rich:1.15,stone:.8,contact:45},
+ barrens:{n:"The stone barrens",g:"almost nothing grows",fert:.6,wild:230,rich:.6,stone:1.9,contact:150}
+};
+const TEMPLE={
+ none:{n:"Nothing",g:"they will remember, or not",shield:0,priest:false},
+ grove:{n:"A grove kept clear",g:"cheap, while the woods stand",shield:14,priest:false},
+ house:{n:"A walled house",g:"it holds against some noise",shield:30,priest:true},
+ inner:{n:"An inner room",g:"thick walls, no light, one door",shield:52,priest:true}
+};
+
+let P={cohort:"rite",inst:{plough:true},custom:"eldest",site:"vale",temple:"grove"};
+let timer=null,SIM=null,prevEpi=null;
+
+function radio(host,src,key){
+ const h=document.getElementById(host);h.innerHTML="";
+ Object.keys(src).forEach(k=>{
+  const o=src[k],d=document.createElement("div");
+  d.className="opt"+(P[key]===k?" on":"");d.tabIndex=0;
+  d.innerHTML=o.n+'<span class="gain">'+o.g+'</span>';
+  const go=()=>{P[key]=k;draw()};
+  d.onclick=go;d.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}};
+  h.appendChild(d);
+ });
+}
+function checks(){
+ const h=document.getElementById("f-inst");h.innerHTML="";
+ Object.keys(INST).forEach(k=>{
+  const o=INST[k],d=document.createElement("div");
+  d.className="opt"+(P.inst[k]?" on":"");d.tabIndex=0;
+  d.innerHTML=o.n+'<span class="gain">'+o.gain+'</span>'+(o.cost?'<span class="cost">— '+o.cost+'</span>':'');
+  const go=()=>{P.inst[k]=!P.inst[k];draw()};
+  d.onclick=go;d.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}};
+  h.appendChild(d);
+ });
+}
+function draw(){
+ radio("f-cohort",COHORT,"cohort");checks();
+ radio("f-custom",CUSTOM,"custom");radio("f-site",SITE,"site");radio("f-temple",TEMPLE,"temple");
+}
+
+function start(){
+ if(timer){clearInterval(timer);timer=null}
+ const c=COHORT[P.cohort],cu=CUSTOM[P.custom],si=SITE[P.site],te=TEMPLE[P.temple];
+ const seed=Math.floor(Math.random()*1e9);
+ SIM={y:0,end:200,rnd:mulberry32(seed),c,cu,si,te,
+  pop:60,wild:si.wild,cleared:3,wealth:0,records:0,military:(P.inst.warband?25:6)*c.arm,
+  reach:10+(P.inst.road?18:0),belief:88,priestInt:100,priest:false,rites:12,
+  mon:0,epic:false,epicDist:0,daughters:0,contact:false,absorbed:false,dark:false,
+  syncr:0,hist:[],log:[],name:null,over:false};
+ SIM.name=pick(["the Ashfolk","the People of the Ford","the Hearth-kin","the Stonewatch","the Elder Reach","the Lowwater People"]);
+ say(0,"The "+SIM.name.replace(/^the /,"")+" go out with "+Object.keys(P.inst).filter(k=>P.inst[k]).length+
+  " things you gave them, to "+si.n.toLowerCase()+".","big");
+ if(P.temple!=="none")say(0,"They raise "+te.n.toLowerCase()+" before they plant anything.","dream");
+ else say(0,"They raise no house for you. You will be a memory here, and nothing more.","bad");
+ document.getElementById("epi").innerHTML="";
+ document.getElementById("run").disabled=true;
+ document.getElementById("skip").classList.remove("hide");
+ render();
+ timer=setInterval(()=>{step();if(SIM.over){clearInterval(timer);timer=null;finish()}else render()},70);
+}
+function pick(a){return a[Math.floor(SIM.rnd()*a.length)]}
+function say(y,t,cls){SIM.log.push({y,t,cls:cls||""})}
+
+function noiseNow(){
+ const s=SIM;
+ return s.pop/11 + s.cleared*0.5 + (P.inst.road?13:0) + s.cu.noise +
+        s.records*0.22 + s.wealth*0.012;
+}
+function audNow(){
+ const s=SIM;
+ const local=Math.max(0,118-noiseNow()+s.wild*0.22);
+ const pf=s.priest?s.priestInt/100:1;
+ return Math.max(0,Math.min(100,(local*0.62+s.te.shield)*(s.belief/100)*pf));
+}
+
+function step(){
+ const s=SIM;s.y++;
+ const r=s.rnd;
+ // land and people
+ const fert=s.si.fert*(P.inst.plough?1.45:1)*(P.inst.granary?1.08:1);
+ const cap=s.cleared*fert*9;
+ const gr=Math.max(-.02,Math.min(.03,(cap-s.pop)/Math.max(cap,1)*0.09));
+ s.pop=Math.max(12,s.pop*(1+gr));
+ const clear=Math.min(s.wild,s.c.till*(s.pop/230)*(P.inst.plough?1.5:1));
+ s.cleared+=clear;s.wild=Math.max(0,s.wild-clear);
+ // surplus
+ const sur=Math.max(0,s.pop*0.045*s.si.rich*(P.inst.granary?1.12:1));
+ s.wealth+=sur*0.45;
+ s.military+=sur*0.12*s.c.arm;
+ if(P.inst.marks)s.records+=sur*0.10*s.c.rec;
+ s.reach+=0.14+(P.inst.road?0.22:0);
+ // belief, rites, priesthood
+ const aud=audNow();
+ s.rites=Math.max(0,s.rites+(aud>28?0.28*s.c.rites:-0.16));
+ s.belief=Math.max(0,Math.min(100,s.belief - noiseNow()/170 + s.rites*0.011*s.c.belief - (P.inst.warband?0.035:0)));
+ if(!s.priest&&s.te.priest&&s.pop>260){s.priest=true;
+  say(s.y,"They appoint keepers of the house. You now speak to them, and they speak to everyone else.","")}
+ if(s.priest){s.priestInt=Math.max(0,s.priestInt-0.22-s.wealth/2600/s.cu.cap);
+  if(s.priestInt<42&&!s.flagCap){s.flagCap=true;
+   say(s.y,"The keepers have become a good position to hold. The rites are longer than they were, and emptier.","bad")}
+  if(s.priestInt<14&&!s.flagLost){s.flagLost=true;
+   say(s.y,"The house still stands and the words are still said. Nobody in it is listening.","bad")}}
+ // monuments
+ const monCost=340*s.si.stone;
+ if(s.wealth>monCost&&s.rites>18&&r()<0.30){s.wealth-=monCost;s.mon++;
+  say(s.y,pick(["They raise a stone. It will outlast everything else here.",
+   "A ring of stones is set on the high ground, and the reason is written nowhere.",
+   "They cut a face into the cliff above the water. It is not a good likeness."]),"good")}
+ // writing canonized
+ if(!s.epic&&P.inst.marks&&s.records>150){
+  s.epic=true;s.epicDist=Math.max(0,Math.min(100,100-aud));
+  if(s.epicDist<32)say(s.y,"They set down the account of you, and it is close to true.","good");
+  else if(s.epicDist<64)say(s.y,"They set down the account of you. Much of it you would recognise.","");
+  else say(s.y,"They set down the account of you. You are in it, and you are not.","bad");
+ }
+ // fission
+ if(s.pop>s.cu.fisAt&&s.wild>28&&r()<0.22){
+  s.pop*=0.74;s.daughters++;s.wild+=6;
+  say(s.y,"A part of them will not stay. They go over the ridge and are their own people now.","dream")}
+ // contact and its consequences
+ if(!s.contact&&s.reach>s.si.contact*0.55&&s.y>s.si.contact*0.3){s.contact=true;
+  say(s.y,"Strangers, regularly now. They have their own dead and their own words for them.","")}
+ if(s.contact&&r()<0.05){
+  const theirs=60+s.y*1.4+r()*90;
+  if(s.military>theirs*1.5){s.wealth+=180;s.mon+=r()<0.4?1:0;
+   say(s.y,"They took the valley to the east. The shrines there answer to your name now, in a fashion.","good")}
+  else if(theirs>s.military*1.5){
+   if(r()<0.34){s.absorbed=true;s.syncr+=45;
+    say(s.y,"They were taken. Their rites continue inside somebody else's calendar, under a name that is nearly yours.","bad")}
+   else say(s.y,"They lost badly and paid for it in grain for a generation.","bad")}
+  else{s.syncr+=7;s.wealth+=70;
+   say(s.y,"Trade, and with it borrowed gods. Two of yours have quietly merged with two of theirs.","")}
+ }
+ // going dark
+ if(!s.dark&&(s.belief<9||(s.priest&&s.priestInt<6))){s.dark=true;
+  say(s.y,"You cannot find them any more. Whatever happens here now, you will hear about it from travellers.","bad")}
+ // history
+ s.hist.push({p:s.pop,w:s.wild,a:aud,b:s.belief});
+ if(s.y>=s.end)s.over=true;
+}
+
+function render(){
+ const s=SIM;if(!s)return;
+ const aud=audNow();
+ document.getElementById("gauges").innerHTML=`
+  <div class="g"><div class="l">year</div><div class="v">${s.y}</div></div>
+  <div class="g"><div class="l">people</div><div class="v">${Math.round(s.pop)}</div></div>
+  <div class="g"><div class="l">wild left</div><div class="v moss">${Math.round(s.wild)}</div></div>
+  <div class="g"><div class="l">you are heard</div><div class="v gold">${Math.round(aud)}</div></div>
+  <div class="g"><div class="l">belief</div><div class="v iron">${Math.round(s.belief)}</div></div>
+  <div class="g"><div class="l">stones</div><div class="v">${s.mon}</div></div>
+  <div class="g"><div class="l">daughters</div><div class="v">${s.daughters}</div></div>`;
+ // chart
+ const H=s.hist,W=700,Ht=220,pad=8;
+ if(H.length>1){
+  const maxP=Math.max(...H.map(h=>h.p),100),maxW=Math.max(...H.map(h=>h.w),1);
+  const px=i=>pad+(i/(s.end-1))*(W-pad*2);
+  const py=v=>Ht-pad-v*(Ht-pad*2);
+  const path=(f)=>H.map((h,i)=>(i?"L":"M")+px(i).toFixed(1)+" "+py(f(h)).toFixed(1)).join(" ");
+  document.getElementById("chart").innerHTML=
+   `<title>Two centuries</title><desc>Population, wilderness, audibility and belief over time.</desc>`+
+   `<path d="${path(h=>h.p/maxP)}" fill="none" stroke="#D9DACE" stroke-width="1.4" opacity=".85"/>`+
+   `<path d="${path(h=>h.w/maxW)}" fill="none" stroke="#7E9166" stroke-width="1.4" opacity=".85"/>`+
+   `<path d="${path(h=>h.a/100)}" fill="none" stroke="#C8B37E" stroke-width="1.8"/>`+
+   `<path d="${path(h=>h.b/100)}" fill="none" stroke="#7593A1" stroke-width="1.4" opacity=".8"/>`;
+ }
+ const c=document.getElementById("chron");
+ c.innerHTML=s.log.map(l=>`<p class="e ${l.cls}"><b>${l.y?"year "+l.y:"the founding"}</b>${l.t}</p>`).join("");
+ c.scrollTop=c.scrollHeight;
+}
+
+function finish(){
+ const s=SIM,last=s.hist[s.hist.length-1];
+ const score=Math.round(s.mon*14+s.rites*0.9+(s.epic?45-s.epicDist*0.32:0)+s.daughters*17+
+   (s.dark?0:24)+(s.absorbed?-16:0)+last.b*0.32);
+ let head,body;
+ if(s.absorbed)head="absorbed";
+ else if(s.dark)head="gone quiet";
+ else if(last.b>45)head="still yours";
+ else head="two hundred years";
+
+ const carriers=s.dark?"They live, and they do not know your name.":
+   (s.absorbed?"They live inside a larger people, and something of you is still said on one day of the year.":
+    (last.b>45?"They live, and they still keep your rites.":"They live. Your name is said at funerals and not much else."));
+
+ const carved=s.epic?(s.epicDist<32?"What they wrote down about you is close to true."
+   :s.epicDist<64?"What they wrote down about you is half right, and it is permanent."
+   :"What they wrote down about you is largely invention, and it is the only version that survives.")
+   :"Nothing about you was ever fixed in writing. It went with the people who remembered it.";
+
+ const stones=s.mon?`${s.mon} stone${s.mon>1?"s":""} stand${s.mon>1?"":"s"} here, and will stand a long time after this.`
+   :"They raised nothing that will outlast the roofs.";
+
+ body=`${carriers} ${stones} ${carved}`;
+
+ const dist=s.epic?`<div class="scroll">${
+   s.epicDist<32?"\u201cAnd the one who walked with them spoke plainly, and it was written as it was spoken.\u201d"
+   :s.epicDist<64?"\u201cAnd the one who walked with them was a king of the old years, and lived nine hundred summers, and was terrible to look upon.\u201d"
+   :"\u201cAnd in the first days there were three gods over this valley, and the greatest of them demanded the stones, and was fed.\u201d"}</div>`:"";
+
+ document.getElementById("epi").innerHTML=
+  `<div class="epitaph"><h3>${head}</h3><p>${body}</p>${dist}
+   <div class="tally">
+    <div class="t"><div class="l">remembered</div><div class="v gold">${score}</div></div>
+    <div class="t"><div class="l">people</div><div class="v">${Math.round(last.p)}</div></div>
+    <div class="t"><div class="l">wild left</div><div class="v moss">${Math.round(last.w)}</div></div>
+    <div class="t"><div class="l">stones</div><div class="v">${s.mon}</div></div>
+    <div class="t"><div class="l">daughters</div><div class="v">${s.daughters}</div></div>
+    <div class="t"><div class="l">distortion</div><div class="v ${s.epicDist>60?"rust":""}">${s.epic?Math.round(s.epicDist):"—"}</div></div>
+   </div></div>`;
+ if(prevEpi)document.getElementById("prev").innerHTML=
+   `<div class="prev"><h4>the founding before this one</h4><p>${prevEpi}</p></div>`;
+ prevEpi=`${COHORT[P.cohort].n} · ${SITE[P.site].n} · ${TEMPLE[P.temple].n} · `+
+   `${Object.keys(P.inst).filter(k=>P.inst[k]).map(k=>INST[k].n.toLowerCase()).join(", ")||"nothing"} — `+
+   `<b style="font-family:'IBM Plex Sans Condensed';color:var(--gold);font-weight:500">remembered ${score}</b>, `+
+   `${s.mon} stones, ${s.daughters} daughters, ${s.dark?"went quiet":"still heard"}.`;
+ document.getElementById("run").disabled=false;
+ document.getElementById("run").textContent="Send another";
+ document.getElementById("skip").classList.add("hide");
+}
+
+document.getElementById("run").onclick=start;
+document.getElementById("skip").onclick=()=>{
+ if(!SIM||SIM.over)return;
+ if(timer){clearInterval(timer);timer=null}
+ while(!SIM.over)step();
+ render();finish();
+};
+draw();
+</script>
+</body>
+</html>

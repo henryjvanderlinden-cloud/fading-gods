@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fading Gods — blessed ground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+ --ground:#12181A;--panel:#1A2123;--line:#283134;--soft:#20282A;
+ --ink:#D9DACE;--dim:#99A096;--faint:#69706A;
+ --gold:#C8B37E;--bless:#9A7BC8;--reck:#C79A52;
+ --rbless:#5FA0A8;--rreck:#B0705A;--rust:#9B4A44;--moss:#7E9166;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0 20px 70px;background:var(--ground);color:var(--ink);
+ font-family:'Spectral',Georgia,serif;font-weight:300;font-size:15.5px;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto}
+header{padding:30px 0 12px;border-bottom:1px solid var(--line)}
+h1{font-size:26px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:lowercase}
+.sub{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.22em;
+ text-transform:uppercase;color:var(--faint);margin-top:5px}
+.q{max-width:66ch;color:var(--dim);margin:16px 0 20px;font-size:15px}
+.cols{display:grid;grid-template-columns:1fr 310px;gap:34px;align-items:start}
+@media(max-width:940px){.cols{grid-template-columns:1fr}}
+h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:10.5px;
+ letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 12px;
+ padding-bottom:7px;border-bottom:1px solid var(--soft)}
+.blk{margin-bottom:24px}
+svg.map{display:block;width:100%;height:auto;background:#0C1214;border:1px solid var(--line)}
+.hx{cursor:pointer}.hx.no{cursor:default}
+.bar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--line);margin-bottom:14px}
+.c{flex:1 1 74px;padding:11px 11px 11px 0;min-width:74px}
+.c .l{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:9.5px;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--faint)}
+.c .v{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:20px;font-weight:500;line-height:1.3}
+.v.g{color:var(--gold)}.v.h{color:var(--bless)}.v.u{color:var(--reck)}
+.v.rv{color:var(--rreck)}.v.r{color:var(--rust)}
+button,select{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11.5px;font-weight:600;
+ letter-spacing:.13em;text-transform:uppercase;background:var(--panel);color:var(--ink);
+ border:1px solid var(--line);padding:9px 13px;cursor:pointer;border-radius:2px}
+select{font-weight:400;text-transform:none;letter-spacing:.03em;padding:7px 9px;width:100%}
+button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+button:disabled{opacity:.35;cursor:not-allowed}
+button.main{border-color:var(--dim);padding:11px 18px}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.key{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;letter-spacing:.1em;
+ text-transform:uppercase;color:var(--faint);display:flex;gap:12px;flex-wrap:wrap;margin-top:9px}
+.key i{display:inline-block;width:10px;height:10px;vertical-align:-1px;margin-right:5px;border-radius:2px}
+.log{max-height:180px;overflow-y:auto;border-left:1px solid var(--soft);padding-left:13px}
+.log p{margin:0 0 6px;font-size:14px;color:var(--dim)}
+.log b{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;letter-spacing:.1em;
+ color:var(--faint);margin-right:7px;font-weight:500}
+.log p.bad{color:var(--rust)}.log p.good{color:var(--moss)}.log p.big{color:var(--ink)}
+.log p.riv{color:var(--rreck)}.log p.omen{color:var(--bless);font-style:italic}
+.tune{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:12px}
+.tune label{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px;
+ letter-spacing:.05em;color:var(--dim)}
+.tune input[type=range]{flex:0 0 92px}
+.tune output{color:var(--gold);font-weight:500;min-width:32px;text-align:right}
+.tune label.cb{justify-content:flex-start;gap:8px}
+.sl{list-style:none;padding:0;margin:0}
+.sl li{display:flex;justify-content:space-between;font-family:'IBM Plex Sans Condensed',sans-serif;
+ font-size:12px;padding:4px 0;border-bottom:1px solid var(--soft);letter-spacing:.04em}
+.b1{color:var(--gold)}.b2{color:var(--dim)}.b3{color:var(--reck)}.b4{color:var(--rust)}
+.dead{color:var(--faint)}
+.done{border-top:2px solid var(--gold);margin-top:20px;padding-top:16px}
+.done h3{font-size:20px;font-weight:400;letter-spacing:.08em;text-transform:lowercase;margin:0 0 10px}
+.done p{max-width:64ch;color:var(--dim)}
+.hintline{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.06em;
+ color:var(--faint);margin-top:8px;min-height:15px}
+</style>
+</head>
+<body><div class="wrap">
+<header><h1>blessed ground</h1><div class="sub">prototype · two powers · stones and cities</div></header>
+<p class="q">Where you have walked, the ground is <b style="color:var(--bless);font-weight:400">blessed</b>.
+Where a settlement has counted and ploughed it, the ground is <b style="color:var(--reck);font-weight:400">reckoned</b>.
+Standing on blessed ground with eight connected tiles beneath it, you can entice a <b style="color:var(--gold);font-weight:400">sacred stone</b>
+out of the earth. A stone is a conduit: it blesses the country around it every year without you,
+and once its region reaches sixteen it begins calling things down on settlements within reach.
+Blessed 3, reckoned 2, settlement 3.</p>
+
+<div class="cols">
+<div>
+  <div class="bar" id="bar"></div>
+  <svg class="map" id="map" viewBox="0 0 632 352" role="img">
+    <title>The contested valley</title><desc>Hex map showing blessed and reckoned ground for both powers, settlements, sacred stones and presence tokens.</desc>
+  </svg>
+  <div class="key">
+    <span><i style="background:#3E3050;border:1px solid #9A7BC8"></i>your blessing</span>
+    <span><i style="background:#4A3F2A;border:1px solid #C79A52"></i>your reckoned</span>
+    <span><i style="background:#1F3A3E;border:1px solid #5FA0A8"></i>their blessing</span>
+    <span><i style="background:#40302A;border:1px solid #B0705A"></i>their reckoned</span>
+    <span><i style="background:#C8B37E;border-radius:50%"></i>you</span>
+  </div>
+  <div class="row">
+    <button id="bless">Bless</button><button id="stone">Raise a stone</button>
+    <button id="found">Found</button><button id="split">Split</button>
+    <button id="pass">Do nothing</button><button id="end" class="main">End year</button>
+  </div>
+  <div class="hintline" id="hint"></div>
+  <div id="done"></div>
+</div>
+
+<div>
+  <div class="blk"><h2>the two of you</h2>
+   <svg id="chart" width="100%" viewBox="0 0 300 130" role="img">
+    <title>Score over time</title><desc>Your total, their total, and your blessed-ground score across the years.</desc></svg>
+   <div class="key"><span><i style="background:#C8B37E"></i>you</span>
+    <span><i style="background:#B0705A"></i>them</span>
+    <span><i style="background:#9A7BC8"></i>your blessing</span></div>
+  </div>
+  <div class="blk"><h2>your stones</h2><ul class="sl" id="st"></ul></div>
+  <div class="blk"><h2>their doctrine</h2>
+   <select id="doc">
+    <option value="cities">Cities — founds, never splits, lets them grow</option>
+    <option value="bands">Bands — splits at sixty, blesses constantly</option>
+    <option value="mixed">Mixed — a bit of both</option>
+    <option value="passive">Passive — does nothing at all</option>
+   </select></div>
+  <div class="blk"><h2>settlements</h2><ul class="sl" id="sl"></ul></div>
+  <div class="blk"><h2>what happened</h2><div class="log" id="log"></div></div>
+  <div class="blk"><h2>knobs</h2><div class="tune" id="tune"></div>
+   <button id="restart" style="margin-top:6px">Restart with these</button></div>
+</div>
+</div></div>
+
+<script>
+"use strict";
+const COLS=14,ROWS=9,SZ=24,W=Math.sqrt(3)*SZ,VS=1.5*SZ;
+const TUNE={
+ growth:{l:"growth per year",v:25,min:8,max:40,s:"%"},
+ spread:{l:"reckoning / year",v:2,min:1,max:6,s:""},
+ radius:{l:"blessing radius",v:1,min:0,max:2,s:""},
+ excl:{l:"founding exclusion",v:2,min:0,max:3,s:""},
+ bval:{l:"blessed ground worth",v:3,min:1,max:5,s:""},
+ stones:{l:"stones allowed",v:3,min:0,max:5,s:""},
+ turns:{l:"years",v:20,min:10,max:40,s:""}};
+const MINREG=8, STRIKEREG=16;
+let CONTIG=false,G=null;
+
+function nbr(c,r){const o=(r&1)?[[1,0],[1,-1],[0,-1],[-1,0],[0,1],[1,1]]:[[1,0],[0,-1],[-1,-1],[-1,0],[-1,1],[0,1]];
+ return o.map(d=>[c+d[0],r+d[1]]).filter(p=>p[0]>=0&&p[0]<COLS&&p[1]>=0&&p[1]<ROWS)}
+const K=(c,r)=>r*COLS+c;
+const NB=[];for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)NB[K(c,r)]=nbr(c,r).map(p=>K(p[0],p[1]));
+const T=k=>G.T[k];
+function px(c,r){return[W*(c+0.5*(r&1))+W/2+4,VS*r+SZ+4]}
+function hexPath(x,y){let p="";for(let i=0;i<6;i++){const a=Math.PI/180*(60*i-30);
+ p+=(i?"L":"M")+(x+SZ*Math.cos(a)).toFixed(1)+" "+(y+SZ*Math.sin(a)).toFixed(1)}return p+"Z"}
+const OMEN=["The river came up in a night and did not go down for a season.",
+ "Murrain in the herds. They burned what they could not bury.",
+ "Hail out of a clear sky, and the standing corn flattened.",
+ "A shaking in the ground. Two roofs and the granary.",
+ "The wells turned brackish and the children sickened.",
+ "Wolves in numbers nobody had seen, and not afraid of fire."];
+
+function gen(){
+ const N=COLS*ROWS;let v=[];for(let i=0;i<N;i++)v.push(Math.random());
+ for(let p=0;p<3;p++){const n=v.slice();
+  for(let k=0;k<N;k++)n[k]=(v[k]+NB[k].reduce((s,x)=>s+v[x],0))/(NB[k].length+1);v=n}
+ const L=[];
+ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+  const ex=Math.min(c/1.9,(COLS-1-c)/1.9,r/1.4,(ROWS-1-r)/1.4,1);
+  const x=v[K(c,r)]*0.5+0.5*ex;
+  let t="plain",f=1;
+  if(x<0.36){t="water";f=0}else if(x>0.73){t="hill";f=.55}else if(x>0.61){t="forest";f=.75}
+  L.push({c,r,t,f,st:"wild",own:null,set:null});}
+ return L;
+}
+function init(){
+ let tries=0;
+ do{G={T:gen(),turn:1,over:false,log:[],hist:[],stones:[[],[]],
+   p:[{pos:0,mp:3,acted:false},{pos:0,doc:document.getElementById("doc").value}]};tries++}
+ while(G.T.filter(t=>t.t!=="water").length<64&&tries<50);
+ const land=G.T.map((t,k)=>({t,k})).filter(o=>o.t.t!=="water");
+ const left=land.filter(o=>o.t.c<COLS*0.34),right=land.filter(o=>o.t.c>COLS*0.66);
+ G.p[0].pos=(left.length?left:land)[Math.floor((left.length?left:land).length/2)].k;
+ G.p[1].pos=(right.length?right:land)[Math.floor((right.length?right:land).length/2)].k;
+ say("You come down on one side of the valley. Something else comes down on the other.","big");
+ document.getElementById("done").innerHTML="";render();
+}
+function say(x,cls){G.log.push({t:G.turn,x,cls:cls||""})}
+function cost(t,who){if(t.t==="water")return 99;if(t.st==="reck")return 3;
+ if(t.st==="bless"&&t.own!==who)return 3;return 1}
+function reach(who){
+ const from=G.p[who].pos,mp=who===0?G.p[0].mp:3,d={};d[from]=0;const q=[[from,0]];
+ while(q.length){const[k,c]=q.shift();
+  NB[k].forEach(nk=>{const nc=c+cost(T(nk),who);
+   if(nc<=mp&&(d[nk]===undefined||nc<d[nk])){d[nk]=nc;q.push([nk,nc])}})}
+ return d;
+}
+function ring(k,rad){let s=[k];for(let i=0;i<rad;i++){const a=[];
+ s.forEach(x=>NB[x].forEach(y=>a.push(y)));s=s.concat(a)}return[...new Set(s)]}
+function region(k,who){
+ const t=T(k);if(t.st!=="bless"||t.own!==who)return[];
+ const seen=new Set([k]),q=[k];
+ while(q.length){const x=q.pop();
+  NB[x].forEach(y=>{const z=T(y);
+   if(!seen.has(y)&&z.st==="bless"&&z.own===who){seen.add(y);q.push(y)}})}
+ return[...seen];
+}
+function foundBlock(k,who){const t=T(k);
+ if(t.t==="water")return"water";
+ if(t.set)return"already a settlement";
+ if(t.st==="bless"&&t.own!==who)return"their blessed ground";
+ if(t.st==="reck"&&t.own!==who)return"their reckoned ground";
+ if(G.stones[0].includes(k)||G.stones[1].includes(k))return"a stone stands here";
+ if(NB[k].some(x=>T(x).set))return"too close to a settlement";
+ if(TUNE.excl.v)for(const x of ring(k,TUNE.excl.v)){const q=T(x);
+  if(q.st==="bless"&&q.own!==null&&q.own!==who)return"within "+TUNE.excl.v+" of their blessing";}
+ return null;
+}
+const canFound=(k,who)=>!foundBlock(k,who);
+function blessGain(k,who){return ring(k,TUNE.radius.v).filter(x=>{const q=T(x);
+ return q.t!=="water"&&!q.set&&(q.st==="wild"||(q.st==="bless"&&q.own!==who))}).length}
+function canSplit(k,who){const t=T(k);
+ return t.set&&t.set.own===who&&t.set.pop>=60&&NB[k].some(x=>canFound(x,who))}
+function stoneBlock(k,who){
+ if(G.stones[who].length>=TUNE.stones.v)return"you have all the stones you can hold";
+ const t=T(k);
+ if(t.st!=="bless"||t.own!==who)return"the ground here is not blessed";
+ if(G.stones[0].includes(k)||G.stones[1].includes(k))return"a stone already stands here";
+ if(t.set)return"a settlement stands here";
+ const r=region(k,who).length;
+ if(r<MINREG)return"only "+r+" connected blessed tiles — needs "+MINREG;
+ return null;
+}
+const canStone=(k,who)=>!stoneBlock(k,who);
+const stoneRange=P=>Math.min(1+Math.floor(P/12),3);
+
+function doAct(kind,who){
+ const k=G.p[who].pos,t=T(k),me=who===0;
+ if(kind==="bless"){
+  const n=blessGain(k,who);if(!n)return false;
+  ring(k,TUNE.radius.v).forEach(x=>{const q=T(x);
+   if(q.t!=="water"&&!q.set&&(q.st==="wild"||(q.st==="bless"&&q.own!==who))){q.st="bless";q.own=who}});
+  say((me?"The ground goes over to you in ":"Theirs takes ")+n+" tile"+(n>1?"s":"")+".",me?"":"riv");
+ }else if(kind==="stone"){
+  if(!canStone(k,who))return false;
+  G.stones[who].push(k);
+  say(me?"A stone comes up out of the ground. Nobody set it there.":"A stone rises on their side.",me?"omen":"riv");
+ }else if(kind==="found"){
+  if(!canFound(k,who))return false;
+  t.set={pop:30,own:who};t.st="wild";t.own=null;
+  say(me?"Thirty of them stay. They will not stay thirty.":"They put down a settlement.",me?"good":"riv");
+ }else if(kind==="split"){
+  if(!canSplit(k,who))return false;
+  const free=NB[k].filter(x=>canFound(x,who));
+  const nk=free[Math.floor(Math.random()*free.length)];
+  const half=Math.floor(t.set.pop/2);t.set.pop-=half;
+  T(nk).set={pop:half,own:who};T(nk).st="wild";T(nk).own=null;
+  say(me?"They keep the Seventy-Seven. Half go over the rise.":"They split one of theirs.",me?"good":"riv");
+ }else return true;
+ return true;
+}
+function rivalTurn(){
+ const who=1,doc=G.p[1].doc;if(doc==="passive")return;
+ const R=reach(who);
+ const wF=doc==="cities"?12:doc==="bands"?5:8;
+ const wH=doc==="cities"?1:doc==="bands"?4:3;
+ const wS=doc==="cities"?0:doc==="bands"?14:6;
+ const wT=doc==="cities"?0:doc==="bands"?16:9;
+ let best=null;
+ Object.keys(R).forEach(ks=>{const k=+ks,c=[];
+  if(canFound(k,who))c.push([wF*(0.6+T(k).f),"found"]);
+  const hg=blessGain(k,who);if(hg)c.push([wH*hg,"bless"]);
+  if(canSplit(k,who))c.push([wS,"split"]);
+  if(canStone(k,who))c.push([wT,"stone"]);
+  c.forEach(([v,a])=>{const s=v-R[k]*0.35+Math.random()*0.9;
+   if(!best||s>best.s)best={s,k,a}})});
+ if(best){G.p[1].pos=best.k;doAct(best.a,who)}
+ else{const ks=Object.keys(R).map(Number);G.p[1].pos=ks[Math.floor(Math.random()*ks.length)]}
+}
+function stoneTick(){
+ [0,1].forEach(who=>{G.stones[who].forEach(sk=>{
+  const P=region(sk,who).length;if(P<6)return;
+  const rng=stoneRange(P);
+  const cand=ring(sk,rng).filter(x=>{const q=T(x);
+   return q.t!=="water"&&!q.set&&q.st==="wild"});
+  if(cand.length){const x=cand[0];T(x).st="bless";T(x).own=who}
+  if(P>=STRIKEREG){
+   for(const x of ring(sk,rng)){const q=T(x);
+    if(q.set&&q.set.own!==who&&q.set.pop>77){
+     q.set.pop*=0.82;
+     say(who===0?OMEN[Math.floor(Math.random()*OMEN.length)]:"Something came down on one of yours.",
+      who===0?"omen":"bad");
+     break}}}
+ })});
+}
+function endTurn(){
+ if(G.over)return;
+ rivalTurn();stoneTick();
+ G.T.forEach((t,k)=>{if(!t.set)return;
+  const land=NB[k].filter(x=>T(x).t!=="water").length/6,f=t.f*(0.55+0.45*land),b=t.set.pop;
+  t.set.pop=Math.min(2600,t.set.pop*(1+TUNE.growth.v/100*f));
+  if(t.set.own===0){
+   if(b<77&&t.set.pop>=77)say("A settlement has passed seventy-seven. Nothing comes through there now.","bad");
+   if(b<150&&t.set.pop>=150)say("Past a hundred and fifty. They begin reckoning the ground outward.","bad")}});
+ G.T.forEach((t,k)=>{if(!t.set||t.set.pop<150)return;
+  const rad=1+Math.floor((t.set.pop-150)/420),o=t.set.own;
+  ring(k,rad).filter(x=>{const q=T(x);
+   return q.t!=="water"&&!q.set&&!(q.st==="reck"&&q.own===o)})
+   .slice(0,TUNE.spread.v).forEach(x=>{T(x).st="reck";T(x).own=o})});
+ let lost=0,rlost=0;
+ G.T.forEach((t,k)=>{if(t.st!=="bless")return;
+  if(NB[k].some(x=>T(x).st==="reck")){t.own===0?lost++:rlost++;t.st="wild";t.own=null}});
+ if(lost)say(lost+" tile"+(lost>1?"s of your blessing go":" of your blessing goes")+" out. It has been surveyed.","bad");
+ if(rlost)say(rlost+" of theirs goes out too.","riv");
+ const deadYours=G.stones[0].filter(k=>region(k,0).length<6).length;
+ if(deadYours&&!G.warned){G.warned=true;
+  say("A stone stands in ground that no longer answers. It is only a stone now.","bad")}
+ G.hist.push(score());
+ if(G.turn>=TUNE.turns.v){G.over=true;finish();render();return}
+ G.turn++;G.p[0].mp=3;G.p[0].acted=false;render();
+}
+function val(t){return t.set?3:(t.st==="bless"?TUNE.bval.v:2)}
+function score(){
+ const s=[{h:0,c:0,s:0,tot:0,big:0},{h:0,c:0,s:0,tot:0,big:0}];
+ G.T.forEach(t=>{if(t.t==="water")return;
+  if(t.set)s[t.set.own].s+=3;
+  else if(t.st==="bless")s[t.own].h+=TUNE.bval.v;
+  else if(t.st==="reck")s[t.own].c+=2});
+ s.forEach(x=>x.tot=x.h+x.c+x.s);
+ [0,1].forEach(w=>{const own=new Set();
+  G.T.forEach((t,k)=>{if(t.t==="water")return;
+   if((t.set&&t.set.own===w)||(!t.set&&t.own===w&&t.st!=="wild"))own.add(k)});
+  const seen=new Set();let best=0;
+  own.forEach(k=>{if(seen.has(k))return;const q=[k];seen.add(k);let v=0;
+   while(q.length){const x=q.pop();v+=val(T(x));
+    NB[x].forEach(y=>{if(own.has(y)&&!seen.has(y)){seen.add(y);q.push(y)}})}
+   if(v>best)best=v});
+  s[w].big=best});
+ return s;
+}
+const shown=s=>CONTIG?s.big:s.tot;
+function band(p){return p<77?["band",1]:p<150?["village",2]:p<800?["town",3]:["city",4]}
+
+function render(){
+ const R=reach(0),S=score();
+ document.getElementById("bar").innerHTML=`
+ <div class="c"><div class="l">year</div><div class="v">${G.turn}<span style="font-size:13px;color:var(--faint)"> / ${TUNE.turns.v}</span></div></div>
+ <div class="c"><div class="l">moves</div><div class="v ${G.p[0].mp?"":"r"}">${G.p[0].mp}</div></div>
+ <div class="c"><div class="l">blessed</div><div class="v h">${S[0].h}</div></div>
+ <div class="c"><div class="l">reckoned</div><div class="v u">${S[0].c}</div></div>
+ <div class="c"><div class="l">settled</div><div class="v">${S[0].s}</div></div>
+ <div class="c"><div class="l">${CONTIG?"your region":"you"}</div><div class="v g">${shown(S[0])}</div></div>
+ <div class="c"><div class="l">them</div><div class="v rv">${shown(S[1])}</div></div>`;
+ let h="";
+ G.T.forEach((t,k)=>{const[x,y]=px(t.c,t.r);
+  let fill="#2B322C",stroke="#1B2220",sw=1;
+  if(t.t==="water"){fill="#0E1416";stroke="#111819"}
+  else if(t.t==="forest")fill="#212C20";else if(t.t==="hill")fill="#343833";
+  if(t.st==="bless"){fill=t.own===0?"#3E3050":"#1F3A3E";stroke=t.own===0?"#9A7BC8":"#5FA0A8";sw=1.3}
+  if(t.st==="reck"){fill=t.own===0?"#4A3F2A":"#40302A";stroke=t.own===0?"#C79A52":"#B0705A";sw=1.3}
+  const go=R[k]!==undefined&&k!==G.p[0].pos;
+  h+=`<path class="hx${go?"":" no"}" d="${hexPath(x,y)}" fill="${fill}" stroke="${stroke}"
+   stroke-width="${sw}" opacity="${go?1:(t.t==="water"?1:.85)}" data-k="${k}"/>`;
+  if(go)h+=`<circle cx="${x}" cy="${y}" r="2.2" fill="#C8B37E" opacity=".3" pointer-events="none"/>`});
+ // stone reach halos
+ [0,1].forEach(who=>G.stones[who].forEach(sk=>{
+  const P=region(sk,who).length;if(P<STRIKEREG)return;
+  ring(sk,stoneRange(P)).forEach(x=>{const t=T(x),[a,b]=px(t.c,t.r);
+   h+=`<path d="${hexPath(a,b)}" fill="none" stroke="${who===0?"#9A7BC8":"#5FA0A8"}"
+    stroke-width="1" opacity=".22" pointer-events="none"/>`})}));
+ G.T.forEach((t,k)=>{if(!t.set)return;const[x,y]=px(t.c,t.r);const b=band(t.set.pop)[1];
+  const col=t.set.own===0?(b===1?"#C8B37E":b===2?"#99A096":b===3?"#C79A52":"#9B4A44")
+   :(b<3?"#8FB9BE":b===3?"#B0705A":"#8E4038");
+  const rr=b===1?6:b===2?7.5:b===3?9:11;
+  h+=`<circle cx="${x}" cy="${y}" r="${rr}" fill="${col}" opacity=".93" pointer-events="none"/>
+   <text x="${x}" y="${y+SZ-4}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
+   font-size="10" fill="#D9DACE" opacity=".7" pointer-events="none">${Math.round(t.set.pop)}</text>`});
+ [0,1].forEach(who=>G.stones[who].forEach(sk=>{
+  const t=T(sk),[x,y]=px(t.c,t.r),P=region(sk,who).length;
+  const live=P>=6,col=who===0?(live?"#C8B37E":"#5B6058"):(live?"#8FB9BE":"#5B6058");
+  h+=`<path d="M${x-4} ${y+9} L${x-3} ${y-9} L${x+3} ${y-10} L${x+4} ${y+9} Z"
+   fill="${col}" opacity="${live?.95:.5}" pointer-events="none"/>`}));
+ [0,1].forEach(w=>{const t=T(G.p[w].pos),[x,y]=px(t.c,t.r),col=w===0?"#C8B37E":"#5FA0A8";
+  h+=`<circle cx="${x}" cy="${y}" r="16" fill="none" stroke="${col}" stroke-width="1.7" pointer-events="none"/>
+   <circle cx="${x}" cy="${y}" r="3.6" fill="${col}" pointer-events="none"/>`});
+ const m=document.getElementById("map");
+ m.innerHTML='<title>The contested valley</title><desc>Hex map.</desc>'+h;
+ m.querySelectorAll(".hx").forEach(e=>{e.onclick=()=>{
+  const k=+e.dataset.k,RR=reach(0);
+  if(RR[k]===undefined||k===G.p[0].pos||G.over)return;
+  G.p[0].mp-=RR[k];G.p[0].pos=k;render()}});
+
+ if(G.hist.length>1){const H=G.hist;
+  const mx=Math.max(...H.map(s=>Math.max(shown(s[0]),shown(s[1]))),10),n=TUNE.turns.v;
+  const X=i=>6+(i/(n-1))*288,Y=v=>124-(v/mx)*116;
+  const p=f=>H.map((s,i)=>(i?"L":"M")+X(i).toFixed(1)+" "+Y(f(s)).toFixed(1)).join(" ");
+  document.getElementById("chart").innerHTML=
+   `<title>Score over time</title><desc>Your total, their total, and your blessed score.</desc>
+    <path d="${p(s=>s[0].h)}" fill="none" stroke="#9A7BC8" stroke-width="1.3" opacity=".8"/>
+    <path d="${p(s=>shown(s[1]))}" fill="none" stroke="#B0705A" stroke-width="1.8"/>
+    <path d="${p(s=>shown(s[0]))}" fill="none" stroke="#C8B37E" stroke-width="1.8"/>`}
+
+ document.getElementById("st").innerHTML=G.stones[0].map((k,i)=>{
+  const P=region(k,0).length;
+  const st=P<6?"gone quiet":P<STRIKEREG?"blessing":"blessing · calling";
+  return `<li><span class="${P<6?"dead":P<STRIKEREG?"b1":"b3"}">stone ${i+1} — ${st}</span>
+   <span>${P} tiles · reach ${P<6?0:stoneRange(P)}</span></li>`}).join("")
+  ||'<li style="color:var(--faint);border:none">none raised</li>';
+ document.getElementById("sl").innerHTML=G.T.filter(t=>t.set).sort((a,b)=>b.set.pop-a.set.pop)
+  .slice(0,10).map(t=>{const[n,b]=band(t.set.pop);
+  return `<li><span class="b${b}">${t.set.own===0?"":"their "}${n}</span><span>${Math.round(t.set.pop)}</span></li>`})
+  .join("")||'<li style="color:var(--faint);border:none">none yet</li>';
+ const L=document.getElementById("log");
+ L.innerHTML=G.log.slice(-40).map(l=>`<p class="${l.cls}"><b>y${l.t}</b>${l.x}</p>`).join("");
+ L.scrollTop=L.scrollHeight;
+
+ const k=G.p[0].pos,a=G.p[0].acted||G.over;
+ document.getElementById("bless").disabled=a||!blessGain(k,0);
+ document.getElementById("stone").disabled=a||!canStone(k,0);
+ document.getElementById("found").disabled=a||!canFound(k,0);
+ document.getElementById("split").disabled=a||!canSplit(k,0);
+ document.getElementById("pass").disabled=a;
+ document.getElementById("end").disabled=G.over;
+ const sb=stoneBlock(k,0),fb=foundBlock(k,0);
+ document.getElementById("hint").textContent=G.over?"":a?"Acted this year — end it.":
+  (sb&&sb.indexOf("connected")>0?"No stone here: "+sb+"."
+   :fb?"Cannot found here: "+fb+".":"");
+}
+function finish(){
+ const S=score(),H=G.hist;let peak=0,pt=0;
+ H.forEach((x,i)=>{if(x[0].h>peak){peak=x[0].h;pt=i+1}});
+ const you=shown(S[0]),them=shown(S[1]);
+ const quiet=G.stones[0].filter(k=>region(k,0).length<6).length;
+ const doc={cities:"Cities",bands:"Bands",mixed:"Mixed",passive:"Passive"}[G.p[1].doc];
+ document.getElementById("done").innerHTML=`<div class="done">
+ <h3>${you>them?"you hold more":you===them?"level":"they hold more"}</h3>
+ <p>${you} to ${them} against <b>${doc}</b>${CONTIG?", counting only the largest unbroken region":""}.
+ Yours: ${S[0].h} blessed, ${S[0].c} reckoned, ${S[0].s} settled — largest unbroken region ${S[0].big}.
+ Your blessing peaked at ${peak} in year ${pt}. You raised ${G.stones[0].length} stone${G.stones[0].length===1?"":"s"}${
+ quiet?", and "+quiet+" of them stand in ground that no longer answers":""}.</p>
+ <p style="color:var(--faint);font-size:14px;margin-top:12px">Play the same seat against Passive
+ and compare. If your score barely changes, you were never really playing each other.</p></div>`;
+}
+const tw=document.getElementById("tune");
+Object.keys(TUNE).forEach(k=>{const o=TUNE[k],l=document.createElement("label");
+ l.innerHTML=`<span>${o.l}</span><input type="range" min="${o.min}" max="${o.max}" value="${o.v}"><output>${o.v}${o.s}</output>`;
+ const i=l.querySelector("input"),ot=l.querySelector("output");
+ i.oninput=()=>{o.v=+i.value;ot.textContent=o.v+o.s;if(G)render()};tw.appendChild(l)});
+const cb=document.createElement("label");cb.className="cb";
+cb.innerHTML=`<input type="checkbox" id="cg"><span>score only the largest unbroken region</span>`;
+tw.appendChild(cb);
+document.getElementById("cg").onchange=e=>{CONTIG=e.target.checked;render()};
+["bless","stone","found","split"].forEach(a=>{document.getElementById(a).onclick=()=>{
+ if(G.p[0].acted||G.over)return;if(doAct(a,0)){G.p[0].acted=true;render()}}});
+document.getElementById("pass").onclick=()=>{G.p[0].acted=true;render()};
+document.getElementById("end").onclick=endTurn;
+document.getElementById("restart").onclick=init;
+document.getElementById("doc").onchange=()=>{if(G)G.p[1].doc=document.getElementById("doc").value};
+init();
+</script>
+</body></html>

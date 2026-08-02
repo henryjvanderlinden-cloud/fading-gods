@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fading Gods — works and wonders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+ --ground:#12181A;--panel:#1A2123;--line:#283134;--soft:#20282A;
+ --ink:#D9DACE;--dim:#99A096;--faint:#69706A;
+ --gold:#C8B37E;--bless:#9A7BC8;--reck:#C79A52;
+ --rbless:#5FA0A8;--rust:#9B4A44;--moss:#7E9166;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0 20px 70px;background:var(--ground);color:var(--ink);
+ font-family:'Spectral',Georgia,serif;font-weight:300;font-size:15.5px;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto}
+header{padding:30px 0 12px;border-bottom:1px solid var(--line)}
+h1{font-size:26px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:lowercase}
+.sub{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.22em;
+ text-transform:uppercase;color:var(--faint);margin-top:5px}
+.q{max-width:68ch;color:var(--dim);margin:16px 0 20px;font-size:15px}
+.cols{display:grid;grid-template-columns:1fr 330px;gap:32px;align-items:start}
+@media(max-width:940px){.cols{grid-template-columns:1fr}}
+h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:10.5px;
+ letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 10px;
+ padding-bottom:7px;border-bottom:1px solid var(--soft)}
+.blk{margin-bottom:22px}
+svg.map{display:block;width:100%;height:auto;background:#0B1113;border:1px solid var(--line)}
+.hx{cursor:pointer}.hx.no{cursor:default}
+.bar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--line);margin-bottom:14px}
+.c{flex:1 1 70px;padding:11px 10px 11px 0;min-width:70px}
+.c .l{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:9.5px;letter-spacing:.15em;
+ text-transform:uppercase;color:var(--faint)}
+.c .v{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:20px;font-weight:500;line-height:1.3}
+.v.g{color:var(--gold)}.v.h{color:var(--bless)}.v.u{color:var(--reck)}
+.v.rv{color:var(--rbless)}.v.r{color:var(--rust)}.v.m{color:var(--moss)}
+button,select{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11.5px;font-weight:600;
+ letter-spacing:.13em;text-transform:uppercase;background:var(--panel);color:var(--ink);
+ border:1px solid var(--line);padding:9px 13px;cursor:pointer;border-radius:2px}
+select{font-weight:400;text-transform:none;letter-spacing:.03em;padding:7px 9px;width:100%}
+button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+button:disabled{opacity:.3;cursor:not-allowed}
+button.main{border-color:var(--dim);padding:11px 18px}
+button.arm{border-color:var(--bless);color:var(--bless)}
+button.armc{border-color:var(--reck);color:var(--reck)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.key{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;letter-spacing:.1em;
+ text-transform:uppercase;color:var(--faint);display:flex;gap:12px;flex-wrap:wrap;margin-top:9px}
+.key i{display:inline-block;width:11px;height:11px;vertical-align:-1px;margin-right:5px;border-radius:2px}
+.log{max-height:170px;overflow-y:auto;border-left:1px solid var(--soft);padding-left:13px}
+.log p{margin:0 0 6px;font-size:14px;color:var(--dim)}
+.log b{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;letter-spacing:.1em;
+ color:var(--faint);margin-right:7px;font-weight:500}
+.log p.bad{color:var(--rust)}.log p.good{color:var(--moss)}.log p.big{color:var(--ink)}
+.log p.riv{color:var(--rbless)}.log p.omen{color:var(--bless);font-style:italic}
+.log p.civ{color:var(--reck)}
+.tune{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:12px}
+.tune label{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;
+ letter-spacing:.05em;color:var(--dim)}
+.tune input[type=range]{flex:0 0 84px}
+.tune output{color:var(--gold);font-weight:500;min-width:32px;text-align:right}
+.tune label.cb{justify-content:flex-start;gap:8px}
+.sl{list-style:none;padding:0;margin:0}
+.sl li{display:flex;justify-content:space-between;font-family:'IBM Plex Sans Condensed',sans-serif;
+ font-size:12px;padding:4px 0;border-bottom:1px solid var(--soft);letter-spacing:.04em}
+.b1{color:var(--gold)}.b2{color:var(--dim)}.b3{color:var(--reck)}.b4{color:var(--rust)}
+.dead{color:var(--faint)}
+.iv{list-style:none;padding:0;margin:0 0 4px}
+.iv li{padding:7px 0;border-bottom:1px solid var(--soft);font-size:14px}
+.iv li.gone{color:var(--faint)}
+.iv li.gone .nm{text-decoration:line-through}
+.iv li .nm{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11.5px;font-weight:600;
+ letter-spacing:.1em;text-transform:uppercase}
+.iv.div li .nm{color:var(--bless)} .iv.civ li .nm{color:var(--reck)}
+.iv li.gone .nm{color:var(--faint)}
+.iv li .ds{font-size:13.5px;color:var(--dim);display:block;margin-top:1px}
+.iv li.gone .ds{color:var(--faint)}
+.tally{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11.5px;letter-spacing:.04em;
+ color:var(--faint);margin-bottom:8px}
+.spent{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.1em;
+ text-transform:uppercase;color:var(--moss);margin-bottom:8px}
+.done{border-top:2px solid var(--gold);margin-top:20px;padding-top:16px}
+.done h3{font-size:20px;font-weight:400;letter-spacing:.08em;text-transform:lowercase;margin:0 0 10px}
+.done p{max-width:64ch;color:var(--dim)}
+.hintline{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.06em;
+ color:var(--faint);margin-top:8px;min-height:15px}
+.hintline.arm{color:var(--bless)}
+</style>
+</head>
+<body><div class="wrap">
+<header><h1>works and wonders</h1><div class="sub">prototype · forty years · one act, one intervention</div></header>
+<p class="q">Each year you act once and intervene once. Interventions come in two kinds and they
+trade places as the years pass. For every settlement of yours past a hundred and fifty, the greatest
+<b style="color:var(--bless);font-weight:400">wonder</b> still left to you goes — a working stone holds
+one back. But as the settlements multiply, the <b style="color:var(--reck);font-weight:400">works</b>
+of the settled open up: clearance, colonies, and finally a levy. You end with everything you can
+build and nothing you can call.</p>
+
+<div class="cols">
+<div>
+  <div class="bar" id="bar"></div>
+  <svg class="map" id="map" viewBox="0 0 632 352" role="img">
+    <title>The contested valley</title><desc>Hex map. Fill shows the land itself — woodland, blessed woodland, farmland, settlement. The border shows who holds it.</desc>
+  </svg>
+  <div class="key">
+    <span><i style="background:#1F2C1E;border:1px solid #2A3530"></i>woodland</span>
+    <span><i style="background:#2A3040;border:1px solid #9A7BC8"></i>blessed</span>
+    <span><i style="background:#6B5A2E;border:1px solid #8A7440"></i>farmland</span>
+    <span><i style="background:#4A4238;border:1px solid #6A6155"></i>settlement</span>
+    <span><i style="border:2px solid #C8B37E"></i>yours</span>
+    <span><i style="border:2px solid #5FA0A8"></i>theirs</span>
+  </div>
+  <div class="row">
+    <button id="bless">Bless</button><button id="stone">Raise a stone</button>
+    <button id="found">Found</button><button id="split">Split</button>
+    <button id="pass">Do nothing</button><button id="end" class="main">End year</button>
+  </div>
+  <div class="hintline" id="hint"></div>
+  <div id="done"></div>
+</div>
+
+<div>
+  <div class="blk"><h2>one intervention a year</h2>
+   <div class="tally" id="tally"></div>
+   <div class="spent" id="spent"></div>
+   <ul class="iv div" id="divine"></ul>
+   <ul class="iv civ" id="civic"></ul></div>
+  <div class="blk"><h2>the two of you</h2>
+   <svg id="chart" width="100%" viewBox="0 0 300 130" role="img">
+    <title>Score over time</title><desc>Your total, their total, and how far you can walk, across the years.</desc></svg>
+   <div class="key"><span><i style="background:#C8B37E"></i>you</span>
+    <span><i style="background:#5FA0A8"></i>them</span>
+    <span><i style="background:#7E9166"></i>where you can walk</span></div>
+  </div>
+  <div class="blk"><h2>your stones</h2><ul class="sl" id="st"></ul></div>
+  <div class="blk"><h2>their doctrine</h2>
+   <select id="doc">
+    <option value="cities">Cities — founds, never splits, lets them grow</option>
+    <option value="bands">Bands — splits at sixty, blesses constantly</option>
+    <option value="mixed">Mixed — a bit of both</option>
+    <option value="passive">Passive — does nothing at all</option>
+   </select></div>
+  <div class="blk"><h2>settlements</h2><ul class="sl" id="sl"></ul></div>
+  <div class="blk"><h2>what happened</h2><div class="log" id="log"></div></div>
+  <div class="blk"><h2>knobs</h2><div class="tune" id="tune"></div>
+   <button id="restart" style="margin-top:6px">Restart with these</button></div>
+</div>
+</div></div>
+
+<script>
+"use strict";
+const COLS=14,ROWS=9,SZ=24,W=Math.sqrt(3)*SZ,VS=1.5*SZ;
+const TUNE={
+ growth:{l:"growth per year",v:22,min:6,max:40,s:"%"},
+ spread:{l:"reckoning / year",v:3,min:1,max:6,s:""},
+ budget:{l:"a settlement's limit",v:30,min:6,max:80,s:""},
+ frac:{l:"blessing needed to found",v:85,min:0,max:100,s:"%"},
+ bval:{l:"blessed ground worth",v:3,min:1,max:5,s:""},
+ stonecap:{l:"stones allowed",v:4,min:0,max:6,s:""},
+ t1:{l:"clearance at",v:5,min:1,max:12,s:""},
+ t2:{l:"colony at",v:7,min:2,max:14,s:""},
+ t3:{l:"levy at",v:9,min:3,max:16,s:""},
+ turns:{l:"years",v:40,min:10,max:60,s:""}};
+const MINREG=8;
+let SOFT=false,G=null,ARM=null;
+
+const DIVINE=[
+ {id:"drown",n:"Drown the ground",d:"One tile becomes water for good. Nothing crosses it again."},
+ {id:"blight",n:"Blight",d:"A hostile settlement loses half its people."},
+ {id:"wither",n:"Wither the furrows",d:"Farmland about a tile goes back to waste."},
+ {id:"quicken",n:"Quicken",d:"Blessing spreads over a tile and its neighbours."}];
+const CIVIC=[
+ {id:"clear",n:"Clearance",d:"Fell and plough three tiles at once. Costs a tenth of the town."},
+ {id:"colony",n:"Send a colony",d:"Found a settlement three tiles out, on any ground. Costs a third of the town."},
+ {id:"levy",n:"Raise a levy",d:"Take a hostile settlement within two tiles. Costs near half the town."}];
+
+function nbr(c,r){const o=(r&1)?[[1,0],[1,-1],[0,-1],[-1,0],[0,1],[1,1]]:[[1,0],[0,-1],[-1,-1],[-1,0],[-1,1],[0,1]];
+ return o.map(d=>[c+d[0],r+d[1]]).filter(p=>p[0]>=0&&p[0]<COLS&&p[1]>=0&&p[1]<ROWS)}
+const K=(c,r)=>r*COLS+c;
+const NB=[];for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)NB[K(c,r)]=nbr(c,r).map(p=>K(p[0],p[1]));
+const T=k=>G.T[k];
+function px(c,r){return[W*(c+0.5*(r&1))+W/2+4,VS*r+SZ+4]}
+function hexPath(x,y,s){s=s||SZ;let p="";for(let i=0;i<6;i++){const a=Math.PI/180*(60*i-30);
+ p+=(i?"L":"M")+(x+s*Math.cos(a)).toFixed(1)+" "+(y+s*Math.sin(a)).toFixed(1)}return p+"Z"}
+const DROWN=["The ground opened and the water came up through it.",
+ "The river changed its mind about where it went.","A lake where there was a meadow, overnight."];
+const BLIGHT=["Murrain, and then fever, and then the burying.",
+ "The wells turned and the children sickened first.","Hail, then rot, then a winter with nothing in the pit."];
+
+function gen(){
+ const N=COLS*ROWS;let v=[];for(let i=0;i<N;i++)v.push(Math.random());
+ for(let p=0;p<3;p++){const n=v.slice();
+  for(let k=0;k<N;k++)n[k]=(v[k]+NB[k].reduce((s,x)=>s+v[x],0))/(NB[k].length+1);v=n}
+ const L=[];
+ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+  const ex=Math.min(c/1.9,(COLS-1-c)/1.9,r/1.4,(ROWS-1-r)/1.4,1);
+  const x=v[K(c,r)]*0.5+0.5*ex;
+  let t="plain",f=1;
+  if(x<0.36){t="water";f=0}else if(x>0.73){t="hill";f=.55}else if(x>0.60){t="forest";f=.75}
+  L.push({c,r,t,f,st:"wild",own:null,set:null,seed:Math.random()});}
+ return L;
+}
+function init(){
+ let tries=0;ARM=null;
+ do{G={T:gen(),turn:1,over:false,log:[],hist:[],stones:[[],[]],warned:0,
+   p:[{pos:0,mp:3,acted:false,cast:false},{pos:0,doc:document.getElementById("doc").value}]};tries++}
+ while(G.T.filter(t=>t.t!=="water").length<64&&tries<50);
+ const land=G.T.map((t,k)=>({t,k})).filter(o=>o.t.t!=="water");
+ const left=land.filter(o=>o.t.c<COLS*0.34),right=land.filter(o=>o.t.c>COLS*0.66);
+ G.p[0].pos=(left.length?left:land)[Math.floor((left.length?left:land).length/2)].k;
+ G.p[1].pos=(right.length?right:land)[Math.floor((right.length?right:land).length/2)].k;
+ say("You come down on one side of the valley. Something else comes down on the other.","big");
+ document.getElementById("done").innerHTML="";render();
+}
+function say(x,cls){G.log.push({t:G.turn,x,cls:cls||""})}
+function cost(t,who){
+ if(t.t==="water")return 99;
+ if(t.st==="reck")return SOFT?3:99;
+ if(t.st==="bless"&&t.own!==who)return SOFT?3:99;
+ return 1;
+}
+function reach(who){
+ const from=G.p[who].pos,mp=who===0?G.p[0].mp:3,d={};d[from]=0;const q=[[from,0]];
+ while(q.length){const[k,c]=q.shift();
+  NB[k].forEach(nk=>{const nc=c+cost(T(nk),who);
+   if(nc<=mp&&(d[nk]===undefined||nc<d[nk])){d[nk]=nc;q.push([nk,nc])}})}
+ return d;
+}
+function ring(k,rad){let s=[k];for(let i=0;i<rad;i++){const a=[];
+ s.forEach(x=>NB[x].forEach(y=>a.push(y)));s=s.concat(a)}return[...new Set(s)]}
+function region(k,who){
+ const t=T(k);if(t.st!=="bless"||t.own!==who)return[];
+ const seen=new Set([k]),q=[k];
+ while(q.length){const x=q.pop();
+  NB[x].forEach(y=>{const z=T(y);
+   if(!seen.has(y)&&z.st==="bless"&&z.own===who){seen.add(y);q.push(y)}})}
+ return[...seen];
+}
+const stoneRange=P=>Math.min(1+Math.floor(P/10),3);
+const working=who=>G.stones[who].filter(k=>region(k,who).length>=6);
+const settlements=who=>G.T.map((t,k)=>({t,k})).filter(o=>o.t.set&&o.t.set.own===who);
+const bigCount=who=>settlements(who).filter(o=>o.t.set.pop>=150).length;
+const hugeCount=who=>settlements(who).filter(o=>o.t.set.pop>=800).length;
+const civicStrength=who=>bigCount(who)+hugeCount(who);
+const lostCount=who=>Math.max(0,bigCount(who)-working(who).length);
+function divineLeft(who){return DIVINE.slice(Math.min(lostCount(who),DIVINE.length))}
+function civicOpen(who){const cs=civicStrength(who),out=[];
+ if(cs>=TUNE.t1.v)out.push("clear");if(cs>=TUNE.t2.v)out.push("colony");
+ if(cs>=TUNE.t3.v)out.push("levy");return out}
+function divineReach(who){
+ const s=new Set();
+ working(who).forEach(k=>ring(k,stoneRange(region(k,who).length)).forEach(x=>s.add(x)));
+ ring(G.p[who].pos,1).forEach(x=>s.add(x));
+ return s;
+}
+function blessFrac(k,who){
+ const r2=ring(k,2).filter(x=>T(x).t!=="water");
+ if(!r2.length)return 0;
+ return r2.filter(x=>T(x).st==="bless"&&T(x).own===who).length/r2.length;
+}
+function foundBlock(k,who,free){const t=T(k);
+ if(t.t==="water")return"water";
+ if(t.set)return"already a settlement";
+ if(G.stones[0].includes(k)||G.stones[1].includes(k))return"a stone stands here";
+ if(NB[k].some(x=>T(x).set))return"too close to a settlement";
+ for(const x of ring(k,2)){const q=T(x);
+  if(q.st==="bless"&&q.own!==null&&q.own!==who)return"their blessing lies within two tiles";}
+ if(free)return null;
+ if(!(t.st==="bless"&&t.own===who))return"the ground here is not blessed";
+ const f=blessFrac(k,who);
+ if(f*100<TUNE.frac.v)return"only "+Math.round(f*100)+"% of the country two tiles round is blessed — needs "+TUNE.frac.v+"%";
+ return null;
+}
+const canFound=(k,who,free)=>!foundBlock(k,who,free);
+function blessGain(k,who){return ring(k,1).filter(x=>{const q=T(x);
+ return q.t!=="water"&&!q.set&&(q.st==="wild"||(q.st==="bless"&&q.own!==who))}).length}
+function canSplit(k,who){const t=T(k);
+ return t.set&&t.set.own===who&&t.set.pop>=60&&NB[k].some(x=>canFound(x,who))}
+function stoneBlock(k,who){
+ if(G.stones[who].length>=TUNE.stonecap.v)return"you hold all the stones you can";
+ const t=T(k);
+ if(t.st!=="bless"||t.own!==who)return"the ground here is not blessed";
+ if(G.stones[0].includes(k)||G.stones[1].includes(k))return"a stone already stands here";
+ if(t.set)return"a settlement stands here";
+ const r=region(k,who).length;
+ if(r<MINREG)return"only "+r+" connected blessed tiles — needs "+MINREG;
+ return null;
+}
+const canStone=(k,who)=>!stoneBlock(k,who);
+
+function targets(id,who){
+ const out=[];
+ if(DIVINE.some(s=>s.id===id)){
+  divineReach(who).forEach(k=>{const t=T(k);
+   if(id==="drown"){if(t.t!=="water"&&!t.set&&!G.stones[0].includes(k)&&!G.stones[1].includes(k))out.push(k)}
+   else if(id==="blight"){if(t.set&&t.set.own!==who&&t.set.pop>40)out.push(k)}
+   else if(id==="wither"){if(ring(k,1).some(x=>{const q=T(x);return !q.set&&q.st==="reck"&&q.own!==who}))out.push(k)}
+   else if(id==="quicken"){if(ring(k,1).some(x=>{const q=T(x);
+    return q.t!=="water"&&!q.set&&(q.st==="wild"||(q.st==="bless"&&q.own!==who))}))out.push(k)}});
+  return[...new Set(out)];
+ }
+ settlements(who).forEach(o=>{
+  if(id==="clear"&&o.t.set.pop>=150)
+   ring(o.k,2).forEach(x=>{const q=T(x);
+    if(q.t!=="water"&&!q.set&&!(q.st==="reck"&&q.own===who))out.push(x)});
+  if(id==="colony"&&o.t.set.pop>=200)
+   ring(o.k,3).forEach(x=>{if(canFound(x,who,true))out.push(x)});
+  if(id==="levy"&&o.t.set.pop>=300)
+   ring(o.k,2).forEach(x=>{const q=T(x);if(q.set&&q.set.own!==who)out.push(x)});
+ });
+ return[...new Set(out)];
+}
+function nearestSource(id,k,who){
+ let best=null,bd=99;
+ settlements(who).forEach(o=>{
+  const min=id==="levy"?300:id==="colony"?200:150;
+  if(o.t.set.pop<min)return;
+  const rad=id==="colony"?3:2;
+  if(ring(o.k,rad).includes(k)){const d=o.t.set.pop;if(d>bd||best===null){best=o;bd=d}}});
+ return best;
+}
+function doIntervene(id,k,who){
+ const me=who===0,t=T(k);
+ if(id==="drown"){t.t="water";t.f=0;t.st="wild";t.own=null;t.set=null;
+  say(me?DROWN[Math.floor(Math.random()*DROWN.length)]:"Water where there was ground, on your side.",me?"omen":"bad")}
+ else if(id==="blight"){t.set.pop=Math.max(8,t.set.pop*0.5);
+  say(me?BLIGHT[Math.floor(Math.random()*BLIGHT.length)]:"Something took half of one of yours.",me?"omen":"bad")}
+ else if(id==="wither"){let n=0;ring(k,1).forEach(x=>{const q=T(x);
+   if(!q.set&&q.st==="reck"&&q.own!==who){q.st="wild";q.own=null;n++}});
+  say(me?"The furrows go back to thorn in "+n+" tile"+(n>1?"s":"")+".":"Their fields go to waste.",me?"omen":"riv")}
+ else if(id==="quicken"){let n=0;ring(k,1).forEach(x=>{const q=T(x);
+   if(q.t!=="water"&&!q.set&&(q.st==="wild"||(q.st==="bless"&&q.own!==who))){q.st="bless";q.own=who;n++}});
+  say(me?"The ground comes over quickly, in "+n+" tile"+(n>1?"s":"")+".":"Theirs quickens.",me?"omen":"riv")}
+ else{
+  const src=nearestSource(id,k,who);if(!src)return false;
+  if(id==="clear"){src.t.set.pop*=0.9;let n=0;
+   ring(k,1).forEach(x=>{const q=T(x);
+    if(q.t!=="water"&&!q.set&&!(q.st==="reck"&&q.own===who)&&n<3){q.st="reck";q.own=who;n++}});
+   say(me?"They fell the wood and put the plough through it. "+n+" tiles, in one season.":"They clear a stretch of wood.",me?"civ":"riv")}
+  if(id==="colony"){src.t.set.pop*=0.65;
+   T(k).set={pop:40,own:who,spent:0};T(k).st="wild";T(k).own=null;
+   say(me?"Forty of them are sent out with carts and a charter.":"They send out a colony.",me?"civ":"riv")}
+  if(id==="levy"){src.t.set.pop*=0.55;
+   t.set.own=who;t.set.pop=Math.max(20,t.set.pop*0.4);t.set.spent=0;t.set.done=false;
+   say(me?"The levy went out in spring and the place answers to you now.":"A levy came and the place is theirs.",me?"civ":"bad")}
+ }
+ return true;
+}
+function rivalTurn(){
+ const who=1,doc=G.p[1].doc;if(doc==="passive")return;
+ const R=reach(who);
+ const wF=doc==="cities"?12:doc==="bands"?5:8;
+ const wH=doc==="cities"?3:doc==="bands"?4:3.5;
+ const wS=doc==="cities"?0:doc==="bands"?14:6;
+ const wT=doc==="cities"?4:doc==="bands"?16:10;
+ let best=null;
+ Object.keys(R).forEach(ks=>{const k=+ks,c=[];
+  if(canFound(k,who))c.push([wF*(0.6+T(k).f),"found"]);
+  const hg=blessGain(k,who);if(hg)c.push([wH*hg,"bless"]);
+  if(canSplit(k,who))c.push([wS,"split"]);
+  if(canStone(k,who))c.push([wT,"stone"]);
+  c.forEach(([v,a])=>{const s=v-R[k]*0.35+Math.random()*0.9;
+   if(!best||s>best.s)best={s,k,a}})});
+ if(best){G.p[1].pos=best.k;doAct(best.a,who)}
+ else{const ks=Object.keys(R).map(Number);G.p[1].pos=ks[Math.floor(Math.random()*ks.length)]}
+ // rival intervention: civics first when open, else wonders
+ const cv=civicOpen(who);
+ for(const id of ["levy","colony","clear"]){
+  if(!cv.includes(id))continue;
+  const tg=targets(id,who);
+  if(tg.length){let p=tg[0];
+   if(id==="levy")p=tg.reduce((a,b)=>T(a).set.pop>=T(b).set.pop?a:b);
+   doIntervene(id,p,who);return}}
+ for(const s of divineLeft(who)){
+  const tg=targets(s.id,who);if(!tg.length)continue;
+  let p=tg[0];
+  if(s.id==="blight")p=tg.reduce((a,b)=>T(a).set.pop>=T(b).set.pop?a:b);
+  if(s.id==="drown"){const n=tg.filter(k=>ring(k,1).some(x=>T(x).set&&T(x).set.own===0));
+   if(!n.length)continue;p=n[0]}
+  doIntervene(s.id,p,who);return;
+ }
+}
+function doAct(kind,who){
+ const k=G.p[who].pos,t=T(k),me=who===0;
+ if(kind==="bless"){
+  const n=blessGain(k,who);if(!n)return false;
+  ring(k,1).forEach(x=>{const q=T(x);
+   if(q.t!=="water"&&!q.set&&(q.st==="wild"||(q.st==="bless"&&q.own!==who))){q.st="bless";q.own=who}});
+  say((me?"The ground goes over to you in ":"Theirs takes ")+n+" tile"+(n>1?"s":"")+".",me?"":"riv");
+ }else if(kind==="stone"){
+  if(!canStone(k,who))return false;G.stones[who].push(k);
+  say(me?"A stone comes up out of the ground. Nobody set it there.":"A stone rises on their side.",me?"omen":"riv");
+ }else if(kind==="found"){
+  if(!canFound(k,who))return false;
+  t.set={pop:30,own:who,spent:0};t.st="wild";t.own=null;
+  say(me?"Thirty of them stay. They will not stay thirty.":"They put down a settlement.",me?"good":"riv");
+ }else if(kind==="split"){
+  if(!canSplit(k,who))return false;
+  const free=NB[k].filter(x=>canFound(x,who));
+  const nk=free[Math.floor(Math.random()*free.length)];
+  const half=Math.floor(t.set.pop/2);t.set.pop-=half;
+  T(nk).set={pop:half,own:who,spent:0};T(nk).st="wild";T(nk).own=null;
+  say(me?"They keep the Seventy-Seven. Half go over the rise.":"They split one of theirs.",me?"good":"riv");
+ }else return true;
+ return true;
+}
+function stoneTick(){
+ [0,1].forEach(who=>{G.stones[who].forEach(sk=>{
+  const P=region(sk,who).length;if(P<6)return;
+  const cand=ring(sk,stoneRange(P)).filter(x=>{const q=T(x);
+   return q.t!=="water"&&!q.set&&q.st==="wild"});
+  if(cand.length){T(cand[0]).st="bless";T(cand[0]).own=who}})});
+}
+function endTurn(){
+ if(G.over)return;ARM=null;
+ const before=Object.keys(reach(0)).length,lostBefore=lostCount(0),civBefore=civicOpen(0).length;
+ rivalTurn();stoneTick();
+ G.T.forEach((t,k)=>{if(!t.set)return;
+  const land=NB[k].filter(x=>T(x).t!=="water").length/6,f=t.f*(0.55+0.45*land),b=t.set.pop;
+  t.set.pop=Math.min(2600,t.set.pop*(1+TUNE.growth.v/100*f));
+  if(t.set.own===0){
+   if(b<77&&t.set.pop>=77)say("A settlement has passed seventy-seven. Nothing comes through there now.","bad");
+   if(b<150&&t.set.pop>=150)say("Past a hundred and fifty. They begin working the ground outward.","bad")}});
+ G.T.forEach((t,k)=>{if(!t.set||t.set.pop<150)return;
+  if(t.set.spent>=TUNE.budget.v){if(!t.set.done){t.set.done=true;
+   if(t.set.own===0)say("They have taken in as much ground as they ever will.","")}return}
+  const o=t.set.own,rad=t.set.pop<800?1:2;
+  ring(k,rad).filter(x=>{const q=T(x);
+   return q.t!=="water"&&!q.set&&!(q.st==="reck"&&q.own===o)})
+   .slice(0,TUNE.spread.v).forEach(x=>{T(x).st="reck";T(x).own=o;t.set.spent++})});
+ let lost=0;
+ G.T.forEach((t,k)=>{if(t.st!=="bless")return;
+  if(NB[k].some(x=>T(x).st==="reck")){if(t.own===0)lost++;t.st="wild";t.own=null}});
+ if(lost)say(lost+" tile"+(lost>1?"s of your blessing go":" of your blessing goes")+" out. It has been surveyed.","bad");
+ const q=G.stones[0].filter(k=>region(k,0).length<6).length;
+ if(q>G.warned){G.warned=q;say("A stone stands in ground that no longer answers. It is only a stone now.","bad")}
+ const lostAfter=lostCount(0);
+ for(let i=lostBefore;i<Math.min(lostAfter,DIVINE.length);i++)
+  say("You reach for it and it is not there. "+DIVINE[i].n+" is gone.","bad");
+ const civAfter=civicOpen(0);
+ if(civAfter.length>civBefore)
+  say("They have learned to do without you: "+CIVIC.find(c=>c.id===civAfter[civAfter.length-1]).n.toLowerCase()+".","civ");
+ G.hist.push({s:score(),r:Object.keys(reach(0)).length});
+ const after=Object.keys(reach(0)).length;
+ if(after<=6&&before>6)say("There is very little country left that you can walk into.","bad");
+ if(G.turn>=TUNE.turns.v){G.over=true;finish();render();return}
+ G.turn++;G.p[0].mp=3;G.p[0].acted=false;G.p[0].cast=false;render();
+}
+function score(){
+ const s=[{h:0,c:0,s:0,tot:0},{h:0,c:0,s:0,tot:0}];
+ G.T.forEach(t=>{if(t.t==="water")return;
+  if(t.set)s[t.set.own].s+=3;
+  else if(t.st==="bless")s[t.own].h+=TUNE.bval.v;
+  else if(t.st==="reck")s[t.own].c+=2});
+ s.forEach(x=>x.tot=x.h+x.c+x.s);return s;
+}
+function band(p){return p<77?["band",1]:p<150?["village",2]:p<800?["town",3]:["city",4]}
+
+// ---------- rendering: fill is the land, border is who holds it ----------
+const FILL={water:"#0D1517",plain:"#2C332B",forest:"#1F2C1E",hill:"#363A35"};
+const BFILL={plain:"#2E3040",forest:"#232E38",hill:"#383A46"};
+function render(){
+ const R=reach(0),S=score(),walk=Object.keys(R).length-1;
+ const tg=ARM?new Set(targets(ARM,0)):null;
+ const isCivic=ARM&&CIVIC.some(c=>c.id===ARM);
+ document.getElementById("bar").innerHTML=`
+ <div class="c"><div class="l">year</div><div class="v">${G.turn}<span style="font-size:13px;color:var(--faint)"> / ${TUNE.turns.v}</span></div></div>
+ <div class="c"><div class="l">moves</div><div class="v ${G.p[0].mp?"":"r"}">${G.p[0].mp}</div></div>
+ <div class="c"><div class="l">can walk to</div><div class="v ${walk<=5?"r":"m"}">${walk}</div></div>
+ <div class="c"><div class="l">blessed</div><div class="v h">${S[0].h}</div></div>
+ <div class="c"><div class="l">farmland</div><div class="v u">${S[0].c}</div></div>
+ <div class="c"><div class="l">you</div><div class="v g">${S[0].tot}</div></div>
+ <div class="c"><div class="l">them</div><div class="v rv">${S[1].tot}</div></div>`;
+ let h="",over="";
+ G.T.forEach((t,k)=>{const[x,y]=px(t.c,t.r);
+  let fill=FILL[t.t];
+  if(t.st==="bless"&&t.t!=="water")fill=BFILL[t.t];
+  if(t.st==="reck")fill="#6B5A2E";
+  if(t.set)fill="#4A4238";
+  const owner=t.set?t.set.own:(t.st==="wild"?null:t.own);
+  const stroke=owner===0?"#C8B37E":owner===1?"#5FA0A8":"#2A3530";
+  const sw=owner===null?0.8:2;
+  const go=tg?tg.has(k):(R[k]!==undefined&&k!==G.p[0].pos);
+  h+=`<path class="hx${go?"":" no"}" d="${hexPath(x,y)}" fill="${fill}"
+   stroke="${stroke}" stroke-width="${sw}" opacity="${t.t==="water"?1:(go||tg?1:.88)}" data-k="${k}"/>`;
+  // land texture
+  if(t.t==="forest"&&t.st!=="reck"&&!t.set){
+   const c1=t.seed*6;
+   over+=`<path d="M${x-7+c1} ${y+5} l3.5 -9 l3.5 9 Z M${x+2+c1*0.4} ${y+7} l3 -7.5 l3 7.5 Z"
+    fill="${t.st==="bless"?"#6E7FA8":"#3A4A36"}" opacity=".65" pointer-events="none"/>`}
+  if(t.t==="hill"&&t.st!=="reck"&&!t.set)
+   over+=`<path d="M${x-8} ${y+5} l5 -6 l4 4 l4 -5 l5 7 Z" fill="${t.st==="bless"?"#6E7FA8":"#4A4E48"}"
+    opacity=".55" pointer-events="none"/>`;
+  if(t.st==="bless"&&!t.set){
+   const s=t.seed;
+   over+=`<g opacity=".9" pointer-events="none" fill="${t.own===0?"#B79AE0":"#7FC2CA"}">
+    <circle cx="${x-9+s*4}" cy="${y-8+s*3}" r="1.3"/><circle cx="${x+7-s*5}" cy="${y-3+s*4}" r="1"/>
+    <circle cx="${x-2+s*6}" cy="${y+9-s*3}" r="1.2"/></g>`}
+  if(t.st==="reck"&&!t.set)
+   over+=`<g opacity=".35" stroke="${t.own===0?"#8A7440":"#7A6A50"}" stroke-width="1" pointer-events="none">
+    <line x1="${x-10}" y1="${y-4}" x2="${x+10}" y2="${y-4}"/>
+    <line x1="${x-10}" y1="${y+1}" x2="${x+10}" y2="${y+1}"/>
+    <line x1="${x-10}" y1="${y+6}" x2="${x+10}" y2="${y+6}"/></g>`;
+  if(go&&!tg)over+=`<circle cx="${x}" cy="${y}" r="2.2" fill="#C8B37E" opacity=".4" pointer-events="none"/>`;
+  if(go&&tg)over+=`<path d="${hexPath(x,y,SZ-3)}" fill="none" stroke="${isCivic?"#C79A52":"#9A7BC8"}"
+   stroke-width="1.6" opacity=".9" pointer-events="none"/>`;
+ });
+ G.T.forEach((t,k)=>{if(!t.set)return;const[x,y]=px(t.c,t.r);const b=band(t.set.pop)[1];
+  const col=t.set.own===0?"#C8B37E":"#5FA0A8";
+  const n=b;let roofs="";
+  for(let i=0;i<Math.min(n+1,5);i++){
+   const ax=x-9+i*4.6,ay=y+4-(i%2)*4;
+   roofs+=`<path d="M${ax} ${ay} l3 -4 l3 4 Z" fill="${col}" opacity=".92"/>`}
+  over+=`<g pointer-events="none">${roofs}
+   <text x="${x}" y="${y+SZ-4}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
+   font-size="10" fill="#D9DACE" opacity=".75">${Math.round(t.set.pop)}</text></g>`});
+ [0,1].forEach(who=>G.stones[who].forEach(sk=>{
+  const t=T(sk),[x,y]=px(t.c,t.r),P=region(sk,who).length;
+  const live=P>=6,col=who===0?(live?"#E4D5A8":"#6A716A"):(live?"#A8D6DC":"#6A716A");
+  over+=`<path d="M${x-4} ${y+9} L${x-3} ${y-10} L${x+3} ${y-11} L${x+4} ${y+9} Z"
+   fill="${col}" opacity="${live?.98:.55}" pointer-events="none"/>`}));
+ [0,1].forEach(w=>{const t=T(G.p[w].pos),[x,y]=px(t.c,t.r),col=w===0?"#C8B37E":"#5FA0A8";
+  over+=`<circle cx="${x}" cy="${y}" r="16" fill="none" stroke="${col}" stroke-width="1.7"
+   opacity=".9" pointer-events="none"/>
+   <circle cx="${x}" cy="${y}" r="3.4" fill="${col}" pointer-events="none"/>`});
+ const m=document.getElementById("map");
+ m.innerHTML='<title>The contested valley</title><desc>Hex map: fill is the land, border is who holds it.</desc>'+h+over;
+ m.querySelectorAll(".hx").forEach(e=>{e.onclick=()=>{
+  const k=+e.dataset.k;if(G.over)return;
+  if(ARM){if(!targets(ARM,0).includes(k))return;
+   if(doIntervene(ARM,k,0)){G.p[0].cast=true;ARM=null}render();return}
+  const RR=reach(0);
+  if(RR[k]===undefined||k===G.p[0].pos)return;
+  G.p[0].mp-=RR[k];G.p[0].pos=k;render()}});
+
+ const lostN=lostCount(0),bg=bigCount(0),hg=hugeCount(0),wk=working(0).length,cs=civicStrength(0);
+ document.getElementById("tally").textContent=
+  `${bg} past 150 · ${hg} past 800 · ${wk} working stone${wk===1?"":"s"} · strength ${cs}`;
+ document.getElementById("spent").textContent=G.p[0].cast?"intervened this year":"";
+ const open=civicOpen(0);
+ document.getElementById("divine").innerHTML=DIVINE.map((s,i)=>{
+  const gone=i<lostN,n=gone?0:targets(s.id,0).length;
+  return `<li class="${gone?"gone":""}"><span class="nm">${s.n}</span><span class="ds">${s.d}</span>
+   ${gone?"":`<button style="margin-top:6px" class="${ARM===s.id?"arm":""}"
+    ${(G.p[0].cast||G.over||!n)?"disabled":""} data-iv="${s.id}">
+    ${ARM===s.id?"choose a tile":(n?"call · "+n+" targets":"nothing in reach")}</button>`}</li>`}).join("");
+ document.getElementById("civic").innerHTML=CIVIC.map((s,i)=>{
+  const need=[TUNE.t1.v,TUNE.t2.v,TUNE.t3.v][i],ok=open.includes(s.id);
+  const n=ok?targets(s.id,0).length:0;
+  return `<li class="${ok?"":"gone"}"><span class="nm">${s.n}</span><span class="ds">${s.d}</span>
+   ${ok?`<button style="margin-top:6px" class="${ARM===s.id?"armc":""}"
+    ${(G.p[0].cast||G.over||!n)?"disabled":""} data-iv="${s.id}">
+    ${ARM===s.id?"choose a tile":(n?"do it · "+n+" targets":"nothing in range")}</button>`
+   :`<span class="ds" style="color:var(--faint)">needs strength ${need}</span>`}</li>`}).join("");
+ document.querySelectorAll("[data-iv]").forEach(b=>{b.onclick=()=>{
+  ARM=ARM===b.dataset.iv?null:b.dataset.iv;render()}});
+
+ if(G.hist.length>1){const H=G.hist;
+  const mx=Math.max(...H.map(o=>Math.max(o.s[0].tot,o.s[1].tot)),10);
+  const mr=Math.max(...H.map(o=>o.r),1),n=TUNE.turns.v;
+  const X=i=>6+(i/(n-1))*288,Y=v=>124-(v/mx)*116,YR=v=>124-(v/mr)*116;
+  const p=f=>H.map((o,i)=>(i?"L":"M")+X(i).toFixed(1)+" "+f(o).toFixed(1)).join(" ");
+  document.getElementById("chart").innerHTML=
+   `<title>Score over time</title><desc>Your total, their total, and how far you can walk.</desc>
+    <path d="${p(o=>YR(o.r))}" fill="none" stroke="#7E9166" stroke-width="1.3" opacity=".75"/>
+    <path d="${p(o=>Y(o.s[1].tot))}" fill="none" stroke="#5FA0A8" stroke-width="1.8"/>
+    <path d="${p(o=>Y(o.s[0].tot))}" fill="none" stroke="#C8B37E" stroke-width="1.8"/>`}
+
+ document.getElementById("st").innerHTML=G.stones[0].map((k,i)=>{
+  const P=region(k,0).length;
+  return `<li><span class="${P<6?"dead":"b1"}">stone ${i+1} — ${P<6?"gone quiet":"holds one back"}</span>
+   <span>${P} tiles · reach ${P<6?0:stoneRange(P)}</span></li>`}).join("")
+  ||'<li style="color:var(--faint);border:none">none raised</li>';
+ document.getElementById("sl").innerHTML=G.T.filter(t=>t.set).sort((a,b)=>b.set.pop-a.set.pop)
+  .slice(0,10).map(t=>{const[n,b]=band(t.set.pop);
+  return `<li><span class="b${b}">${t.set.own===0?"":"their "}${n}${t.set.done?" · spent":""}</span><span>${Math.round(t.set.pop)}</span></li>`})
+  .join("")||'<li style="color:var(--faint);border:none">none yet</li>';
+ const L=document.getElementById("log");
+ L.innerHTML=G.log.slice(-45).map(l=>`<p class="${l.cls}"><b>y${l.t}</b>${l.x}</p>`).join("");
+ L.scrollTop=L.scrollHeight;
+
+ const k=G.p[0].pos,a=G.p[0].acted||G.over;
+ document.getElementById("bless").disabled=a||!!ARM||!blessGain(k,0);
+ document.getElementById("stone").disabled=a||!!ARM||!canStone(k,0);
+ document.getElementById("found").disabled=a||!!ARM||!canFound(k,0);
+ document.getElementById("split").disabled=a||!!ARM||!canSplit(k,0);
+ document.getElementById("pass").disabled=a||!!ARM;
+ document.getElementById("end").disabled=G.over;
+ const hint=document.getElementById("hint");
+ hint.className="hintline"+(ARM?" arm":"");
+ const sb=stoneBlock(k,0),fb=foundBlock(k,0);
+ hint.textContent=G.over?"":ARM?"Choose an outlined tile, or press the button again to put it down."
+  :a?"Acted this year. You may still intervene, then end the year."
+  :walk===0?"There is nowhere you can walk from here."
+  :(fb&&fb.indexOf("%")>0?"Cannot found here: "+fb+"."
+   :sb&&sb.indexOf("connected")>0?"No stone here: "+sb+".":fb?"Cannot found here: "+fb+".":"");
+}
+function finish(){
+ const S=score(),H=G.hist;let peak=0,pt=0;
+ H.forEach((o,i)=>{if(o.s[0].h>peak){peak=o.s[0].h;pt=i+1}});
+ const lostN=lostCount(0),open=civicOpen(0),walk=Object.keys(reach(0)).length-1;
+ const doc={cities:"Cities",bands:"Bands",mixed:"Mixed",passive:"Passive"}[G.p[1].doc];
+ document.getElementById("done").innerHTML=`<div class="done">
+ <h3>${S[0].tot>S[1].tot?"you hold more":S[0].tot===S[1].tot?"level":"they hold more"}</h3>
+ <p>${S[0].tot} to ${S[1].tot} against <b>${doc}</b>. ${S[0].h} blessed, ${S[0].c} farmland,
+ ${S[0].s} settled. Your blessing peaked at ${peak} in year ${pt}.
+ You ended with ${DIVINE.length-lostN} of four wonders and ${open.length} of three works.
+ There ${walk===1?"was one tile":"were "+walk+" tiles"} you could still walk into.</p>
+ <p style="color:var(--faint);font-size:14px;margin-top:12px">The trade this build asks about:
+ was there a year when you would rather have had Drown back than the levy you used instead?</p></div>`;
+}
+const tw=document.getElementById("tune");
+Object.keys(TUNE).forEach(k=>{const o=TUNE[k],l=document.createElement("label");
+ l.innerHTML=`<span>${o.l}</span><input type="range" min="${o.min}" max="${o.max}" value="${o.v}"><output>${o.v}${o.s}</output>`;
+ const i=l.querySelector("input"),ot=l.querySelector("output");
+ i.oninput=()=>{o.v=+i.value;ot.textContent=o.v+o.s;if(G)render()};tw.appendChild(l)});
+const cbl=document.createElement("label");cbl.className="cb";
+cbl.innerHTML=`<input type="checkbox" id="sf"><span>walls are slow going, not impassable</span>`;
+tw.appendChild(cbl);
+cbl.querySelector("input").onchange=e=>{SOFT=e.target.checked;render()};
+["bless","stone","found","split"].forEach(a=>{document.getElementById(a).onclick=()=>{
+ if(G.p[0].acted||G.over||ARM)return;if(doAct(a,0)){G.p[0].acted=true;render()}}});
+document.getElementById("pass").onclick=()=>{G.p[0].acted=true;render()};
+document.getElementById("end").onclick=endTurn;
+document.getElementById("restart").onclick=init;
+document.getElementById("doc").onchange=()=>{if(G)G.p[1].doc=document.getElementById("doc").value};
+init();
+</script>
+</body></html>
