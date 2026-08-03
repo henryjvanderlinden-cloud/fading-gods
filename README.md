@@ -37,7 +37,7 @@ it is present and skip them if it is not.
 | `game/previous/` | Earlier prototypes, kept because they test different questions. |
 | `sim/` | Headless harness, balance matrix, and checks. |
 | `design/` | The rules as they currently stand, in full. The source of truth. |
-| `concept/` | What the game is about, and what it should look and feel like. |
+| `concept/` | What the game is about, and what it should look and feel like. `art-direction/` holds the live comparison. |
 | `registers/` | Live working documents — open points, archive, ideas, rejected. |
 | `architecture/` | Where the code is now and where it should go. |
 

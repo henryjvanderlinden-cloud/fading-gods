@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fading Gods — art direction comparison</title>
+<style>
+ :root{ --ink:#E6E2D6; --dim:#9A9384; --faint:#6A6558; }
+ *{box-sizing:border-box}
+ body{margin:0;padding:26px 30px 70px;background:#0E1113;color:var(--ink);
+      font:14px/1.55 "IBM Plex Sans Condensed",-apple-system,Segoe UI,sans-serif;}
+ h1{font:300 27px/1.2 Spectral,Georgia,serif;margin:0 0 4px;letter-spacing:.01em}
+ h2{font:300 20px/1.2 Spectral,Georgia,serif;margin:0 0 2px}
+ .sub{color:var(--dim);max-width:78ch;margin:0 0 20px;font-size:13.5px}
+ .note{color:var(--faint);font-size:12.5px;max-width:74ch}
+ .ctl{position:sticky;top:0;z-index:20;background:rgba(14,17,19,.95);backdrop-filter:blur(6px);
+      border-bottom:1px solid #262B2C;padding:11px 0 12px;margin:0 0 22px;display:flex;
+      gap:26px;flex-wrap:wrap;align-items:center}
+ .grp{display:flex;gap:7px;align-items:center}
+ .grp>span{color:var(--faint);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin-right:3px}
+ button{font:inherit;font-size:12.5px;background:#191E20;color:var(--dim);border:1px solid #2E3436;
+        padding:5px 12px;border-radius:2px;cursor:pointer}
+ button:hover{border-color:#4A5254;color:var(--ink)}
+ button.on{background:#C8B37E;border-color:#C8B37E;color:#12181A;font-weight:600}
+ .boards{display:grid;grid-template-columns:repeat(auto-fit,minmax(620px,1fr));gap:30px 26px}
+ .card{min-width:0}
+ .card header{margin:0 0 9px;display:flex;justify-content:space-between;align-items:baseline;gap:14px}
+ .card .tag{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint)}
+ .card p{margin:8px 0 0;font-size:12.5px;color:var(--dim);max-width:62ch}
+ svg{display:block;max-width:100%;height:auto}
+ .stat{display:flex;gap:20px;color:var(--faint);font-size:11.5px;margin:14px 0 4px;flex-wrap:wrap}
+ .stat b{color:var(--dim);font-weight:600}
+ .chron{font:300 13.5px/1.6 Spectral,Georgia,serif;color:var(--dim);
+        border-left:1px solid #2A2F30;padding:2px 0 2px 15px;margin:18px 0 0;max-width:70ch}
+ .chron div{margin:1px 0}
+ .zoom{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0 0}
+ .zoom figure{margin:0;text-align:center}
+ .zoom figcaption{font-size:10.5px;color:var(--faint);margin-top:4px;letter-spacing:.05em}
+ hr{border:0;border-top:1px solid #212628;margin:38px 0 26px}
+</style>
+</head>
+<body>
+
+<h1>Three art directions, one real board</h1>
+<p class="sub">Same game, same seed, rendered at true size — 24px hexes, exactly what
+<code>game/ui.js</code> draws today. The three boards below are the same state; only the palette,
+the border treatment and the tile marks differ. Board states are real: <code>seed 6</code>,
+mixed doctrine against cities, played headlessly through the actual engine.
+The question this is meant to settle is narrow — <em>at this size, can you tell whose ground it is,
+and what kind of ground it is, without hesitating?</em></p>
+
+<div class="ctl">
+ <div class="grp"><span>Year</span>
+  <button data-yr="early" class="on">9 — open</button>
+  <button data-yr="mid">27 — contested</button>
+  <button data-yr="late">40 — walled in</button></div>
+ <div class="grp"><span>Scale</span>
+  <button data-sc="1" class="on">1×</button>
+  <button data-sc="1.5">1.5×</button>
+  <button data-sc="2">2×</button></div>
+ <div class="grp"><span>Frame</span>
+  <button data-fr="1" class="on">on</button>
+  <button data-fr="0">off</button></div>
+</div>
+
+<div class="boards" id="boards"></div>
+
+<hr>
+<h2>The tile language, at 3×</h2>
+<p class="note">Not how it will be seen in play — this is only to check that each mark is a distinct
+shape and not just a distinct colour. Anything that relies on hue alone fails on a projector,
+on a bad panel, and for the ~8% of men who will not see your gold against your ochre.</p>
+<div id="zooms"></div>
+
+<hr>
+<h2>Chronicle</h2>
+<p class="note">The last lines of the real log at the selected year, set in the serif. Included
+because the frame and the text have to sit in the same world.</p>
+<div class="chron" id="chron"></div>
+
+<script>
+const BOARD = {"cols":14,"rows":9,"early":{"turn":9,"tiles":[{"k":0,"c":0,"r":0,"t":"water","st":"wild","own":null,"seed":0.5001,"set":null},{"k":1,"c":1,"r":0,"t":"water","st":"wild","own":null,"seed":0.2746,"set":null},{"k":2,"c":2,"r":0,"t":"water","st":"wild","own":null,"seed":0.9623,"set":null},{"k":3,"c":3,"r":0,"t":"water","st":"wild","own":null,"seed":0.9313,"set":null},{"k":4,"c":4,"r":0,"t":"water","st":"wild","own":null,"seed":0.5381,"set":null},{"k":5,"c":5,"r":0,"t":"water","st":"wild","own":null,"seed":0.596,"set":null},{"k":6,"c":6,"r":0,"t":"water","st":"wild","own":null,"seed":0.7548,"set":null},{"k":7,"c":7,"r":0,"t":"water","st":"wild","own":null,"seed":0.2864,"set":null},{"k":8,"c":8,"r":0,"t":"water","st":"wild","own":null,"seed":0.2622,"set":null},{"k":9,"c":9,"r":0,"t":"water","st":"wild","own":null,"seed":0.391,"set":null},{"k":10,"c":10,"r":0,"t":"water","st":"wild","own":null,"seed":0.539,"set":null},{"k":11,"c":11,"r":0,"t":"water","st":"wild","own":null,"seed":0.7186,"set":null},{"k":12,"c":12,"r":0,"t":"water","st":"wild","own":null,"seed":0.8517,"set":null},{"k":13,"c":13,"r":0,"t":"water","st":"wild","own":null,"seed":0.109,"set":null},{"k":14,"c":0,"r":1,"t":"water","st":"wild","own":null,"seed":0.2516,"set":null},{"k":15,"c":1,"r":1,"t":"plain","st":"bless","own":1,"seed":0.8673,"set":null},{"k":16,"c":2,"r":1,"t":"forest","st":"bless","own":1,"seed":0.0707,"set":null},{"k":17,"c":3,"r":1,"t":"plain","st":"bless","own":1,"seed":0.1272,"set":null},{"k":18,"c":4,"r":1,"t":"plain","st":"bless","own":1,"seed":0.7112,"set":null},{"k":19,"c":5,"r":1,"t":"plain","st":"bless","own":1,"seed":0.5257,"set":null},{"k":20,"c":6,"r":1,"t":"forest","st":"bless","own":1,"seed":0.9577,"set":null},{"k":21,"c":7,"r":1,"t":"forest","st":"bless","own":0,"seed":0.0811,"set":null},{"k":22,"c":8,"r":1,"t":"forest","st":"bless","own":0,"seed":0.9121,"set":null},{"k":23,"c":9,"r":1,"t":"forest","st":"bless","own":0,"seed":0.3367,"set":null},{"k":24,"c":10,"r":1,"t":"forest","st":"bless","own":1,"seed":0.4996,"set":null},{"k":25,"c":11,"r":1,"t":"forest","st":"wild","own":null,"seed":0.4902,"set":null},{"k":26,"c":12,"r":1,"t":"plain","st":"wild","own":null,"seed":0.3182,"set":null},{"k":27,"c":13,"r":1,"t":"water","st":"wild","own":null,"seed":0.2359,"set":null},{"k":28,"c":0,"r":2,"t":"water","st":"wild","own":null,"seed":0.3973,"set":null},{"k":29,"c":1,"r":2,"t":"plain","st":"bless","own":1,"seed":0.2806,"set":null},{"k":30,"c":2,"r":2,"t":"hill","st":"bless","own":1,"seed":0.3517,"set":null},{"k":31,"c":3,"r":2,"t":"forest","st":"bless","own":1,"seed":0.5056,"set":null},{"k":32,"c":4,"r":2,"t":"forest","st":"bless","own":1,"seed":0.5913,"set":null},{"k":33,"c":5,"r":2,"t":"forest","st":"bless","own":1,"seed":0.9278,"set":null},{"k":34,"c":6,"r":2,"t":"forest","st":"bless","own":1,"seed":0.475,"set":null},{"k":35,"c":7,"r":2,"t":"hill","st":"bless","own":0,"seed":0.9932,"set":null},{"k":36,"c":8,"r":2,"t":"hill","st":"bless","own":0,"seed":0.9439,"set":null},{"k":37,"c":9,"r":2,"t":"hill","st":"bless","own":0,"seed":0.7739,"set":null},{"k":38,"c":10,"r":2,"t":"hill","st":"bless","own":0,"seed":0.0344,"set":null},{"k":39,"c":11,"r":2,"t":"hill","st":"bless","own":1,"seed":0.5205,"set":null},{"k":40,"c":12,"r":2,"t":"plain","st":"wild","own":null,"seed":0.4059,"set":null},{"k":41,"c":13,"r":2,"t":"water","st":"wild","own":null,"seed":0.6403,"set":null},{"k":42,"c":0,"r":3,"t":"water","st":"wild","own":null,"seed":0.4323,"set":null},{"k":43,"c":1,"r":3,"t":"plain","st":"bless","own":1,"seed":0.1311,"set":null},{"k":44,"c":2,"r":3,"t":"forest","st":"bless","own":1,"seed":0.8977,"set":null},{"k":45,"c":3,"r":3,"t":"forest","st":"bless","own":1,"seed":0.0256,"set":null},{"k":46,"c":4,"r":3,"t":"forest","st":"bless","own":0,"seed":0.0249,"set":null},{"k":47,"c":5,"r":3,"t":"forest","st":"bless","own":1,"seed":0.4298,"set":null},{"k":48,"c":6,"r":3,"t":"hill","st":"bless","own":1,"seed":0.7696,"set":null},{"k":49,"c":7,"r":3,"t":"hill","st":"bless","own":0,"seed":0.1766,"set":null},{"k":50,"c":8,"r":3,"t":"forest","st":"bless","own":0,"seed":0.6373,"set":null},{"k":51,"c":9,"r":3,"t":"forest","st":"bless","own":0,"seed":0.9754,"set":null},{"k":52,"c":10,"r":3,"t":"forest","st":"bless","own":0,"seed":0.283,"set":null},{"k":53,"c":11,"r":3,"t":"hill","st":"bless","own":0,"seed":0.4383,"set":null},{"k":54,"c":12,"r":3,"t":"plain","st":"bless","own":1,"seed":0.3534,"set":null},{"k":55,"c":13,"r":3,"t":"water","st":"wild","own":null,"seed":0.2811,"set":null},{"k":56,"c":0,"r":4,"t":"water","st":"wild","own":null,"seed":0.4251,"set":null},{"k":57,"c":1,"r":4,"t":"plain","st":"wild","own":null,"seed":0.9615,"set":null},{"k":58,"c":2,"r":4,"t":"forest","st":"wild","own":null,"seed":0.4052,"set":null},{"k":59,"c":3,"r":4,"t":"forest","st":"bless","own":0,"seed":0.5253,"set":null},{"k":60,"c":4,"r":4,"t":"forest","st":"bless","own":0,"seed":0.782,"set":null},{"k":61,"c":5,"r":4,"t":"hill","st":"bless","own":0,"seed":0.2723,"set":null},{"k":62,"c":6,"r":4,"t":"hill","st":"bless","own":1,"seed":0.899,"set":null},{"k":63,"c":7,"r":4,"t":"hill","st":"bless","own":1,"seed":0.0129,"set":null},{"k":64,"c":8,"r":4,"t":"forest","st":"bless","own":1,"seed":0.5636,"set":null},{"k":65,"c":9,"r":4,"t":"forest","st":"bless","own":0,"seed":0.0403,"set":null},{"k":66,"c":10,"r":4,"t":"forest","st":"bless","own":0,"seed":0.3915,"set":null},{"k":67,"c":11,"r":4,"t":"forest","st":"bless","own":0,"seed":0.8971,"set":null},{"k":68,"c":12,"r":4,"t":"plain","st":"bless","own":0,"seed":0.6086,"set":null},{"k":69,"c":13,"r":4,"t":"water","st":"wild","own":null,"seed":0.9212,"set":null},{"k":70,"c":0,"r":5,"t":"water","st":"wild","own":null,"seed":0.1205,"set":null},{"k":71,"c":1,"r":5,"t":"plain","st":"bless","own":0,"seed":0.427,"set":null},{"k":72,"c":2,"r":5,"t":"forest","st":"bless","own":0,"seed":0.5774,"set":null},{"k":73,"c":3,"r":5,"t":"forest","st":"bless","own":0,"seed":0.3569,"set":null},{"k":74,"c":4,"r":5,"t":"hill","st":"bless","own":0,"seed":0.8192,"set":null},{"k":75,"c":5,"r":5,"t":"hill","st":"bless","own":1,"seed":0.9811,"set":null},{"k":76,"c":6,"r":5,"t":"hill","st":"bless","own":1,"seed":0.6207,"set":null},{"k":77,"c":7,"r":5,"t":"hill","st":"bless","own":1,"seed":0.5189,"set":null},{"k":78,"c":8,"r":5,"t":"forest","st":"bless","own":1,"seed":0.0844,"set":null},{"k":79,"c":9,"r":5,"t":"forest","st":"bless","own":0,"seed":0.3916,"set":null},{"k":80,"c":10,"r":5,"t":"forest","st":"bless","own":0,"seed":0.909,"set":null},{"k":81,"c":11,"r":5,"t":"forest","st":"bless","own":0,"seed":0.7653,"set":null},{"k":82,"c":12,"r":5,"t":"plain","st":"bless","own":1,"seed":0.7763,"set":null},{"k":83,"c":13,"r":5,"t":"water","st":"wild","own":null,"seed":0.18,"set":null},{"k":84,"c":0,"r":6,"t":"water","st":"wild","own":null,"seed":0.3564,"set":null},{"k":85,"c":1,"r":6,"t":"plain","st":"bless","own":0,"seed":0.8792,"set":null},{"k":86,"c":2,"r":6,"t":"forest","st":"bless","own":0,"seed":0.6895,"set":null},{"k":87,"c":3,"r":6,"t":"forest","st":"bless","own":0,"seed":0.2279,"set":null},{"k":88,"c":4,"r":6,"t":"forest","st":"bless","own":0,"seed":0.3237,"set":null},{"k":89,"c":5,"r":6,"t":"hill","st":"bless","own":0,"seed":0.2022,"set":null},{"k":90,"c":6,"r":6,"t":"hill","st":"bless","own":1,"seed":0.6855,"set":null},{"k":91,"c":7,"r":6,"t":"hill","st":"bless","own":1,"seed":0.5504,"set":null},{"k":92,"c":8,"r":6,"t":"forest","st":"bless","own":1,"seed":0.25,"set":null},{"k":93,"c":9,"r":6,"t":"forest","st":"bless","own":1,"seed":0.9036,"set":null},{"k":94,"c":10,"r":6,"t":"forest","st":"wild","own":null,"seed":0.5351,"set":null},{"k":95,"c":11,"r":6,"t":"forest","st":"wild","own":null,"seed":0.3751,"set":null},{"k":96,"c":12,"r":6,"t":"plain","st":"wild","own":null,"seed":0.786,"set":null},{"k":97,"c":13,"r":6,"t":"water","st":"wild","own":null,"seed":0.1892,"set":null},{"k":98,"c":0,"r":7,"t":"water","st":"wild","own":null,"seed":0.9372,"set":null},{"k":99,"c":1,"r":7,"t":"plain","st":"bless","own":0,"seed":0.95,"set":null},{"k":100,"c":2,"r":7,"t":"plain","st":"bless","own":0,"seed":0.2182,"set":null},{"k":101,"c":3,"r":7,"t":"plain","st":"bless","own":0,"seed":0.6812,"set":null},{"k":102,"c":4,"r":7,"t":"plain","st":"bless","own":0,"seed":0.9326,"set":null},{"k":103,"c":5,"r":7,"t":"forest","st":"bless","own":0,"seed":0.6976,"set":null},{"k":104,"c":6,"r":7,"t":"forest","st":"bless","own":0,"seed":0.5967,"set":null},{"k":105,"c":7,"r":7,"t":"plain","st":"wild","own":null,"seed":0.5073,"set":null},{"k":106,"c":8,"r":7,"t":"plain","st":"wild","own":null,"seed":0.0776,"set":null},{"k":107,"c":9,"r":7,"t":"plain","st":"wild","own":null,"seed":0.0798,"set":null},{"k":108,"c":10,"r":7,"t":"plain","st":"wild","own":null,"seed":0.7827,"set":null},{"k":109,"c":11,"r":7,"t":"forest","st":"wild","own":null,"seed":0.2943,"set":null},{"k":110,"c":12,"r":7,"t":"plain","st":"wild","own":null,"seed":0.931,"set":null},{"k":111,"c":13,"r":7,"t":"water","st":"wild","own":null,"seed":0.4559,"set":null},{"k":112,"c":0,"r":8,"t":"water","st":"wild","own":null,"seed":0.3377,"set":null},{"k":113,"c":1,"r":8,"t":"water","st":"wild","own":null,"seed":0.9679,"set":null},{"k":114,"c":2,"r":8,"t":"water","st":"wild","own":null,"seed":0.9861,"set":null},{"k":115,"c":3,"r":8,"t":"water","st":"wild","own":null,"seed":0.6273,"set":null},{"k":116,"c":4,"r":8,"t":"water","st":"wild","own":null,"seed":0.6877,"set":null},{"k":117,"c":5,"r":8,"t":"water","st":"wild","own":null,"seed":0.0163,"set":null},{"k":118,"c":6,"r":8,"t":"water","st":"wild","own":null,"seed":0.2909,"set":null},{"k":119,"c":7,"r":8,"t":"water","st":"wild","own":null,"seed":0.2632,"set":null},{"k":120,"c":8,"r":8,"t":"water","st":"wild","own":null,"seed":0.6194,"set":null},{"k":121,"c":9,"r":8,"t":"water","st":"wild","own":null,"seed":0.3894,"set":null},{"k":122,"c":10,"r":8,"t":"water","st":"wild","own":null,"seed":0.3021,"set":null},{"k":123,"c":11,"r":8,"t":"water","st":"wild","own":null,"seed":0.8175,"set":null},{"k":124,"c":12,"r":8,"t":"water","st":"wild","own":null,"seed":0.551,"set":null},{"k":125,"c":13,"r":8,"t":"water","st":"wild","own":null,"seed":0.1787,"set":null}],"stones":[],"p":[{"pos":66},{"pos":30}],"armies":[],"refugees":[],"reach":23,"score":[{"h":114,"c":0,"s":0,"tot":114},{"h":96,"c":0,"s":0,"tot":96}],"log":[{"t":6,"x":"The ground goes over to you in 4 tiles."},{"t":6,"x":"The ground comes over quickly, in 1 tile."},{"t":6,"x":"Theirs takes 4 tiles."},{"t":6,"x":"Theirs quickens."},{"t":7,"x":"The ground goes over to you in 4 tiles."},{"t":7,"x":"The ground comes over quickly, in 1 tile."},{"t":7,"x":"Theirs takes 5 tiles."},{"t":7,"x":"Theirs quickens."},{"t":8,"x":"The ground goes over to you in 4 tiles."},{"t":8,"x":"The ground comes over quickly, in 3 tiles."},{"t":8,"x":"Theirs takes 7 tiles."},{"t":8,"x":"Theirs quickens."}]},"mid":{"turn":27,"tiles":[{"k":0,"c":0,"r":0,"t":"water","st":"wild","own":null,"seed":0.5001,"set":null},{"k":1,"c":1,"r":0,"t":"water","st":"wild","own":null,"seed":0.2746,"set":null},{"k":2,"c":2,"r":0,"t":"water","st":"wild","own":null,"seed":0.9623,"set":null},{"k":3,"c":3,"r":0,"t":"water","st":"wild","own":null,"seed":0.9313,"set":null},{"k":4,"c":4,"r":0,"t":"water","st":"wild","own":null,"seed":0.5381,"set":null},{"k":5,"c":5,"r":0,"t":"water","st":"wild","own":null,"seed":0.596,"set":null},{"k":6,"c":6,"r":0,"t":"water","st":"wild","own":null,"seed":0.7548,"set":null},{"k":7,"c":7,"r":0,"t":"water","st":"wild","own":null,"seed":0.2864,"set":null},{"k":8,"c":8,"r":0,"t":"water","st":"wild","own":null,"seed":0.2622,"set":null},{"k":9,"c":9,"r":0,"t":"water","st":"wild","own":null,"seed":0.391,"set":null},{"k":10,"c":10,"r":0,"t":"water","st":"wild","own":null,"seed":0.539,"set":null},{"k":11,"c":11,"r":0,"t":"water","st":"wild","own":null,"seed":0.7186,"set":null},{"k":12,"c":12,"r":0,"t":"water","st":"wild","own":null,"seed":0.8517,"set":null},{"k":13,"c":13,"r":0,"t":"water","st":"wild","own":null,"seed":0.109,"set":null},{"k":14,"c":0,"r":1,"t":"water","st":"wild","own":null,"seed":0.2516,"set":null},{"k":15,"c":1,"r":1,"t":"plain","st":"wild","own":null,"seed":0.8673,"set":{"own":1,"pop":510,"band":3}},{"k":16,"c":2,"r":1,"t":"forest","st":"reck","own":1,"seed":0.0707,"set":null},{"k":17,"c":3,"r":1,"t":"plain","st":"wild","own":null,"seed":0.1272,"set":null},{"k":18,"c":4,"r":1,"t":"plain","st":"bless","own":1,"seed":0.7112,"set":null},{"k":19,"c":5,"r":1,"t":"plain","st":"wild","own":null,"seed":0.5257,"set":{"own":1,"pop":36,"band":1}},{"k":20,"c":6,"r":1,"t":"forest","st":"bless","own":1,"seed":0.9577,"set":null},{"k":21,"c":7,"r":1,"t":"forest","st":"bless","own":1,"seed":0.0811,"set":null},{"k":22,"c":8,"r":1,"t":"forest","st":"bless","own":0,"seed":0.9121,"set":null},{"k":23,"c":9,"r":1,"t":"forest","st":"wild","own":null,"seed":0.3367,"set":{"own":0,"pop":98,"band":2}},{"k":24,"c":10,"r":1,"t":"forest","st":"bless","own":0,"seed":0.4996,"set":null},{"k":25,"c":11,"r":1,"t":"forest","st":"wild","own":null,"seed":0.4902,"set":null},{"k":26,"c":12,"r":1,"t":"plain","st":"wild","own":null,"seed":0.3182,"set":{"own":0,"pop":126,"band":2}},{"k":27,"c":13,"r":1,"t":"water","st":"wild","own":null,"seed":0.2359,"set":null},{"k":28,"c":0,"r":2,"t":"water","st":"wild","own":null,"seed":0.3973,"set":null},{"k":29,"c":1,"r":2,"t":"plain","st":"reck","own":1,"seed":0.2806,"set":null},{"k":30,"c":2,"r":2,"t":"hill","st":"reck","own":1,"seed":0.3517,"set":null},{"k":31,"c":3,"r":2,"t":"forest","st":"wild","own":null,"seed":0.5056,"set":null},{"k":32,"c":4,"r":2,"t":"forest","st":"bless","own":1,"seed":0.5913,"set":null},{"k":33,"c":5,"r":2,"t":"forest","st":"bless","own":1,"seed":0.9278,"set":null},{"k":34,"c":6,"r":2,"t":"forest","st":"bless","own":1,"seed":0.475,"set":null},{"k":35,"c":7,"r":2,"t":"hill","st":"bless","own":1,"seed":0.9932,"set":null},{"k":36,"c":8,"r":2,"t":"hill","st":"bless","own":0,"seed":0.9439,"set":null},{"k":37,"c":9,"r":2,"t":"hill","st":"bless","own":0,"seed":0.7739,"set":null},{"k":38,"c":10,"r":2,"t":"hill","st":"bless","own":0,"seed":0.0344,"set":null},{"k":39,"c":11,"r":2,"t":"hill","st":"wild","own":null,"seed":0.5205,"set":null},{"k":40,"c":12,"r":2,"t":"plain","st":"reck","own":0,"seed":0.4059,"set":null},{"k":41,"c":13,"r":2,"t":"water","st":"wild","own":null,"seed":0.6403,"set":null},{"k":42,"c":0,"r":3,"t":"water","st":"wild","own":null,"seed":0.4323,"set":null},{"k":43,"c":1,"r":3,"t":"plain","st":"wild","own":null,"seed":0.1311,"set":{"own":1,"pop":581,"band":3}},{"k":44,"c":2,"r":3,"t":"forest","st":"reck","own":1,"seed":0.8977,"set":null},{"k":45,"c":3,"r":3,"t":"forest","st":"wild","own":null,"seed":0.0256,"set":null},{"k":46,"c":4,"r":3,"t":"forest","st":"bless","own":1,"seed":0.0249,"set":null},{"k":47,"c":5,"r":3,"t":"forest","st":"bless","own":1,"seed":0.4298,"set":null},{"k":48,"c":6,"r":3,"t":"hill","st":"bless","own":1,"seed":0.7696,"set":null},{"k":49,"c":7,"r":3,"t":"hill","st":"bless","own":0,"seed":0.1766,"set":null},{"k":50,"c":8,"r":3,"t":"forest","st":"bless","own":0,"seed":0.6373,"set":null},{"k":51,"c":9,"r":3,"t":"forest","st":"wild","own":null,"seed":0.9754,"set":{"own":0,"pop":87,"band":2}},{"k":52,"c":10,"r":3,"t":"forest","st":"wild","own":null,"seed":0.283,"set":null},{"k":53,"c":11,"r":3,"t":"hill","st":"reck","own":0,"seed":0.4383,"set":null},{"k":54,"c":12,"r":3,"t":"plain","st":"wild","own":null,"seed":0.3534,"set":{"own":0,"pop":170,"band":3}},{"k":55,"c":13,"r":3,"t":"water","st":"wild","own":null,"seed":0.2811,"set":null},{"k":56,"c":0,"r":4,"t":"water","st":"wild","own":null,"seed":0.4251,"set":null},{"k":57,"c":1,"r":4,"t":"plain","st":"reck","own":1,"seed":0.9615,"set":null},{"k":58,"c":2,"r":4,"t":"forest","st":"reck","own":1,"seed":0.4052,"set":null},{"k":59,"c":3,"r":4,"t":"forest","st":"wild","own":null,"seed":0.5253,"set":null},{"k":60,"c":4,"r":4,"t":"forest","st":"wild","own":null,"seed":0.782,"set":{"own":1,"pop":102,"band":2}},{"k":61,"c":5,"r":4,"t":"hill","st":"bless","own":1,"seed":0.2723,"set":null},{"k":62,"c":6,"r":4,"t":"hill","st":"bless","own":1,"seed":0.899,"set":null},{"k":63,"c":7,"r":4,"t":"hill","st":"bless","own":0,"seed":0.0129,"set":null},{"k":64,"c":8,"r":4,"t":"forest","st":"bless","own":0,"seed":0.5636,"set":null},{"k":65,"c":9,"r":4,"t":"forest","st":"wild","own":null,"seed":0.0403,"set":null},{"k":66,"c":10,"r":4,"t":"forest","st":"reck","own":0,"seed":0.3915,"set":null},{"k":67,"c":11,"r":4,"t":"forest","st":"reck","own":0,"seed":0.8971,"set":null},{"k":68,"c":12,"r":4,"t":"plain","st":"reck","own":0,"seed":0.6086,"set":null},{"k":69,"c":13,"r":4,"t":"water","st":"wild","own":null,"seed":0.9212,"set":null},{"k":70,"c":0,"r":5,"t":"water","st":"wild","own":null,"seed":0.1205,"set":null},{"k":71,"c":1,"r":5,"t":"plain","st":"reck","own":1,"seed":0.427,"set":null},{"k":72,"c":2,"r":5,"t":"forest","st":"wild","own":null,"seed":0.5774,"set":null},{"k":73,"c":3,"r":5,"t":"forest","st":"wild","own":null,"seed":0.3569,"set":null},{"k":74,"c":4,"r":5,"t":"hill","st":"bless","own":1,"seed":0.8192,"set":null},{"k":75,"c":5,"r":5,"t":"hill","st":"bless","own":1,"seed":0.9811,"set":null},{"k":76,"c":6,"r":5,"t":"hill","st":"bless","own":0,"seed":0.6207,"set":null},{"k":77,"c":7,"r":5,"t":"hill","st":"bless","own":0,"seed":0.5189,"set":null},{"k":78,"c":8,"r":5,"t":"forest","st":"wild","own":null,"seed":0.0844,"set":null},{"k":79,"c":9,"r":5,"t":"forest","st":"reck","own":0,"seed":0.3916,"set":null},{"k":80,"c":10,"r":5,"t":"forest","st":"wild","own":null,"seed":0.909,"set":{"own":0,"pop":218,"band":3}},{"k":81,"c":11,"r":5,"t":"forest","st":"reck","own":0,"seed":0.7653,"set":null},{"k":82,"c":12,"r":5,"t":"plain","st":"reck","own":0,"seed":0.7763,"set":null},{"k":83,"c":13,"r":5,"t":"water","st":"wild","own":null,"seed":0.18,"set":null},{"k":84,"c":0,"r":6,"t":"water","st":"wild","own":null,"seed":0.3564,"set":null},{"k":85,"c":1,"r":6,"t":"plain","st":"wild","own":null,"seed":0.8792,"set":{"own":1,"pop":198,"band":3}},{"k":86,"c":2,"r":6,"t":"forest","st":"reck","own":1,"seed":0.6895,"set":null},{"k":87,"c":3,"r":6,"t":"forest","st":"reck","own":1,"seed":0.2279,"set":null},{"k":88,"c":4,"r":6,"t":"forest","st":"wild","own":null,"seed":0.3237,"set":{"own":1,"pop":114,"band":2}},{"k":89,"c":5,"r":6,"t":"water","st":"wild","own":null,"seed":0.2022,"set":null},{"k":90,"c":6,"r":6,"t":"hill","st":"bless","own":0,"seed":0.6855,"set":null},{"k":91,"c":7,"r":6,"t":"hill","st":"bless","own":0,"seed":0.5504,"set":null},{"k":92,"c":8,"r":6,"t":"forest","st":"wild","own":null,"seed":0.25,"set":null},{"k":93,"c":9,"r":6,"t":"forest","st":"reck","own":0,"seed":0.9036,"set":null},{"k":94,"c":10,"r":6,"t":"forest","st":"reck","own":0,"seed":0.5351,"set":null},{"k":95,"c":11,"r":6,"t":"forest","st":"reck","own":0,"seed":0.3751,"set":null},{"k":96,"c":12,"r":6,"t":"plain","st":"wild","own":null,"seed":0.786,"set":{"own":0,"pop":483,"band":3}},{"k":97,"c":13,"r":6,"t":"water","st":"wild","own":null,"seed":0.1892,"set":null},{"k":98,"c":0,"r":7,"t":"water","st":"wild","own":null,"seed":0.9372,"set":null},{"k":99,"c":1,"r":7,"t":"plain","st":"reck","own":1,"seed":0.95,"set":null},{"k":100,"c":2,"r":7,"t":"plain","st":"wild","own":null,"seed":0.2182,"set":{"own":1,"pop":198,"band":3}},{"k":101,"c":3,"r":7,"t":"plain","st":"reck","own":1,"seed":0.6812,"set":null},{"k":102,"c":4,"r":7,"t":"plain","st":"wild","own":null,"seed":0.9326,"set":null},{"k":103,"c":5,"r":7,"t":"forest","st":"bless","own":0,"seed":0.6976,"set":null},{"k":104,"c":6,"r":7,"t":"forest","st":"bless","own":0,"seed":0.5967,"set":null},{"k":105,"c":7,"r":7,"t":"plain","st":"wild","own":null,"seed":0.5073,"set":null},{"k":106,"c":8,"r":7,"t":"plain","st":"reck","own":0,"seed":0.0776,"set":null},{"k":107,"c":9,"r":7,"t":"plain","st":"wild","own":null,"seed":0.0798,"set":{"own":0,"pop":466,"band":3}},{"k":108,"c":10,"r":7,"t":"plain","st":"reck","own":0,"seed":0.7827,"set":null},{"k":109,"c":11,"r":7,"t":"forest","st":"reck","own":0,"seed":0.2943,"set":null},{"k":110,"c":12,"r":7,"t":"plain","st":"reck","own":0,"seed":0.931,"set":null},{"k":111,"c":13,"r":7,"t":"water","st":"wild","own":null,"seed":0.4559,"set":null},{"k":112,"c":0,"r":8,"t":"water","st":"wild","own":null,"seed":0.3377,"set":null},{"k":113,"c":1,"r":8,"t":"water","st":"wild","own":null,"seed":0.9679,"set":null},{"k":114,"c":2,"r":8,"t":"water","st":"wild","own":null,"seed":0.9861,"set":null},{"k":115,"c":3,"r":8,"t":"water","st":"wild","own":null,"seed":0.6273,"set":null},{"k":116,"c":4,"r":8,"t":"water","st":"wild","own":null,"seed":0.6877,"set":null},{"k":117,"c":5,"r":8,"t":"water","st":"wild","own":null,"seed":0.0163,"set":null},{"k":118,"c":6,"r":8,"t":"water","st":"wild","own":null,"seed":0.2909,"set":null},{"k":119,"c":7,"r":8,"t":"water","st":"wild","own":null,"seed":0.2632,"set":null},{"k":120,"c":8,"r":8,"t":"water","st":"wild","own":null,"seed":0.6194,"set":null},{"k":121,"c":9,"r":8,"t":"water","st":"wild","own":null,"seed":0.3894,"set":null},{"k":122,"c":10,"r":8,"t":"water","st":"wild","own":null,"seed":0.3021,"set":null},{"k":123,"c":11,"r":8,"t":"water","st":"wild","own":null,"seed":0.8175,"set":null},{"k":124,"c":12,"r":8,"t":"water","st":"wild","own":null,"seed":0.551,"set":null},{"k":125,"c":13,"r":8,"t":"water","st":"wild","own":null,"seed":0.1787,"set":null}],"stones":[{"k":82,"own":0,"power":0,"live":false},{"k":67,"own":0,"power":0,"live":false},{"k":37,"own":0,"power":15,"live":true},{"k":87,"own":1,"power":0,"live":false}],"p":[{"pos":64},{"pos":19}],"armies":[],"refugees":[],"reach":19,"score":[{"h":45,"c":30,"s":21,"tot":96},{"h":42,"c":22,"s":21,"tot":85}],"log":[{"t":25,"x":"Theirs takes 4 tiles."},{"t":25,"x":"Theirs quickens."},{"t":25,"x":"A settlement has passed seventy-seven. Nothing comes through there now."},{"t":25,"x":"3 tiles of your blessing go out. It has been surveyed."},{"t":26,"x":"The ground goes over to you in 3 tiles."},{"t":26,"x":"The ground comes over quickly, in 1 tile."},{"t":26,"x":"They put down a settlement."},{"t":26,"x":"Theirs quickens."},{"t":26,"x":"A settlement has passed seventy-seven. Nothing comes through there now."},{"t":26,"x":"Past a hundred and fifty. They begin working the ground outward."},{"t":26,"x":"5 tiles of your blessing go out. It has been surveyed."},{"t":26,"x":"You reach for it and it is not there. Blight is gone."}]},"late":{"turn":40,"tiles":[{"k":0,"c":0,"r":0,"t":"water","st":"wild","own":null,"seed":0.5001,"set":null},{"k":1,"c":1,"r":0,"t":"water","st":"wild","own":null,"seed":0.2746,"set":null},{"k":2,"c":2,"r":0,"t":"water","st":"wild","own":null,"seed":0.9623,"set":null},{"k":3,"c":3,"r":0,"t":"water","st":"wild","own":null,"seed":0.9313,"set":null},{"k":4,"c":4,"r":0,"t":"water","st":"wild","own":null,"seed":0.5381,"set":null},{"k":5,"c":5,"r":0,"t":"water","st":"wild","own":null,"seed":0.596,"set":null},{"k":6,"c":6,"r":0,"t":"water","st":"wild","own":null,"seed":0.7548,"set":null},{"k":7,"c":7,"r":0,"t":"water","st":"wild","own":null,"seed":0.2864,"set":null},{"k":8,"c":8,"r":0,"t":"water","st":"wild","own":null,"seed":0.2622,"set":null},{"k":9,"c":9,"r":0,"t":"water","st":"wild","own":null,"seed":0.391,"set":null},{"k":10,"c":10,"r":0,"t":"water","st":"wild","own":null,"seed":0.539,"set":null},{"k":11,"c":11,"r":0,"t":"water","st":"wild","own":null,"seed":0.7186,"set":null},{"k":12,"c":12,"r":0,"t":"water","st":"wild","own":null,"seed":0.8517,"set":null},{"k":13,"c":13,"r":0,"t":"water","st":"wild","own":null,"seed":0.109,"set":null},{"k":14,"c":0,"r":1,"t":"water","st":"wild","own":null,"seed":0.2516,"set":null},{"k":15,"c":1,"r":1,"t":"plain","st":"wild","own":null,"seed":0.8673,"set":{"own":1,"pop":2600,"band":4}},{"k":16,"c":2,"r":1,"t":"forest","st":"reck","own":1,"seed":0.0707,"set":null},{"k":17,"c":3,"r":1,"t":"plain","st":"wild","own":null,"seed":0.1272,"set":{"own":1,"pop":222,"band":3}},{"k":18,"c":4,"r":1,"t":"plain","st":"reck","own":1,"seed":0.7112,"set":null},{"k":19,"c":5,"r":1,"t":"plain","st":"wild","own":null,"seed":0.5257,"set":{"own":1,"pop":298,"band":3}},{"k":20,"c":6,"r":1,"t":"forest","st":"reck","own":1,"seed":0.9577,"set":null},{"k":21,"c":7,"r":1,"t":"forest","st":"wild","own":null,"seed":0.0811,"set":{"own":0,"pop":88,"band":2}},{"k":22,"c":8,"r":1,"t":"forest","st":"reck","own":0,"seed":0.9121,"set":null},{"k":23,"c":9,"r":1,"t":"forest","st":"wild","own":null,"seed":0.3367,"set":{"own":0,"pop":193,"band":3}},{"k":24,"c":10,"r":1,"t":"forest","st":"reck","own":0,"seed":0.4996,"set":null},{"k":25,"c":11,"r":1,"t":"forest","st":"reck","own":0,"seed":0.4902,"set":null},{"k":26,"c":12,"r":1,"t":"plain","st":"wild","own":null,"seed":0.3182,"set":{"own":0,"pop":728,"band":3}},{"k":27,"c":13,"r":1,"t":"water","st":"wild","own":null,"seed":0.2359,"set":null},{"k":28,"c":0,"r":2,"t":"water","st":"wild","own":null,"seed":0.3973,"set":null},{"k":29,"c":1,"r":2,"t":"plain","st":"reck","own":1,"seed":0.2806,"set":null},{"k":30,"c":2,"r":2,"t":"hill","st":"reck","own":1,"seed":0.3517,"set":null},{"k":31,"c":3,"r":2,"t":"forest","st":"reck","own":1,"seed":0.5056,"set":null},{"k":32,"c":4,"r":2,"t":"forest","st":"reck","own":1,"seed":0.5913,"set":null},{"k":33,"c":5,"r":2,"t":"forest","st":"reck","own":1,"seed":0.9278,"set":null},{"k":34,"c":6,"r":2,"t":"forest","st":"reck","own":1,"seed":0.475,"set":null},{"k":35,"c":7,"r":2,"t":"hill","st":"reck","own":0,"seed":0.9932,"set":null},{"k":36,"c":8,"r":2,"t":"hill","st":"reck","own":0,"seed":0.9439,"set":null},{"k":37,"c":9,"r":2,"t":"hill","st":"reck","own":0,"seed":0.7739,"set":null},{"k":38,"c":10,"r":2,"t":"hill","st":"reck","own":0,"seed":0.0344,"set":null},{"k":39,"c":11,"r":2,"t":"hill","st":"wild","own":null,"seed":0.5205,"set":{"own":0,"pop":112,"band":2}},{"k":40,"c":12,"r":2,"t":"plain","st":"reck","own":0,"seed":0.4059,"set":null},{"k":41,"c":13,"r":2,"t":"water","st":"wild","own":null,"seed":0.6403,"set":null},{"k":42,"c":0,"r":3,"t":"water","st":"wild","own":null,"seed":0.4323,"set":null},{"k":43,"c":1,"r":3,"t":"plain","st":"wild","own":null,"seed":0.1311,"set":{"own":1,"pop":2600,"band":4}},{"k":44,"c":2,"r":3,"t":"forest","st":"reck","own":1,"seed":0.8977,"set":null},{"k":45,"c":3,"r":3,"t":"forest","st":"reck","own":1,"seed":0.0256,"set":null},{"k":46,"c":4,"r":3,"t":"forest","st":"reck","own":1,"seed":0.0249,"set":null},{"k":47,"c":5,"r":3,"t":"forest","st":"reck","own":1,"seed":0.4298,"set":null},{"k":48,"c":6,"r":3,"t":"hill","st":"reck","own":1,"seed":0.7696,"set":null},{"k":49,"c":7,"r":3,"t":"hill","st":"wild","own":null,"seed":0.1766,"set":{"own":0,"pop":71,"band":1}},{"k":50,"c":8,"r":3,"t":"forest","st":"reck","own":0,"seed":0.6373,"set":null},{"k":51,"c":9,"r":3,"t":"forest","st":"wild","own":null,"seed":0.9754,"set":{"own":0,"pop":335,"band":3}},{"k":52,"c":10,"r":3,"t":"forest","st":"reck","own":0,"seed":0.283,"set":null},{"k":53,"c":11,"r":3,"t":"hill","st":"reck","own":0,"seed":0.4383,"set":null},{"k":54,"c":12,"r":3,"t":"plain","st":"wild","own":null,"seed":0.3534,"set":{"own":0,"pop":1312,"band":4}},{"k":55,"c":13,"r":3,"t":"water","st":"wild","own":null,"seed":0.2811,"set":null},{"k":56,"c":0,"r":4,"t":"water","st":"wild","own":null,"seed":0.4251,"set":null},{"k":57,"c":1,"r":4,"t":"plain","st":"reck","own":1,"seed":0.9615,"set":null},{"k":58,"c":2,"r":4,"t":"forest","st":"reck","own":1,"seed":0.4052,"set":null},{"k":59,"c":3,"r":4,"t":"forest","st":"reck","own":1,"seed":0.5253,"set":null},{"k":60,"c":4,"r":4,"t":"forest","st":"wild","own":null,"seed":0.782,"set":{"own":1,"pop":540,"band":3}},{"k":61,"c":5,"r":4,"t":"hill","st":"reck","own":1,"seed":0.2723,"set":null},{"k":62,"c":6,"r":4,"t":"hill","st":"reck","own":1,"seed":0.899,"set":null},{"k":63,"c":7,"r":4,"t":"hill","st":"reck","own":0,"seed":0.0129,"set":null},{"k":64,"c":8,"r":4,"t":"forest","st":"reck","own":0,"seed":0.5636,"set":null},{"k":65,"c":9,"r":4,"t":"forest","st":"reck","own":0,"seed":0.0403,"set":null},{"k":66,"c":10,"r":4,"t":"forest","st":"reck","own":0,"seed":0.3915,"set":null},{"k":67,"c":11,"r":4,"t":"forest","st":"reck","own":0,"seed":0.8971,"set":null},{"k":68,"c":12,"r":4,"t":"plain","st":"reck","own":0,"seed":0.6086,"set":null},{"k":69,"c":13,"r":4,"t":"water","st":"wild","own":null,"seed":0.9212,"set":null},{"k":70,"c":0,"r":5,"t":"water","st":"wild","own":null,"seed":0.1205,"set":null},{"k":71,"c":1,"r":5,"t":"plain","st":"reck","own":1,"seed":0.427,"set":null},{"k":72,"c":2,"r":5,"t":"forest","st":"wild","own":null,"seed":0.5774,"set":{"own":1,"pop":158,"band":3}},{"k":73,"c":3,"r":5,"t":"forest","st":"reck","own":1,"seed":0.3569,"set":null},{"k":74,"c":4,"r":5,"t":"hill","st":"reck","own":1,"seed":0.8192,"set":null},{"k":75,"c":5,"r":5,"t":"hill","st":"reck","own":0,"seed":0.9811,"set":null},{"k":76,"c":6,"r":5,"t":"hill","st":"reck","own":0,"seed":0.6207,"set":null},{"k":77,"c":7,"r":5,"t":"hill","st":"reck","own":0,"seed":0.5189,"set":null},{"k":78,"c":8,"r":5,"t":"forest","st":"wild","own":null,"seed":0.0844,"set":{"own":0,"pop":136,"band":2}},{"k":79,"c":9,"r":5,"t":"forest","st":"reck","own":0,"seed":0.3916,"set":null},{"k":80,"c":10,"r":5,"t":"forest","st":"wild","own":null,"seed":0.909,"set":{"own":0,"pop":931,"band":4}},{"k":81,"c":11,"r":5,"t":"forest","st":"reck","own":0,"seed":0.7653,"set":null},{"k":82,"c":12,"r":5,"t":"plain","st":"reck","own":0,"seed":0.7763,"set":null},{"k":83,"c":13,"r":5,"t":"water","st":"wild","own":null,"seed":0.18,"set":null},{"k":84,"c":0,"r":6,"t":"water","st":"wild","own":null,"seed":0.3564,"set":null},{"k":85,"c":1,"r":6,"t":"plain","st":"wild","own":null,"seed":0.8792,"set":{"own":1,"pop":1536,"band":4}},{"k":86,"c":2,"r":6,"t":"forest","st":"reck","own":1,"seed":0.6895,"set":null},{"k":87,"c":3,"r":6,"t":"forest","st":"reck","own":1,"seed":0.2279,"set":null},{"k":88,"c":4,"r":6,"t":"forest","st":"wild","own":null,"seed":0.3237,"set":{"own":1,"pop":468,"band":3}},{"k":89,"c":5,"r":6,"t":"water","st":"wild","own":null,"seed":0.2022,"set":null},{"k":90,"c":6,"r":6,"t":"hill","st":"wild","own":null,"seed":0.6855,"set":{"own":0,"pop":183,"band":3}},{"k":91,"c":7,"r":6,"t":"hill","st":"reck","own":0,"seed":0.5504,"set":null},{"k":92,"c":8,"r":6,"t":"forest","st":"reck","own":0,"seed":0.25,"set":null},{"k":93,"c":9,"r":6,"t":"forest","st":"reck","own":0,"seed":0.9036,"set":null},{"k":94,"c":10,"r":6,"t":"forest","st":"reck","own":0,"seed":0.5351,"set":null},{"k":95,"c":11,"r":6,"t":"forest","st":"reck","own":0,"seed":0.3751,"set":null},{"k":96,"c":12,"r":6,"t":"plain","st":"wild","own":null,"seed":0.786,"set":{"own":0,"pop":2600,"band":4}},{"k":97,"c":13,"r":6,"t":"water","st":"wild","own":null,"seed":0.1892,"set":null},{"k":98,"c":0,"r":7,"t":"water","st":"wild","own":null,"seed":0.9372,"set":null},{"k":99,"c":1,"r":7,"t":"plain","st":"reck","own":1,"seed":0.95,"set":null},{"k":100,"c":2,"r":7,"t":"plain","st":"wild","own":null,"seed":0.2182,"set":{"own":1,"pop":307,"band":3}},{"k":101,"c":3,"r":7,"t":"plain","st":"reck","own":1,"seed":0.6812,"set":null},{"k":102,"c":4,"r":7,"t":"plain","st":"reck","own":1,"seed":0.9326,"set":null},{"k":103,"c":5,"r":7,"t":"forest","st":"reck","own":0,"seed":0.6976,"set":null},{"k":104,"c":6,"r":7,"t":"forest","st":"reck","own":0,"seed":0.5967,"set":null},{"k":105,"c":7,"r":7,"t":"plain","st":"wild","own":null,"seed":0.5073,"set":{"own":0,"pop":79,"band":2}},{"k":106,"c":8,"r":7,"t":"plain","st":"reck","own":0,"seed":0.0776,"set":null},{"k":107,"c":9,"r":7,"t":"plain","st":"wild","own":null,"seed":0.0798,"set":{"own":0,"pop":1006,"band":4}},{"k":108,"c":10,"r":7,"t":"plain","st":"reck","own":0,"seed":0.7827,"set":null},{"k":109,"c":11,"r":7,"t":"forest","st":"reck","own":0,"seed":0.2943,"set":null},{"k":110,"c":12,"r":7,"t":"plain","st":"reck","own":0,"seed":0.931,"set":null},{"k":111,"c":13,"r":7,"t":"water","st":"wild","own":null,"seed":0.4559,"set":null},{"k":112,"c":0,"r":8,"t":"water","st":"wild","own":null,"seed":0.3377,"set":null},{"k":113,"c":1,"r":8,"t":"water","st":"wild","own":null,"seed":0.9679,"set":null},{"k":114,"c":2,"r":8,"t":"water","st":"wild","own":null,"seed":0.9861,"set":null},{"k":115,"c":3,"r":8,"t":"water","st":"wild","own":null,"seed":0.6273,"set":null},{"k":116,"c":4,"r":8,"t":"water","st":"wild","own":null,"seed":0.6877,"set":null},{"k":117,"c":5,"r":8,"t":"water","st":"wild","own":null,"seed":0.0163,"set":null},{"k":118,"c":6,"r":8,"t":"water","st":"wild","own":null,"seed":0.2909,"set":null},{"k":119,"c":7,"r":8,"t":"water","st":"wild","own":null,"seed":0.2632,"set":null},{"k":120,"c":8,"r":8,"t":"water","st":"wild","own":null,"seed":0.6194,"set":null},{"k":121,"c":9,"r":8,"t":"water","st":"wild","own":null,"seed":0.3894,"set":null},{"k":122,"c":10,"r":8,"t":"water","st":"wild","own":null,"seed":0.3021,"set":null},{"k":123,"c":11,"r":8,"t":"water","st":"wild","own":null,"seed":0.8175,"set":null},{"k":124,"c":12,"r":8,"t":"water","st":"wild","own":null,"seed":0.551,"set":null},{"k":125,"c":13,"r":8,"t":"water","st":"wild","own":null,"seed":0.1787,"set":null}],"stones":[{"k":82,"own":0,"power":0,"live":false},{"k":67,"own":0,"power":0,"live":false},{"k":37,"own":0,"power":0,"live":false},{"k":87,"own":1,"power":0,"live":false}],"p":[{"pos":77},{"pos":104}],"armies":[{"at":103,"to":90,"n":494,"own":1},{"at":102,"to":90,"n":322,"own":1},{"at":22,"to":19,"n":138,"own":0},{"at":101,"to":90,"n":210,"own":1}],"refugees":[],"reach":1,"score":[{"h":0,"c":68,"s":39,"tot":107},{"h":0,"c":54,"s":27,"tot":81}],"log":[{"t":37,"x":"A levy has formed, and it is coming."},{"t":37,"x":"2 tiles of your blessing go out. It has been surveyed."},{"t":38,"x":"The ground goes over to you in 3 tiles."},{"t":38,"x":"They fell the wood and put the plough through it — 3 tiles in one season."},{"t":38,"x":"Theirs takes 2 tiles."},{"t":38,"x":"A levy has formed, and it is coming."},{"t":38,"x":"A settlement has passed seventy-seven. Nothing comes through there now."},{"t":38,"x":"Past a hundred and fifty. They begin working the ground outward."},{"t":39,"x":"The levy forms. It will be some years on the road."},{"t":39,"x":"Theirs takes 2 tiles."},{"t":39,"x":"A levy has formed, and it is coming."},{"t":39,"x":"A settlement has passed seventy-seven. Nothing comes through there now."}]}};
+
+/* ---------- geometry: identical to game/ui.js ---------- */
+const SZ = 24, W = Math.sqrt(3)*SZ, VS = 1.5*SZ;
+const COLS = BOARD.cols, ROWS = BOARD.rows;
+const BW = W*(COLS+0.5)+8, BH = VS*(ROWS-1)+2*SZ+8;
+const px = (c,r) => [W*(c+0.5*(r&1))+W/2+4, VS*r+SZ+4];
+
+function verts(x,y,s){
+ s = s||SZ; const v=[];
+ for(let i=0;i<6;i++){ const a=Math.PI/180*(60*i-30);
+  v.push([x+s*Math.cos(a), y+s*Math.sin(a)]); }
+ return v;                                    // 0 r-up 1 r-dn 2 btm 3 l-dn 4 l-up 5 top
+}
+const poly = v => v.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join("")+"Z";
+const line = v => v.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join("");
+const hexPath = (x,y,s) => poly(verts(x,y,s));
+
+/* deterministic per-tile jitter, so a stone looks the same every render */
+function rng(seed){ let s = Math.floor(seed*99991)>>>0 || 7;
+ return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+
+/* ---------- colour helpers ---------- */
+function shift(hex,f){
+ const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
+ const m=v=> Math.max(0,Math.min(255, f>0 ? v+(255-v)*f : v*(1+f)));
+ return "#"+[m(r),m(g),m(b)].map(v=>Math.round(v).toString(16).padStart(2,"0")).join("");
+}
+
+/* ---------- the three palettes ---------- */
+/* A is lifted verbatim from game/ui.js so the baseline is honest.            */
+const A = {
+ id:"A", name:"As built — cold northern",
+ tag:"the current renderer",
+ bg:"#12181A", seam:"#2A3530", frame:null,
+ land:{water:"#0D1517",plain:"#2C332B",forest:"#1F2C1E",hill:"#363A35",mount:"#514F52"},
+ bless:{plain:"#2E3040",forest:"#232E38",hill:"#383A46"},
+ reck:"#6B5A2E", set:"#4A4238",
+ own:["#C8B37E","#5FA0A8"], mote:["#B79AE0","#7FC2CA"],
+ furrow:["#8A7440","#7A6A50"], tree:"#3A4A36", treeBless:"#6E7FA8",
+ emboss:0, ink:"#D9DACE",
+ blurb:"The baseline. Everything is the same temperature, so blessed ground and farmland "
+      +"differ in hue but not in mood — and at year 40, when the blessing is gone, the board "
+      +"looks much as it did at year 9. The arc is invisible."
+};
+
+/* Warm painted earth — the Fantasy Empires read. Land is the hero. */
+const WARM_LAND = {water:"#274F6B",plain:"#6E7A3C",forest:"#3C5A2C",hill:"#8A7A4C",mount:"#7A7166"};
+
+const B = {
+ id:"B", name:"Fantasy Empires — warm throughout",
+ tag:"painted, embossed, everything warm",
+ bg:"#16202B", seam:"#1E2A1C", frame:"bronze",
+ land:WARM_LAND,
+ bless:{plain:"#88A448",forest:"#4E7A34",hill:"#A08E58"},   /* lusher, still warm */
+ reck:"#C9A24A", set:"#8A6B48",
+ own:["#E8C86A","#B25040"], mote:["#F0E0A0","#E8B0A0"],
+ furrow:["#8A6A22","#7A5A20"], tree:"#24421C", treeBless:"#2C5420",
+ emboss:1, ink:"#F0E6CE",
+ blurb:"The aesthetic you liked, taken straight: saturated painted earth, provincial borders "
+      +"raised into the landscape rather than drawn on top of it, a bronze frame. It reads as a "
+      +"place. But blessed ground is warm too, so it is only a greener green — the one distinction "
+      +"the whole design rests on is the weakest thing on the board."
+};
+
+/* Warm land, cold god — same land as B, blessing moved to the other temperature. */
+const C = {
+ id:"C", name:"Warm land, cold god",
+ tag:"the proposal",
+ bg:"#16202B", seam:"#1E2A1C", frame:"bronze",
+ land:WARM_LAND,
+ bless:{plain:"#A4A8C4",forest:"#5E6C8C",hill:"#8C90AE"},   /* moonlit silver-lilac */
+ reck:"#C9A24A", set:"#8A6B48",
+ own:["#E8C86A","#B25040"], mote:["#F0F0FA","#E0E4F4"],
+ furrow:["#8A6A22","#7A5A20"], tree:"#24421C", treeBless:"#38445F",
+ emboss:1, ink:"#F0E6CE", lit:1,
+ blurb:"Identical land to B — only blessing has changed temperature. The divine is now the one "
+      +"cool, lit thing on a warm board, so it separates instantly and it separates by mood rather "
+      +"than by hue. The payoff is at year 40: as blessing is ploughed under, the whole board "
+      +"warms and dulls on its own. The art direction performs the thesis without anyone narrating it."
+};
+
+const VARIANTS = [A,B,C];
+
+/* ---------- marks ---------- */
+function conifer(x,y,h,w,col,dark){
+ return `<path d="M${x} ${y-h} L${x+w} ${y} L${x-w} ${y} Z" fill="${col}"/>`
+      + `<path d="M${x} ${y-h} L${x} ${y} L${x-w} ${y} Z" fill="${dark}" opacity=".45"/>`;
+}
+
+/* Megalithic: irregular tapered slab, no straight edges, seeded so it is stable.
+   Leaning + notched when the stone is dead. */
+function menhir(x,y,h,w,seed,opt){
+ opt = opt||{}; const r = rng(seed), lean = opt.lean||0;
+ const j = a => (r()-0.5)*a;
+ const tw = w*(0.52+r()*0.16), lx = lean*h;
+ const p = [
+  [x-w/2+j(1.4),          y],
+  [x-w/2*(0.86+r()*0.2)+j(1),  y-h*0.34],
+  [x-tw/2+lx*0.85+j(1),   y-h*0.72],
+  [x+j(1.6)+lx,           y-h],
+  [x+tw/2+lx*0.85+j(1),   y-h*0.70],
+  [x+w/2*(0.88+r()*0.2)+j(1),  y-h*0.36],
+  [x+w/2+j(1.4),          y]
+ ];
+ let s = `<path d="${poly(p)}" fill="${opt.fill}"/>`;
+ /* lit face on the left, the way a low sun would take it */
+ s += `<path d="M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)} L${p[1][0].toFixed(1)} ${p[1][1].toFixed(1)}`
+    + ` L${p[2][0].toFixed(1)} ${p[2][1].toFixed(1)} L${p[3][0].toFixed(1)} ${p[3][1].toFixed(1)}`
+    + ` L${(x+j(0.5)+lx*0.3).toFixed(1)} ${y.toFixed(1)} Z" fill="${shift(opt.fill,.26)}"/>`;
+ if(opt.crack) s += `<path d="M${(x-1+lx*0.6).toFixed(1)} ${(y-h*0.62).toFixed(1)} l2.4 ${(h*0.2).toFixed(1)}`
+    + ` l-1.6 ${(h*0.16).toFixed(1)}" stroke="${shift(opt.fill,-.42)}" stroke-width="1" fill="none"/>`;
+ return s;
+}
+
+function stoneGroup(x,y,st,V){
+ const live = st.live, own = st.own;
+ const base = live ? (own===0?"#D8CCA6":"#BFC9CF") : "#7E8079";
+ let s = `<ellipse cx="${x}" cy="${y+9}" rx="12" ry="3.4" fill="#000" opacity=".26"/>`;
+ /* satellite stones — the circle around it */
+ const r = rng(st.k*0.017+0.3);
+ for(let i=0;i<3;i++){
+  const ax = x-11+i*11+ (r()-0.5)*3, ay = y+8-(i===1?2:0);
+  s += menhir(ax, ay, 5+r()*2.5, 3.4, st.k*0.31+i, {fill: shift(base,-0.3)});
+ }
+ if(live && st.power>=12){                       /* trilithon for a strong one */
+  s += menhir(x-6.5, y+7, 15, 5.5, st.k*0.11, {fill:base});
+  s += menhir(x+6.5, y+7, 15, 5.5, st.k*0.53, {fill:base});
+  s += `<path d="M${x-11} ${y-8} L${x+11} ${y-9.4} L${x+11} ${y-5.6} L${x-11} ${y-4.4} Z"
+        fill="${shift(base,.1)}"/>`;
+ } else {
+  s += menhir(x, y+7, live?17:13, 8, st.k*0.07,
+       {fill:base, lean: live?0:0.20, crack:!live});
+ }
+ if(live && V.lit) s += `<g fill="${V.mote[own]}" opacity=".85">`
+   + `<path d="M${x-13} ${y-6} l1.6 -1.6 l1.6 1.6 l-1.6 1.6 Z"/>`
+   + `<path d="M${x+12} ${y-11} l1.3 -1.3 l1.3 1.3 l-1.3 1.3 Z"/>`
+   + `<path d="M${x+3} ${y-16} l1.4 -1.4 l1.4 1.4 l-1.4 1.4 Z"/></g>`;
+ return s;
+}
+
+/* ---------- one tile ---------- */
+function tile(t,V,G){
+ const [x,y] = px(t.c,t.r);
+ const blessed = t.st==="bless" && t.t!=="water" && t.t!=="mount";
+ let fill = V.land[t.t];
+ if(blessed) fill = V.bless[t.t] || fill;
+ if(t.st==="reck") fill = V.reck;
+ if(t.set) fill = V.set;
+
+ const owner = t.set ? t.set.own : (t.st==="wild" ? null : t.own);
+ let s = `<path d="${hexPath(x,y)}" fill="${fill}" stroke="${V.seam}" stroke-width=".7"/>`;
+ const r = rng(t.seed);
+
+ /* --- terrain marks: chunky solids, no gradients --- */
+ if(t.t==="water"){
+  const wc = shift(V.land.water,.30);
+  s += `<g stroke="${wc}" stroke-width="1.6" stroke-linecap="round" opacity=".55">`
+     + `<path d="M${x-9} ${y-5} h7"/><path d="M${x+1} ${y+1} h8"/><path d="M${x-7} ${y+7} h6"/></g>`;
+ }
+ if(t.t==="mount"){
+  s += `<path d="M${x-12} ${y+8} L${x-3} ${y-9} L${x+3} ${y-1} L${x+7} ${y-7} L${x+13} ${y+8} Z"
+        fill="${shift(V.land.mount,.16)}"/>`
+     + `<path d="M${x-3} ${y-9} L${x+1} ${y-2} L${x-6} ${y+2} Z" fill="${shift(V.land.mount,.5)}"/>`
+     + `<path d="M${x-3} ${y-9} L${x-12} ${y+8} L${x-5} ${y+8} Z" fill="${shift(V.land.mount,-.3)}"/>`;
+ }
+ if(t.t==="forest" && t.st!=="reck" && !t.set){
+  const col = blessed ? V.treeBless : V.tree;
+  const dk = shift(col,-.35);
+  s += conifer(x-6+r()*2, y+7,  10, 4.4, col, dk);
+  s += conifer(x+5-r()*2, y+5,  8.5, 3.8, col, dk);
+  s += conifer(x+0+r()*3, y+10, 7.5, 3.4, col, dk);
+ }
+ if(t.t==="hill" && t.st!=="reck" && !t.set){
+  const col = blessed ? shift(V.bless[t.t],-.40) : shift(V.land.hill,-.34);
+  s += `<path d="M${x-11} ${y+7} q5.5 -11 11 0 Z" fill="${col}"/>`
+     + `<path d="M${x-1} ${y+8} q5 -13 11 0 Z" fill="${shift(col,.20)}"/>`
+     + `<path d="M${x-11} ${y+7} q5.5 -11 11 0" fill="none" stroke="${shift(col,-.3)}" stroke-width=".9"/>`;
+ }
+ if(t.st==="reck" && !t.set){
+  const f = V.furrow[t.own===0?0:1];
+  s += `<g fill="${f}" opacity=".62">`
+     + `<rect x="${x-12}" y="${y-7}" width="24" height="3" rx="1"/>`
+     + `<rect x="${x-12}" y="${y-1}" width="24" height="3" rx="1"/>`
+     + `<rect x="${x-12}" y="${y+5}" width="24" height="3" rx="1"/></g>`;
+ }
+ if(blessed && !t.set){
+  const m = V.mote[t.own===0?0:1];
+  s += `<g fill="${m}" opacity="${V.lit?.95:.8}">`
+     + `<path d="M${(x-9+r()*4).toFixed(1)} ${(y-7+r()*3).toFixed(1)} l1.7 -1.7 l1.7 1.7 l-1.7 1.7 Z"/>`
+     + `<path d="M${(x+6-r()*4).toFixed(1)} ${(y-2+r()*4).toFixed(1)} l1.3 -1.3 l1.3 1.3 l-1.3 1.3 Z"/>`
+     + `<path d="M${(x-2+r()*6).toFixed(1)} ${(y+8-r()*3).toFixed(1)} l1.5 -1.5 l1.5 1.5 l-1.5 1.5 Z"/></g>`;
+  if(V.lit) s += `<path d="${hexPath(x,y,SZ-2.2)}" fill="none" stroke="${V.mote[t.own===0?0:1]}"
+        stroke-width="1" opacity=".22"/>`;
+ }
+
+ /* --- the border: embossed into the land, not drawn on it --- */
+ if(owner!==null){
+  const col = V.own[owner], v = verts(x,y,SZ-1.4);
+  if(V.emboss){
+   s += `<path d="${line([v[3],v[4],v[5],v[0]])}" fill="none" stroke="${shift(col,.45)}"
+         stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`
+      + `<path d="${line([v[0],v[1],v[2],v[3]])}" fill="none" stroke="${shift(col,-.45)}"
+         stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>`
+      + `<path d="${hexPath(x,y,SZ-2.6)}" fill="none" stroke="${col}" stroke-width="1.5"
+         opacity=".92" stroke-linejoin="round"/>`;
+  } else {
+   s += `<path d="${hexPath(x,y,SZ-1)}" fill="none" stroke="${col}" stroke-width="2"/>`;
+  }
+ }
+ return s;
+}
+
+/* ---------- settlements, columns, the powers ---------- */
+function settlement(t,V){
+ const [x,y] = px(t.c,t.r), b = t.set.band, col = V.own[t.set.own];
+ const n = Math.min(b+1,5);
+ let s = `<ellipse cx="${x}" cy="${y+8}" rx="13" ry="3.2" fill="#000" opacity=".22"/>`;
+ for(let i=0;i<n;i++){
+  const ax = x-10+i*4.9, ay = y+5-(i%2)*4.4;
+  s += `<rect x="${ax-0.4}" y="${ay-3.2}" width="4.6" height="3.4" fill="${shift(col,-.5)}"/>`
+     + `<path d="M${ax-1.2} ${ay-3} l3.1 -4 l3.1 4 Z" fill="${col}"/>`;
+ }
+ s += `<text x="${x}" y="${y+SZ-3.5}" text-anchor="middle" font-size="10" font-weight="600"
+       font-family="IBM Plex Sans Condensed,sans-serif" fill="${V.ink}" opacity=".9"
+       stroke="#000" stroke-width="2.2" paint-order="stroke" stroke-opacity=".5">${t.set.pop}</text>`;
+ return s;
+}
+
+function column(a,V,kind){
+ const t = TILE[a.at], d = TILE[a.to];
+ const [x,y] = px(t.c,t.r), [dx,dy] = px(d.c,d.r);
+ const col = kind==="army" ? (a.own===0?V.own[0]:"#9B4A44") : V.mote[a.own];
+ let s = `<line x1="${x}" y1="${y}" x2="${dx}" y2="${dy}" stroke="${col}" stroke-width="1.2"
+          stroke-dasharray="${kind==="army"?"3 4":"1 5"}" opacity=".6"/>`;
+ s += kind==="army"
+   ? `<path d="M${x} ${y-9} l7.5 13 l-15 0 Z" fill="${col}" stroke="#000" stroke-width=".8"/>`
+   : `<circle cx="${x}" cy="${y-3}" r="7.4" fill="${col}" stroke="#000" stroke-width=".8"/>`;
+ s += `<text x="${x}" y="${y+(kind==="army"?2:-1)}" text-anchor="middle" font-size="8"
+       font-weight="700" font-family="IBM Plex Sans Condensed,sans-serif" fill="#12181A">${a.n}</text>`;
+ return s;
+}
+
+function power(w,pos,V){
+ const t = TILE[pos], [x,y] = px(t.c,t.r), col = V.own[w];
+ return `<circle cx="${x}" cy="${y}" r="16" fill="none" stroke="#000" stroke-width="3.4" opacity=".35"/>`
+      + `<circle cx="${x}" cy="${y}" r="16" fill="none" stroke="${col}" stroke-width="1.9"
+         stroke-dasharray="5 3.4" opacity=".95"/>`
+      + `<circle cx="${x}" cy="${y}" r="3.6" fill="${col}" stroke="#000" stroke-width=".8"/>`;
+}
+
+/* ---------- ornate frame ---------- */
+const FR = 19;
+function frame(V){
+ if(!V.frame) return {pad:0, back:"", front:""};
+ const w = BW+FR*2, h = BH+FR*2;
+ const boss = (cx,cy) => `<circle cx="${cx}" cy="${cy}" r="5.4" fill="#6E5A36"
+   stroke="#2A2114" stroke-width="1"/><circle cx="${cx-1}" cy="${cy-1.2}" r="2" fill="#B9A063"/>`;
+ const back =
+   `<rect x="0" y="0" width="${w}" height="${h}" fill="#4A3C24"/>`
+  +`<rect x="2.5" y="2.5" width="${w-5}" height="${h-5}" fill="none" stroke="#8A7346" stroke-width="2.4"/>`
+  +`<rect x="7" y="7" width="${w-14}" height="${h-14}" fill="none" stroke="#2A2114" stroke-width="2"/>`
+  +`<rect x="10.5" y="10.5" width="${w-21}" height="${h-21}" fill="#5C4A2C"/>`
+  +`<rect x="${FR-2.5}" y="${FR-2.5}" width="${BW+5}" height="${BH+5}" fill="#12140F"
+     stroke="#241C10" stroke-width="3"/>`;
+ const front =
+   `<rect x="${FR-2.5}" y="${FR-2.5}" width="${BW+5}" height="${BH+5}" fill="none"
+     stroke="#8A7346" stroke-width="1.2" opacity=".55"/>`
+  + boss(FR/2+1,FR/2+1) + boss(w-FR/2-1,FR/2+1)
+  + boss(FR/2+1,h-FR/2-1) + boss(w-FR/2-1,h-FR/2-1);
+ return {pad:FR, back, front};
+}
+
+/* ---------- render one board ---------- */
+let TILE = {};
+function board(V,S,scale,useFrame){
+ TILE = {}; S.tiles.forEach(t=>TILE[t.k]=t);
+ const F = useFrame ? frame(V) : {pad:0,back:"",front:""};
+ const w = BW+F.pad*2, h = BH+F.pad*2;
+ let g = "";
+ S.tiles.forEach(t=>{ g += tile(t,V,S); });
+ S.tiles.filter(t=>t.set).forEach(t=>{ g += settlement(t,V); });
+ S.stones.forEach(st=>{ const t=TILE[st.k], [x,y]=px(t.c,t.r); g += stoneGroup(x,y,st,V); });
+ S.armies.forEach(a=>{ g += column(a,V,"army"); });
+ S.refugees.forEach(f=>{ g += column(f,V,"refugee"); });
+ g += power(0,S.p[0].pos,V) + power(1,S.p[1].pos,V);
+
+ return `<svg viewBox="0 0 ${w} ${h}" width="${(w*scale).toFixed(0)}" height="${(h*scale).toFixed(0)}"
+   xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+   <rect width="${w}" height="${h}" fill="${V.bg}"/>${F.back}
+   <g transform="translate(${F.pad},${F.pad})">${g}</g>${F.front}</svg>`;
+}
+
+/* ---------- zoom strip ---------- */
+function zoomStrip(V,S){
+ const pick = [
+  ["wild forest",   S.tiles.find(t=>t.t==="forest"&&t.st==="wild"&&!t.set)],
+  ["blessed, yours",S.tiles.find(t=>t.st==="bless"&&t.own===0&&!t.set)],
+  ["blessed, theirs",S.tiles.find(t=>t.st==="bless"&&t.own===1&&!t.set)],
+  ["farmland, yours",S.tiles.find(t=>t.st==="reck"&&t.own===0&&!t.set)],
+  ["farmland, theirs",S.tiles.find(t=>t.st==="reck"&&t.own===1&&!t.set)],
+  ["a town",        S.tiles.find(t=>t.set&&t.set.band>=2)],
+  ["hill",          S.tiles.find(t=>t.t==="hill"&&t.st==="wild")],
+  ["water",         S.tiles.find(t=>t.t==="water")]
+ ].filter(p=>p[1]);
+ let out = `<div class="zoom">`;
+ pick.forEach(([label,t])=>{
+  const [x,y] = px(t.c,t.r);
+  let g = tile(t,V,S); if(t.set) g += settlement(t,V);
+  out += `<figure><svg viewBox="${x-SZ-2} ${y-SZ-2} ${SZ*2+4} ${SZ*2+4}" width="${(SZ*2+4)*2.4}"
+    height="${(SZ*2+4)*2.4}" xmlns="http://www.w3.org/2000/svg">
+    <rect x="${x-SZ-2}" y="${y-SZ-2}" width="${SZ*2+4}" height="${SZ*2+4}" fill="${V.bg}"/>
+    ${g}</svg><figcaption>${label}</figcaption></figure>`;
+ });
+ /* the stones, always worth seeing large */
+ [["a stone that answers",{k:0,own:0,power:15,live:true}],
+  ["a stone that does not",{k:9,own:0,power:2,live:false}]].forEach(([label,st])=>{
+  out += `<figure><svg viewBox="0 0 ${SZ*2+4} ${SZ*2+4}" width="${(SZ*2+4)*2.4}"
+    height="${(SZ*2+4)*2.4}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="${SZ*2+4}" height="${SZ*2+4}" fill="${V.land.plain}"/>
+    ${stoneGroup(SZ+2,SZ+4,st,V)}</svg><figcaption>${label}</figcaption></figure>`;
+ });
+ return out + `</div>`;
+}
+
+/* ---------- wiring ---------- */
+let YR="early", SC=1, FRAME=1;
+function draw(){
+ const S = BOARD[YR];
+ document.getElementById("boards").innerHTML = VARIANTS.map(V=>`
+  <div class="card">
+   <header><h2>${V.name}</h2><span class="tag">${V.tag}</span></header>
+   ${board(V,S,SC,FRAME)}
+   <p>${V.blurb}</p>
+  </div>`).join("");
+
+ document.getElementById("zooms").innerHTML = VARIANTS.map(V=>
+  `<h3 style="font:300 15px Spectral,Georgia,serif;color:#9A9384;margin:22px 0 8px">${V.name}</h3>`
+  + zoomStrip(V,S)).join("");
+
+ document.getElementById("chron").innerHTML =
+  `<div class="stat"><span>year <b>${S.turn}</b></span><span>you <b>${S.score[0].tot}</b></span>
+   <span>them <b>${S.score[1].tot}</b></span><span>blessed <b>${S.score[0].h}</b></span>
+   <span>farmland <b>${S.score[0].c}</b></span><span>can walk to <b>${S.reach}</b></span></div>`
+  + S.log.map(l=>`<div>${l.x}</div>`).join("");
+}
+document.querySelectorAll(".ctl button").forEach(b=>{
+ b.onclick = () => {
+  const key = b.dataset.yr ? "yr" : b.dataset.sc ? "sc" : "fr";
+  document.querySelectorAll(`.ctl button[data-${key}]`).forEach(o=>o.classList.remove("on"));
+  b.classList.add("on");
+  if(key==="yr") YR = b.dataset.yr;
+  if(key==="sc") SC = +b.dataset.sc;
+  if(key==="fr") FRAME = +b.dataset.fr;
+  draw();
+ };
+});
+draw();
+</script>
+</body>
+</html>

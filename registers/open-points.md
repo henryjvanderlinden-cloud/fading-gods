@@ -255,6 +255,37 @@ OP-09.
 **Settled by:** writing all of them and reading the endings of forty simulated
 games. If one fires in 80% of them, the set is wrong.
 
+## OP-17 · medium · Art direction was never chosen
+
+The palette in `concept/concept.md` — *"cold, dark, northern"*, *"no gradients,
+no shadows, no glow"* — describes the renderer that happened to exist. Nobody
+decided it. It has since been quoted back as though it were load-bearing.
+
+Measured, it is worse than that. Blessed plain against wild plain in the current
+build separates at **1.00 luminance contrast** — the one-way ratchet in §1, the
+distinction the whole arc runs on, is drawn at zero. See
+`concept/art-direction/`.
+
+Three directions are now rendered over real board states at years 9, 27 and 40.
+The proposal is **warm painted land, cool luminous blessing**: it separates
+blessed from wild at 1.99, and it makes the forty-year fade a colour-temperature
+shift across the whole board that nothing has to narrate.
+
+**Direction chosen: warm throughout.** The measurement argued for cool blessing
+and was overruled, correctly — it showed that warm separates blessed from wild
+badly on *fill*, not that warm is wrong. The gap is now closed on other channels:
+faction-coloured animated sparkle (motion is independent of hue and luminance),
+and contiguous-group outlines. See `concept/art-direction/`.
+
+Hex goes 24 → 50, board 611 × 344 → 1272 × 717, tile area **4.3×**. The grid
+stays 14 × 9 — §1 marks the size load-bearing and 18 × 11 measured 0%
+interference.
+
+**Settled by:** playing a full game in it. Stills cannot answer OP-03 or OP-05,
+and both are partly art questions. Note that a still is now *worse* than the
+running game, since sparkle carries real information — this build must not be
+judged from screenshots.
+
 ## OP-16 · low · What silences a stone, and can anything bring one back?
 
 Downgraded from medium after measuring, because the part that was noticed is not

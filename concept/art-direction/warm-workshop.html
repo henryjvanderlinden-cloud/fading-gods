@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fading Gods — warm direction, workshop</title>
+<style>
+ :root{ --ink:#F0E6CE; --dim:#A99C7E; --faint:#786C55; }
+ *{box-sizing:border-box}
+ body{margin:0;padding:24px 28px 70px;background:#0F1216;color:var(--ink);
+      font:14px/1.55 "IBM Plex Sans Condensed",-apple-system,Segoe UI,sans-serif}
+ h1{font:300 26px/1.2 Spectral,Georgia,serif;margin:0 0 4px}
+ h2{font:300 18px/1.2 Spectral,Georgia,serif;margin:26px 0 8px;color:var(--dim)}
+ .sub{color:var(--dim);max-width:80ch;margin:0 0 18px;font-size:13.5px}
+ .ctl{position:sticky;top:0;z-index:20;background:rgba(15,18,22,.96);backdrop-filter:blur(6px);
+      border-bottom:1px solid #2A2A24;padding:10px 0 11px;margin:0 0 20px;
+      display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+ .grp{display:flex;gap:6px;align-items:center}
+ .grp>span{color:var(--faint);font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-right:2px}
+ button{font:inherit;font-size:12.5px;background:#1B1E1A;color:var(--dim);border:1px solid #33362C;
+        padding:5px 11px;border-radius:2px;cursor:pointer}
+ button:hover{border-color:#5A5E4C;color:var(--ink)}
+ button.on{background:#E8C86A;border-color:#E8C86A;color:#1A1508;font-weight:600}
+ .dims{color:var(--faint);font-size:11.5px;margin-left:auto;font-variant-numeric:tabular-nums}
+ .wrap{overflow-x:auto;padding-bottom:8px}
+ svg{display:block}
+ .note{color:var(--faint);font-size:12.5px;max-width:78ch;margin:10px 0 0}
+ table{border-collapse:collapse;font-size:12.5px;margin:8px 0 0}
+ td,th{padding:3px 16px 3px 0;text-align:left;color:var(--dim);font-weight:400}
+ th{color:var(--faint);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+ td b{color:var(--ink);font-variant-numeric:tabular-nums}
+ .bad{color:#E07A5A}
+ .ok{color:#9BC46A}
+
+ /* Sparkle: opacity + fill only. No transforms — SVG transform-origin is a pit,
+    and several hundred animated nodes want the cheapest properties available. */
+ @keyframes tw { 0%,100%{opacity:.28} 42%{opacity:1} 60%{opacity:.62} }
+ @keyframes hu { 0%,100%{fill:var(--s1)} 33%{fill:var(--s2)} 66%{fill:var(--s3)} }
+ .sp{animation:tw 2.4s ease-in-out infinite, hu 5.2s linear infinite}
+ .sp1{animation-delay:-.35s,-1.1s} .sp2{animation-delay:-.9s,-2.4s}
+ .sp3{animation-delay:-1.5s,-3.6s} .sp4{animation-delay:-2.1s,-4.4s}
+
+ /* Water: hue cycles through the blues to white. The wave shape itself is
+    animated with SMIL on the path, because CSS `d` is not safe across browsers. */
+ @keyframes wv { 0%,100%{stroke:var(--w1)} 40%{stroke:var(--w2)} 70%{stroke:var(--w3)} }
+ .wv{animation:wv 6.5s ease-in-out infinite}
+ .wv1{animation-delay:-.8s} .wv2{animation-delay:-2.6s} .wv3{animation-delay:-4.3s}
+
+ /* Nothing below is the sole carrier of any information — see the motion note. */
+ .still .sp{animation:none;opacity:.92}
+ .still .wv{animation:none}
+ .still animate{display:none}
+ @media (prefers-reduced-motion: reduce){
+  .sp{animation:none;opacity:.92} .wv{animation:none}
+ }
+</style>
+</head>
+<body>
+
+<h1>Warm throughout — workshop</h1>
+<p class="sub">Warm throughout, hex 50, neon and violet, outlined by owner. Settlements are Bronze Age
+temple complexes that grow through four stages, the powers walk the board as figures, and the water moves.
+Real board states, <code>seed 6</code>, straight out of the engine — the year-40 board has four levies
+marching on it because the game put them there.</p>
+
+<div class="ctl">
+ <div class="grp"><span>Year</span>
+  <button data-yr="early">9</button><button data-yr="mid" class="on">27</button><button data-yr="late">40</button></div>
+ <div class="grp"><span>Hex</span>
+  <button data-sz="24">24 — old</button><button data-sz="40">40</button>
+  <button data-sz="50" class="on">50</button><button data-sz="56">56</button></div>
+ <div class="grp"><span>Factions</span>
+  <button data-fc="vivid" class="on">neon · violet</button><button data-fc="classic">gold · red</button></div>
+ <div class="grp"><span>Outline</span>
+  <button data-ol="tile">every tile</button><button data-ol="owner" class="on">by owner</button>
+  <button data-ol="state">by owner + state</button></div>
+ <div class="grp"><span>Figures</span>
+  <button data-fg="0" class="on">♀ you · ♂ them</button><button data-fg="1">♂ you · ♀ them</button></div>
+ <div class="grp"><span>Motion</span>
+  <button data-sp="1" class="on">on</button><button data-sp="0">stilled</button></div>
+ <div class="grp"><span>Farmland</span>
+  <button data-cr="1" class="on">mixed crops</button><button data-cr="0">flat ochre</button></div>
+ <div class="grp"><span>Field mark</span>
+  <button data-tok="stone" class="on">boundary stone</button><button data-tok="flag">flag</button>
+  <button data-tok="plough">ploughman</button><button data-tok="none">nothing</button></div>
+ <div class="grp"><span>Furrows</span>
+  <button data-fu="1" class="on">by faction</button><button data-fu="0">all one way</button></div>
+ <div class="grp"><span>People</span>
+  <button data-fk="1" class="on">wild folk + hands</button><button data-fk="0">none</button></div>
+ <div class="dims" id="dims"></div>
+</div>
+
+<div class="wrap" id="board"></div>
+<div id="notes"></div>
+
+<h2>Contrast, at the current settings</h2>
+<p class="note">Luminance contrast is what survives a bad panel, a projector and red-green colour
+blindness. 1.00 means the two are the same brightness and separate by hue alone.</p>
+<div id="contrast"></div>
+
+<script>
+const BOARD = {"cols":14,"rows":9,"early":{"turn":9,"tiles":[{"k":0,"c":0,"r":0,"t":"water","st":"wild","own":null,"seed":0.5001,"set":null},{"k":1,"c":1,"r":0,"t":"water","st":"wild","own":null,"seed":0.2746,"set":null},{"k":2,"c":2,"r":0,"t":"water","st":"wild","own":null,"seed":0.9623,"set":null},{"k":3,"c":3,"r":0,"t":"water","st":"wild","own":null,"seed":0.9313,"set":null},{"k":4,"c":4,"r":0,"t":"water","st":"wild","own":null,"seed":0.5381,"set":null},{"k":5,"c":5,"r":0,"t":"water","st":"wild","own":null,"seed":0.596,"set":null},{"k":6,"c":6,"r":0,"t":"water","st":"wild","own":null,"seed":0.7548,"set":null},{"k":7,"c":7,"r":0,"t":"water","st":"wild","own":null,"seed":0.2864,"set":null},{"k":8,"c":8,"r":0,"t":"water","st":"wild","own":null,"seed":0.2622,"set":null},{"k":9,"c":9,"r":0,"t":"water","st":"wild","own":null,"seed":0.391,"set":null},{"k":10,"c":10,"r":0,"t":"water","st":"wild","own":null,"seed":0.539,"set":null},{"k":11,"c":11,"r":0,"t":"water","st":"wild","own":null,"seed":0.7186,"set":null},{"k":12,"c":12,"r":0,"t":"water","st":"wild","own":null,"seed":0.8517,"set":null},{"k":13,"c":13,"r":0,"t":"water","st":"wild","own":null,"seed":0.109,"set":null},{"k":14,"c":0,"r":1,"t":"water","st":"wild","own":null,"seed":0.2516,"set":null},{"k":15,"c":1,"r":1,"t":"plain","st":"bless","own":1,"seed":0.8673,"set":null},{"k":16,"c":2,"r":1,"t":"forest","st":"bless","own":1,"seed":0.0707,"set":null},{"k":17,"c":3,"r":1,"t":"plain","st":"bless","own":1,"seed":0.1272,"set":null},{"k":18,"c":4,"r":1,"t":"plain","st":"bless","own":1,"seed":0.7112,"set":null},{"k":19,"c":5,"r":1,"t":"plain","st":"bless","own":1,"seed":0.5257,"set":null},{"k":20,"c":6,"r":1,"t":"forest","st":"bless","own":1,"seed":0.9577,"set":null},{"k":21,"c":7,"r":1,"t":"forest","st":"bless","own":0,"seed":0.0811,"set":null},{"k":22,"c":8,"r":1,"t":"forest","st":"bless","own":0,"seed":0.9121,"set":null},{"k":23,"c":9,"r":1,"t":"forest","st":"bless","own":0,"seed":0.3367,"set":null},{"k":24,"c":10,"r":1,"t":"forest","st":"bless","own":1,"seed":0.4996,"set":null},{"k":25,"c":11,"r":1,"t":"forest","st":"wild","own":null,"seed":0.4902,"set":null},{"k":26,"c":12,"r":1,"t":"plain","st":"wild","own":null,"seed":0.3182,"set":null},{"k":27,"c":13,"r":1,"t":"water","st":"wild","own":null,"seed":0.2359,"set":null},{"k":28,"c":0,"r":2,"t":"water","st":"wild","own":null,"seed":0.3973,"set":null},{"k":29,"c":1,"r":2,"t":"plain","st":"bless","own":1,"seed":0.2806,"set":null},{"k":30,"c":2,"r":2,"t":"hill","st":"bless","own":1,"seed":0.3517,"set":null},{"k":31,"c":3,"r":2,"t":"forest","st":"bless","own":1,"seed":0.5056,"set":null},{"k":32,"c":4,"r":2,"t":"forest","st":"bless","own":1,"seed":0.5913,"set":null},{"k":33,"c":5,"r":2,"t":"forest","st":"bless","own":1,"seed":0.9278,"set":null},{"k":34,"c":6,"r":2,"t":"forest","st":"bless","own":1,"seed":0.475,"set":null},{"k":35,"c":7,"r":2,"t":"hill","st":"bless","own":0,"seed":0.9932,"set":null},{"k":36,"c":8,"r":2,"t":"hill","st":"bless","own":0,"seed":0.9439,"set":null},{"k":37,"c":9,"r":2,"t":"hill","st":"bless","own":0,"seed":0.7739,"set":null},{"k":38,"c":10,"r":2,"t":"hill","st":"bless","own":0,"seed":0.0344,"set":null},{"k":39,"c":11,"r":2,"t":"hill","st":"bless","own":1,"seed":0.5205,"set":null},{"k":40,"c":12,"r":2,"t":"plain","st":"wild","own":null,"seed":0.4059,"set":null},{"k":41,"c":13,"r":2,"t":"water","st":"wild","own":null,"seed":0.6403,"set":null},{"k":42,"c":0,"r":3,"t":"water","st":"wild","own":null,"seed":0.4323,"set":null},{"k":43,"c":1,"r":3,"t":"plain","st":"bless","own":1,"seed":0.1311,"set":null},{"k":44,"c":2,"r":3,"t":"forest","st":"bless","own":1,"seed":0.8977,"set":null},{"k":45,"c":3,"r":3,"t":"forest","st":"bless","own":1,"seed":0.0256,"set":null},{"k":46,"c":4,"r":3,"t":"forest","st":"bless","own":0,"seed":0.0249,"set":null},{"k":47,"c":5,"r":3,"t":"forest","st":"bless","own":1,"seed":0.4298,"set":null},{"k":48,"c":6,"r":3,"t":"hill","st":"bless","own":1,"seed":0.7696,"set":null},{"k":49,"c":7,"r":3,"t":"hill","st":"bless","own":0,"seed":0.1766,"set":null},{"k":50,"c":8,"r":3,"t":"forest","st":"bless","own":0,"seed":0.6373,"set":null},{"k":51,"c":9,"r":3,"t":"forest","st":"bless","own":0,"seed":0.9754,"set":null},{"k":52,"c":10,"r":3,"t":"forest","st":"bless","own":0,"seed":0.283,"set":null},{"k":53,"c":11,"r":3,"t":"hill","st":"bless","own":0,"seed":0.4383,"set":null},{"k":54,"c":12,"r":3,"t":"plain","st":"bless","own":1,"seed":0.3534,"set":null},{"k":55,"c":13,"r":3,"t":"water","st":"wild","own":null,"seed":0.2811,"set":null},{"k":56,"c":0,"r":4,"t":"water","st":"wild","own":null,"seed":0.4251,"set":null},{"k":57,"c":1,"r":4,"t":"plain","st":"wild","own":null,"seed":0.9615,"set":null},{"k":58,"c":2,"r":4,"t":"forest","st":"wild","own":null,"seed":0.4052,"set":null},{"k":59,"c":3,"r":4,"t":"forest","st":"bless","own":0,"seed":0.5253,"set":null},{"k":60,"c":4,"r":4,"t":"forest","st":"bless","own":0,"seed":0.782,"set":null},{"k":61,"c":5,"r":4,"t":"hill","st":"bless","own":0,"seed":0.2723,"set":null},{"k":62,"c":6,"r":4,"t":"hill","st":"bless","own":1,"seed":0.899,"set":null},{"k":63,"c":7,"r":4,"t":"hill","st":"bless","own":1,"seed":0.0129,"set":null},{"k":64,"c":8,"r":4,"t":"forest","st":"bless","own":1,"seed":0.5636,"set":null},{"k":65,"c":9,"r":4,"t":"forest","st":"bless","own":0,"seed":0.0403,"set":null},{"k":66,"c":10,"r":4,"t":"forest","st":"bless","own":0,"seed":0.3915,"set":null},{"k":67,"c":11,"r":4,"t":"forest","st":"bless","own":0,"seed":0.8971,"set":null},{"k":68,"c":12,"r":4,"t":"plain","st":"bless","own":0,"seed":0.6086,"set":null},{"k":69,"c":13,"r":4,"t":"water","st":"wild","own":null,"seed":0.9212,"set":null},{"k":70,"c":0,"r":5,"t":"water","st":"wild","own":null,"seed":0.1205,"set":null},{"k":71,"c":1,"r":5,"t":"plain","st":"bless","own":0,"seed":0.427,"set":null},{"k":72,"c":2,"r":5,"t":"forest","st":"bless","own":0,"seed":0.5774,"set":null},{"k":73,"c":3,"r":5,"t":"forest","st":"bless","own":0,"seed":0.3569,"set":null},{"k":74,"c":4,"r":5,"t":"hill","st":"bless","own":0,"seed":0.8192,"set":null},{"k":75,"c":5,"r":5,"t":"hill","st":"bless","own":1,"seed":0.9811,"set":null},{"k":76,"c":6,"r":5,"t":"hill","st":"bless","own":1,"seed":0.6207,"set":null},{"k":77,"c":7,"r":5,"t":"hill","st":"bless","own":1,"seed":0.5189,"set":null},{"k":78,"c":8,"r":5,"t":"forest","st":"bless","own":1,"seed":0.0844,"set":null},{"k":79,"c":9,"r":5,"t":"forest","st":"bless","own":0,"seed":0.3916,"set":null},{"k":80,"c":10,"r":5,"t":"forest","st":"bless","own":0,"seed":0.909,"set":null},{"k":81,"c":11,"r":5,"t":"forest","st":"bless","own":0,"seed":0.7653,"set":null},{"k":82,"c":12,"r":5,"t":"plain","st":"bless","own":1,"seed":0.7763,"set":null},{"k":83,"c":13,"r":5,"t":"water","st":"wild","own":null,"seed":0.18,"set":null},{"k":84,"c":0,"r":6,"t":"water","st":"wild","own":null,"seed":0.3564,"set":null},{"k":85,"c":1,"r":6,"t":"plain","st":"bless","own":0,"seed":0.8792,"set":null},{"k":86,"c":2,"r":6,"t":"forest","st":"bless","own":0,"seed":0.6895,"set":null},{"k":87,"c":3,"r":6,"t":"forest","st":"bless","own":0,"seed":0.2279,"set":null},{"k":88,"c":4,"r":6,"t":"forest","st":"bless","own":0,"seed":0.3237,"set":null},{"k":89,"c":5,"r":6,"t":"hill","st":"bless","own":0,"seed":0.2022,"set":null},{"k":90,"c":6,"r":6,"t":"hill","st":"bless","own":1,"seed":0.6855,"set":null},{"k":91,"c":7,"r":6,"t":"hill","st":"bless","own":1,"seed":0.5504,"set":null},{"k":92,"c":8,"r":6,"t":"forest","st":"bless","own":1,"seed":0.25,"set":null},{"k":93,"c":9,"r":6,"t":"forest","st":"bless","own":1,"seed":0.9036,"set":null},{"k":94,"c":10,"r":6,"t":"forest","st":"wild","own":null,"seed":0.5351,"set":null},{"k":95,"c":11,"r":6,"t":"forest","st":"wild","own":null,"seed":0.3751,"set":null},{"k":96,"c":12,"r":6,"t":"plain","st":"wild","own":null,"seed":0.786,"set":null},{"k":97,"c":13,"r":6,"t":"water","st":"wild","own":null,"seed":0.1892,"set":null},{"k":98,"c":0,"r":7,"t":"water","st":"wild","own":null,"seed":0.9372,"set":null},{"k":99,"c":1,"r":7,"t":"plain","st":"bless","own":0,"seed":0.95,"set":null},{"k":100,"c":2,"r":7,"t":"plain","st":"bless","own":0,"seed":0.2182,"set":null},{"k":101,"c":3,"r":7,"t":"plain","st":"bless","own":0,"seed":0.6812,"set":null},{"k":102,"c":4,"r":7,"t":"plain","st":"bless","own":0,"seed":0.9326,"set":null},{"k":103,"c":5,"r":7,"t":"forest","st":"bless","own":0,"seed":0.6976,"set":null},{"k":104,"c":6,"r":7,"t":"forest","st":"bless","own":0,"seed":0.5967,"set":null},{"k":105,"c":7,"r":7,"t":"plain","st":"wild","own":null,"seed":0.5073,"set":null},{"k":106,"c":8,"r":7,"t":"plain","st":"wild","own":null,"seed":0.0776,"set":null},{"k":107,"c":9,"r":7,"t":"plain","st":"wild","own":null,"seed":0.0798,"set":null},{"k":108,"c":10,"r":7,"t":"plain","st":"wild","own":null,"seed":0.7827,"set":null},{"k":109,"c":11,"r":7,"t":"forest","st":"wild","own":null,"seed":0.2943,"set":null},{"k":110,"c":12,"r":7,"t":"plain","st":"wild","own":null,"seed":0.931,"set":null},{"k":111,"c":13,"r":7,"t":"water","st":"wild","own":null,"seed":0.4559,"set":null},{"k":112,"c":0,"r":8,"t":"water","st":"wild","own":null,"seed":0.3377,"set":null},{"k":113,"c":1,"r":8,"t":"water","st":"wild","own":null,"seed":0.9679,"set":null},{"k":114,"c":2,"r":8,"t":"water","st":"wild","own":null,"seed":0.9861,"set":null},{"k":115,"c":3,"r":8,"t":"water","st":"wild","own":null,"seed":0.6273,"set":null},{"k":116,"c":4,"r":8,"t":"water","st":"wild","own":null,"seed":0.6877,"set":null},{"k":117,"c":5,"r":8,"t":"water","st":"wild","own":null,"seed":0.0163,"set":null},{"k":118,"c":6,"r":8,"t":"water","st":"wild","own":null,"seed":0.2909,"set":null},{"k":119,"c":7,"r":8,"t":"water","st":"wild","own":null,"seed":0.2632,"set":null},{"k":120,"c":8,"r":8,"t":"water","st":"wild","own":null,"seed":0.6194,"set":null},{"k":121,"c":9,"r":8,"t":"water","st":"wild","own":null,"seed":0.3894,"set":null},{"k":122,"c":10,"r":8,"t":"water","st":"wild","own":null,"seed":0.3021,"set":null},{"k":123,"c":11,"r":8,"t":"water","st":"wild","own":null,"seed":0.8175,"set":null},{"k":124,"c":12,"r":8,"t":"water","st":"wild","own":null,"seed":0.551,"set":null},{"k":125,"c":13,"r":8,"t":"water","st":"wild","own":null,"seed":0.1787,"set":null}],"stones":[],"p":[{"pos":66},{"pos":30}],"armies":[],"refugees":[],"reach":23,"score":[{"h":114,"c":0,"s":0,"tot":114},{"h":96,"c":0,"s":0,"tot":96}],"log":[{"t":6,"x":"The ground goes over to you in 4 tiles."},{"t":6,"x":"The ground comes over quickly, in 1 tile."},{"t":6,"x":"Theirs takes 4 tiles."},{"t":6,"x":"Theirs quickens."},{"t":7,"x":"The ground goes over to you in 4 tiles."},{"t":7,"x":"The ground comes over quickly, in 1 tile."},{"t":7,"x":"Theirs takes 5 tiles."},{"t":7,"x":"Theirs quickens."},{"t":8,"x":"The ground goes over to you in 4 tiles."},{"t":8,"x":"The ground comes over quickly, in 3 tiles."},{"t":8,"x":"Theirs takes 7 tiles."},{"t":8,"x":"Theirs quickens."}]},"mid":{"turn":27,"tiles":[{"k":0,"c":0,"r":0,"t":"water","st":"wild","own":null,"seed":0.5001,"set":null},{"k":1,"c":1,"r":0,"t":"water","st":"wild","own":null,"seed":0.2746,"set":null},{"k":2,"c":2,"r":0,"t":"water","st":"wild","own":null,"seed":0.9623,"set":null},{"k":3,"c":3,"r":0,"t":"water","st":"wild","own":null,"seed":0.9313,"set":null},{"k":4,"c":4,"r":0,"t":"water","st":"wild","own":null,"seed":0.5381,"set":null},{"k":5,"c":5,"r":0,"t":"water","st":"wild","own":null,"seed":0.596,"set":null},{"k":6,"c":6,"r":0,"t":"water","st":"wild","own":null,"seed":0.7548,"set":null},{"k":7,"c":7,"r":0,"t":"water","st":"wild","own":null,"seed":0.2864,"set":null},{"k":8,"c":8,"r":0,"t":"water","st":"wild","own":null,"seed":0.2622,"set":null},{"k":9,"c":9,"r":0,"t":"water","st":"wild","own":null,"seed":0.391,"set":null},{"k":10,"c":10,"r":0,"t":"water","st":"wild","own":null,"seed":0.539,"set":null},{"k":11,"c":11,"r":0,"t":"water","st":"wild","own":null,"seed":0.7186,"set":null},{"k":12,"c":12,"r":0,"t":"water","st":"wild","own":null,"seed":0.8517,"set":null},{"k":13,"c":13,"r":0,"t":"water","st":"wild","own":null,"seed":0.109,"set":null},{"k":14,"c":0,"r":1,"t":"water","st":"wild","own":null,"seed":0.2516,"set":null},{"k":15,"c":1,"r":1,"t":"plain","st":"wild","own":null,"seed":0.8673,"set":{"own":1,"pop":510,"band":3}},{"k":16,"c":2,"r":1,"t":"forest","st":"reck","own":1,"seed":0.0707,"set":null},{"k":17,"c":3,"r":1,"t":"plain","st":"wild","own":null,"seed":0.1272,"set":null},{"k":18,"c":4,"r":1,"t":"plain","st":"bless","own":1,"seed":0.7112,"set":null},{"k":19,"c":5,"r":1,"t":"plain","st":"wild","own":null,"seed":0.5257,"set":{"own":1,"pop":36,"band":1}},{"k":20,"c":6,"r":1,"t":"forest","st":"bless","own":1,"seed":0.9577,"set":null},{"k":21,"c":7,"r":1,"t":"forest","st":"bless","own":1,"seed":0.0811,"set":null},{"k":22,"c":8,"r":1,"t":"forest","st":"bless","own":0,"seed":0.9121,"set":null},{"k":23,"c":9,"r":1,"t":"forest","st":"wild","own":null,"seed":0.3367,"set":{"own":0,"pop":98,"band":2}},{"k":24,"c":10,"r":1,"t":"forest","st":"bless","own":0,"seed":0.4996,"set":null},{"k":25,"c":11,"r":1,"t":"forest","st":"wild","own":null,"seed":0.4902,"set":null},{"k":26,"c":12,"r":1,"t":"plain","st":"wild","own":null,"seed":0.3182,"set":{"own":0,"pop":126,"band":2}},{"k":27,"c":13,"r":1,"t":"water","st":"wild","own":null,"seed":0.2359,"set":null},{"k":28,"c":0,"r":2,"t":"water","st":"wild","own":null,"seed":0.3973,"set":null},{"k":29,"c":1,"r":2,"t":"plain","st":"reck","own":1,"seed":0.2806,"set":null},{"k":30,"c":2,"r":2,"t":"hill","st":"reck","own":1,"seed":0.3517,"set":null},{"k":31,"c":3,"r":2,"t":"forest","st":"wild","own":null,"seed":0.5056,"set":null},{"k":32,"c":4,"r":2,"t":"forest","st":"bless","own":1,"seed":0.5913,"set":null},{"k":33,"c":5,"r":2,"t":"forest","st":"bless","own":1,"seed":0.9278,"set":null},{"k":34,"c":6,"r":2,"t":"forest","st":"bless","own":1,"seed":0.475,"set":null},{"k":35,"c":7,"r":2,"t":"hill","st":"bless","own":1,"seed":0.9932,"set":null},{"k":36,"c":8,"r":2,"t":"hill","st":"bless","own":0,"seed":0.9439,"set":null},{"k":37,"c":9,"r":2,"t":"hill","st":"bless","own":0,"seed":0.7739,"set":null},{"k":38,"c":10,"r":2,"t":"hill","st":"bless","own":0,"seed":0.0344,"set":null},{"k":39,"c":11,"r":2,"t":"hill","st":"wild","own":null,"seed":0.5205,"set":null},{"k":40,"c":12,"r":2,"t":"plain","st":"reck","own":0,"seed":0.4059,"set":null},{"k":41,"c":13,"r":2,"t":"water","st":"wild","own":null,"seed":0.6403,"set":null},{"k":42,"c":0,"r":3,"t":"water","st":"wild","own":null,"seed":0.4323,"set":null},{"k":43,"c":1,"r":3,"t":"plain","st":"wild","own":null,"seed":0.1311,"set":{"own":1,"pop":581,"band":3}},{"k":44,"c":2,"r":3,"t":"forest","st":"reck","own":1,"seed":0.8977,"set":null},{"k":45,"c":3,"r":3,"t":"forest","st":"wild","own":null,"seed":0.0256,"set":null},{"k":46,"c":4,"r":3,"t":"forest","st":"bless","own":1,"seed":0.0249,"set":null},{"k":47,"c":5,"r":3,"t":"forest","st":"bless","own":1,"seed":0.4298,"set":null},{"k":48,"c":6,"r":3,"t":"hill","st":"bless","own":1,"seed":0.7696,"set":null},{"k":49,"c":7,"r":3,"t":"hill","st":"bless","own":0,"seed":0.1766,"set":null},{"k":50,"c":8,"r":3,"t":"forest","st":"bless","own":0,"seed":0.6373,"set":null},{"k":51,"c":9,"r":3,"t":"forest","st":"wild","own":null,"seed":0.9754,"set":{"own":0,"pop":87,"band":2}},{"k":52,"c":10,"r":3,"t":"forest","st":"wild","own":null,"seed":0.283,"set":null},{"k":53,"c":11,"r":3,"t":"hill","st":"reck","own":0,"seed":0.4383,"set":null},{"k":54,"c":12,"r":3,"t":"plain","st":"wild","own":null,"seed":0.3534,"set":{"own":0,"pop":170,"band":3}},{"k":55,"c":13,"r":3,"t":"water","st":"wild","own":null,"seed":0.2811,"set":null},{"k":56,"c":0,"r":4,"t":"water","st":"wild","own":null,"seed":0.4251,"set":null},{"k":57,"c":1,"r":4,"t":"plain","st":"reck","own":1,"seed":0.9615,"set":null},{"k":58,"c":2,"r":4,"t":"forest","st":"reck","own":1,"seed":0.4052,"set":null},{"k":59,"c":3,"r":4,"t":"forest","st":"wild","own":null,"seed":0.5253,"set":null},{"k":60,"c":4,"r":4,"t":"forest","st":"wild","own":null,"seed":0.782,"set":{"own":1,"pop":102,"band":2}},{"k":61,"c":5,"r":4,"t":"hill","st":"bless","own":1,"seed":0.2723,"set":null},{"k":62,"c":6,"r":4,"t":"hill","st":"bless","own":1,"seed":0.899,"set":null},{"k":63,"c":7,"r":4,"t":"hill","st":"bless","own":0,"seed":0.0129,"set":null},{"k":64,"c":8,"r":4,"t":"forest","st":"bless","own":0,"seed":0.5636,"set":null},{"k":65,"c":9,"r":4,"t":"forest","st":"wild","own":null,"seed":0.0403,"set":null},{"k":66,"c":10,"r":4,"t":"forest","st":"reck","own":0,"seed":0.3915,"set":null},{"k":67,"c":11,"r":4,"t":"forest","st":"reck","own":0,"seed":0.8971,"set":null},{"k":68,"c":12,"r":4,"t":"plain","st":"reck","own":0,"seed":0.6086,"set":null},{"k":69,"c":13,"r":4,"t":"water","st":"wild","own":null,"seed":0.9212,"set":null},{"k":70,"c":0,"r":5,"t":"water","st":"wild","own":null,"seed":0.1205,"set":null},{"k":71,"c":1,"r":5,"t":"plain","st":"reck","own":1,"seed":0.427,"set":null},{"k":72,"c":2,"r":5,"t":"forest","st":"wild","own":null,"seed":0.5774,"set":null},{"k":73,"c":3,"r":5,"t":"forest","st":"wild","own":null,"seed":0.3569,"set":null},{"k":74,"c":4,"r":5,"t":"hill","st":"bless","own":1,"seed":0.8192,"set":null},{"k":75,"c":5,"r":5,"t":"hill","st":"bless","own":1,"seed":0.9811,"set":null},{"k":76,"c":6,"r":5,"t":"hill","st":"bless","own":0,"seed":0.6207,"set":null},{"k":77,"c":7,"r":5,"t":"hill","st":"bless","own":0,"seed":0.5189,"set":null},{"k":78,"c":8,"r":5,"t":"forest","st":"wild","own":null,"seed":0.0844,"set":null},{"k":79,"c":9,"r":5,"t":"forest","st":"reck","own":0,"seed":0.3916,"set":null},{"k":80,"c":10,"r":5,"t":"forest","st":"wild","own":null,"seed":0.909,"set":{"own":0,"pop":218,"band":3}},{"k":81,"c":11,"r":5,"t":"forest","st":"reck","own":0,"seed":0.7653,"set":null},{"k":82,"c":12,"r":5,"t":"plain","st":"reck","own":0,"seed":0.7763,"set":null},{"k":83,"c":13,"r":5,"t":"water","st":"wild","own":null,"seed":0.18,"set":null},{"k":84,"c":0,"r":6,"t":"water","st":"wild","own":null,"seed":0.3564,"set":null},{"k":85,"c":1,"r":6,"t":"plain","st":"wild","own":null,"seed":0.8792,"set":{"own":1,"pop":198,"band":3}},{"k":86,"c":2,"r":6,"t":"forest","st":"reck","own":1,"seed":0.6895,"set":null},{"k":87,"c":3,"r":6,"t":"forest","st":"reck","own":1,"seed":0.2279,"set":null},{"k":88,"c":4,"r":6,"t":"forest","st":"wild","own":null,"seed":0.3237,"set":{"own":1,"pop":114,"band":2}},{"k":89,"c":5,"r":6,"t":"water","st":"wild","own":null,"seed":0.2022,"set":null},{"k":90,"c":6,"r":6,"t":"hill","st":"bless","own":0,"seed":0.6855,"set":null},{"k":91,"c":7,"r":6,"t":"hill","st":"bless","own":0,"seed":0.5504,"set":null},{"k":92,"c":8,"r":6,"t":"forest","st":"wild","own":null,"seed":0.25,"set":null},{"k":93,"c":9,"r":6,"t":"forest","st":"reck","own":0,"seed":0.9036,"set":null},{"k":94,"c":10,"r":6,"t":"forest","st":"reck","own":0,"seed":0.5351,"set":null},{"k":95,"c":11,"r":6,"t":"forest","st":"reck","own":0,"seed":0.3751,"set":null},{"k":96,"c":12,"r":6,"t":"plain","st":"wild","own":null,"seed":0.786,"set":{"own":0,"pop":483,"band":3}},{"k":97,"c":13,"r":6,"t":"water","st":"wild","own":null,"seed":0.1892,"set":null},{"k":98,"c":0,"r":7,"t":"water","st":"wild","own":null,"seed":0.9372,"set":null},{"k":99,"c":1,"r":7,"t":"plain","st":"reck","own":1,"seed":0.95,"set":null},{"k":100,"c":2,"r":7,"t":"plain","st":"wild","own":null,"seed":0.2182,"set":{"own":1,"pop":198,"band":3}},{"k":101,"c":3,"r":7,"t":"plain","st":"reck","own":1,"seed":0.6812,"set":null},{"k":102,"c":4,"r":7,"t":"plain","st":"wild","own":null,"seed":0.9326,"set":null},{"k":103,"c":5,"r":7,"t":"forest","st":"bless","own":0,"seed":0.6976,"set":null},{"k":104,"c":6,"r":7,"t":"forest","st":"bless","own":0,"seed":0.5967,"set":null},{"k":105,"c":7,"r":7,"t":"plain","st":"wild","own":null,"seed":0.5073,"set":null},{"k":106,"c":8,"r":7,"t":"plain","st":"reck","own":0,"seed":0.0776,"set":null},{"k":107,"c":9,"r":7,"t":"plain","st":"wild","own":null,"seed":0.0798,"set":{"own":0,"pop":466,"band":3}},{"k":108,"c":10,"r":7,"t":"plain","st":"reck","own":0,"seed":0.7827,"set":null},{"k":109,"c":11,"r":7,"t":"forest","st":"reck","own":0,"seed":0.2943,"set":null},{"k":110,"c":12,"r":7,"t":"plain","st":"reck","own":0,"seed":0.931,"set":null},{"k":111,"c":13,"r":7,"t":"water","st":"wild","own":null,"seed":0.4559,"set":null},{"k":112,"c":0,"r":8,"t":"water","st":"wild","own":null,"seed":0.3377,"set":null},{"k":113,"c":1,"r":8,"t":"water","st":"wild","own":null,"seed":0.9679,"set":null},{"k":114,"c":2,"r":8,"t":"water","st":"wild","own":null,"seed":0.9861,"set":null},{"k":115,"c":3,"r":8,"t":"water","st":"wild","own":null,"seed":0.6273,"set":null},{"k":116,"c":4,"r":8,"t":"water","st":"wild","own":null,"seed":0.6877,"set":null},{"k":117,"c":5,"r":8,"t":"water","st":"wild","own":null,"seed":0.0163,"set":null},{"k":118,"c":6,"r":8,"t":"water","st":"wild","own":null,"seed":0.2909,"set":null},{"k":119,"c":7,"r":8,"t":"water","st":"wild","own":null,"seed":0.2632,"set":null},{"k":120,"c":8,"r":8,"t":"water","st":"wild","own":null,"seed":0.6194,"set":null},{"k":121,"c":9,"r":8,"t":"water","st":"wild","own":null,"seed":0.3894,"set":null},{"k":122,"c":10,"r":8,"t":"water","st":"wild","own":null,"seed":0.3021,"set":null},{"k":123,"c":11,"r":8,"t":"water","st":"wild","own":null,"seed":0.8175,"set":null},{"k":124,"c":12,"r":8,"t":"water","st":"wild","own":null,"seed":0.551,"set":null},{"k":125,"c":13,"r":8,"t":"water","st":"wild","own":null,"seed":0.1787,"set":null}],"stones":[{"k":82,"own":0,"power":0,"live":false},{"k":67,"own":0,"power":0,"live":false},{"k":37,"own":0,"power":15,"live":true},{"k":87,"own":1,"power":0,"live":false}],"p":[{"pos":64},{"pos":19}],"armies":[],"refugees":[],"reach":19,"score":[{"h":45,"c":30,"s":21,"tot":96},{"h":42,"c":22,"s":21,"tot":85}],"log":[{"t":25,"x":"Theirs takes 4 tiles."},{"t":25,"x":"Theirs quickens."},{"t":25,"x":"A settlement has passed seventy-seven. Nothing comes through there now."},{"t":25,"x":"3 tiles of your blessing go out. It has been surveyed."},{"t":26,"x":"The ground goes over to you in 3 tiles."},{"t":26,"x":"The ground comes over quickly, in 1 tile."},{"t":26,"x":"They put down a settlement."},{"t":26,"x":"Theirs quickens."},{"t":26,"x":"A settlement has passed seventy-seven. Nothing comes through there now."},{"t":26,"x":"Past a hundred and fifty. They begin working the ground outward."},{"t":26,"x":"5 tiles of your blessing go out. It has been surveyed."},{"t":26,"x":"You reach for it and it is not there. Blight is gone."}]},"late":{"turn":40,"tiles":[{"k":0,"c":0,"r":0,"t":"water","st":"wild","own":null,"seed":0.5001,"set":null},{"k":1,"c":1,"r":0,"t":"water","st":"wild","own":null,"seed":0.2746,"set":null},{"k":2,"c":2,"r":0,"t":"water","st":"wild","own":null,"seed":0.9623,"set":null},{"k":3,"c":3,"r":0,"t":"water","st":"wild","own":null,"seed":0.9313,"set":null},{"k":4,"c":4,"r":0,"t":"water","st":"wild","own":null,"seed":0.5381,"set":null},{"k":5,"c":5,"r":0,"t":"water","st":"wild","own":null,"seed":0.596,"set":null},{"k":6,"c":6,"r":0,"t":"water","st":"wild","own":null,"seed":0.7548,"set":null},{"k":7,"c":7,"r":0,"t":"water","st":"wild","own":null,"seed":0.2864,"set":null},{"k":8,"c":8,"r":0,"t":"water","st":"wild","own":null,"seed":0.2622,"set":null},{"k":9,"c":9,"r":0,"t":"water","st":"wild","own":null,"seed":0.391,"set":null},{"k":10,"c":10,"r":0,"t":"water","st":"wild","own":null,"seed":0.539,"set":null},{"k":11,"c":11,"r":0,"t":"water","st":"wild","own":null,"seed":0.7186,"set":null},{"k":12,"c":12,"r":0,"t":"water","st":"wild","own":null,"seed":0.8517,"set":null},{"k":13,"c":13,"r":0,"t":"water","st":"wild","own":null,"seed":0.109,"set":null},{"k":14,"c":0,"r":1,"t":"water","st":"wild","own":null,"seed":0.2516,"set":null},{"k":15,"c":1,"r":1,"t":"plain","st":"wild","own":null,"seed":0.8673,"set":{"own":1,"pop":2600,"band":4}},{"k":16,"c":2,"r":1,"t":"forest","st":"reck","own":1,"seed":0.0707,"set":null},{"k":17,"c":3,"r":1,"t":"plain","st":"wild","own":null,"seed":0.1272,"set":{"own":1,"pop":222,"band":3}},{"k":18,"c":4,"r":1,"t":"plain","st":"reck","own":1,"seed":0.7112,"set":null},{"k":19,"c":5,"r":1,"t":"plain","st":"wild","own":null,"seed":0.5257,"set":{"own":1,"pop":298,"band":3}},{"k":20,"c":6,"r":1,"t":"forest","st":"reck","own":1,"seed":0.9577,"set":null},{"k":21,"c":7,"r":1,"t":"forest","st":"wild","own":null,"seed":0.0811,"set":{"own":0,"pop":88,"band":2}},{"k":22,"c":8,"r":1,"t":"forest","st":"reck","own":0,"seed":0.9121,"set":null},{"k":23,"c":9,"r":1,"t":"forest","st":"wild","own":null,"seed":0.3367,"set":{"own":0,"pop":193,"band":3}},{"k":24,"c":10,"r":1,"t":"forest","st":"reck","own":0,"seed":0.4996,"set":null},{"k":25,"c":11,"r":1,"t":"forest","st":"reck","own":0,"seed":0.4902,"set":null},{"k":26,"c":12,"r":1,"t":"plain","st":"wild","own":null,"seed":0.3182,"set":{"own":0,"pop":728,"band":3}},{"k":27,"c":13,"r":1,"t":"water","st":"wild","own":null,"seed":0.2359,"set":null},{"k":28,"c":0,"r":2,"t":"water","st":"wild","own":null,"seed":0.3973,"set":null},{"k":29,"c":1,"r":2,"t":"plain","st":"reck","own":1,"seed":0.2806,"set":null},{"k":30,"c":2,"r":2,"t":"hill","st":"reck","own":1,"seed":0.3517,"set":null},{"k":31,"c":3,"r":2,"t":"forest","st":"reck","own":1,"seed":0.5056,"set":null},{"k":32,"c":4,"r":2,"t":"forest","st":"reck","own":1,"seed":0.5913,"set":null},{"k":33,"c":5,"r":2,"t":"forest","st":"reck","own":1,"seed":0.9278,"set":null},{"k":34,"c":6,"r":2,"t":"forest","st":"reck","own":1,"seed":0.475,"set":null},{"k":35,"c":7,"r":2,"t":"hill","st":"reck","own":0,"seed":0.9932,"set":null},{"k":36,"c":8,"r":2,"t":"hill","st":"reck","own":0,"seed":0.9439,"set":null},{"k":37,"c":9,"r":2,"t":"hill","st":"reck","own":0,"seed":0.7739,"set":null},{"k":38,"c":10,"r":2,"t":"hill","st":"reck","own":0,"seed":0.0344,"set":null},{"k":39,"c":11,"r":2,"t":"hill","st":"wild","own":null,"seed":0.5205,"set":{"own":0,"pop":112,"band":2}},{"k":40,"c":12,"r":2,"t":"plain","st":"reck","own":0,"seed":0.4059,"set":null},{"k":41,"c":13,"r":2,"t":"water","st":"wild","own":null,"seed":0.6403,"set":null},{"k":42,"c":0,"r":3,"t":"water","st":"wild","own":null,"seed":0.4323,"set":null},{"k":43,"c":1,"r":3,"t":"plain","st":"wild","own":null,"seed":0.1311,"set":{"own":1,"pop":2600,"band":4}},{"k":44,"c":2,"r":3,"t":"forest","st":"reck","own":1,"seed":0.8977,"set":null},{"k":45,"c":3,"r":3,"t":"forest","st":"reck","own":1,"seed":0.0256,"set":null},{"k":46,"c":4,"r":3,"t":"forest","st":"reck","own":1,"seed":0.0249,"set":null},{"k":47,"c":5,"r":3,"t":"forest","st":"reck","own":1,"seed":0.4298,"set":null},{"k":48,"c":6,"r":3,"t":"hill","st":"reck","own":1,"seed":0.7696,"set":null},{"k":49,"c":7,"r":3,"t":"hill","st":"wild","own":null,"seed":0.1766,"set":{"own":0,"pop":71,"band":1}},{"k":50,"c":8,"r":3,"t":"forest","st":"reck","own":0,"seed":0.6373,"set":null},{"k":51,"c":9,"r":3,"t":"forest","st":"wild","own":null,"seed":0.9754,"set":{"own":0,"pop":335,"band":3}},{"k":52,"c":10,"r":3,"t":"forest","st":"reck","own":0,"seed":0.283,"set":null},{"k":53,"c":11,"r":3,"t":"hill","st":"reck","own":0,"seed":0.4383,"set":null},{"k":54,"c":12,"r":3,"t":"plain","st":"wild","own":null,"seed":0.3534,"set":{"own":0,"pop":1312,"band":4}},{"k":55,"c":13,"r":3,"t":"water","st":"wild","own":null,"seed":0.2811,"set":null},{"k":56,"c":0,"r":4,"t":"water","st":"wild","own":null,"seed":0.4251,"set":null},{"k":57,"c":1,"r":4,"t":"plain","st":"reck","own":1,"seed":0.9615,"set":null},{"k":58,"c":2,"r":4,"t":"forest","st":"reck","own":1,"seed":0.4052,"set":null},{"k":59,"c":3,"r":4,"t":"forest","st":"reck","own":1,"seed":0.5253,"set":null},{"k":60,"c":4,"r":4,"t":"forest","st":"wild","own":null,"seed":0.782,"set":{"own":1,"pop":540,"band":3}},{"k":61,"c":5,"r":4,"t":"hill","st":"reck","own":1,"seed":0.2723,"set":null},{"k":62,"c":6,"r":4,"t":"hill","st":"reck","own":1,"seed":0.899,"set":null},{"k":63,"c":7,"r":4,"t":"hill","st":"reck","own":0,"seed":0.0129,"set":null},{"k":64,"c":8,"r":4,"t":"forest","st":"reck","own":0,"seed":0.5636,"set":null},{"k":65,"c":9,"r":4,"t":"forest","st":"reck","own":0,"seed":0.0403,"set":null},{"k":66,"c":10,"r":4,"t":"forest","st":"reck","own":0,"seed":0.3915,"set":null},{"k":67,"c":11,"r":4,"t":"forest","st":"reck","own":0,"seed":0.8971,"set":null},{"k":68,"c":12,"r":4,"t":"plain","st":"reck","own":0,"seed":0.6086,"set":null},{"k":69,"c":13,"r":4,"t":"water","st":"wild","own":null,"seed":0.9212,"set":null},{"k":70,"c":0,"r":5,"t":"water","st":"wild","own":null,"seed":0.1205,"set":null},{"k":71,"c":1,"r":5,"t":"plain","st":"reck","own":1,"seed":0.427,"set":null},{"k":72,"c":2,"r":5,"t":"forest","st":"wild","own":null,"seed":0.5774,"set":{"own":1,"pop":158,"band":3}},{"k":73,"c":3,"r":5,"t":"forest","st":"reck","own":1,"seed":0.3569,"set":null},{"k":74,"c":4,"r":5,"t":"hill","st":"reck","own":1,"seed":0.8192,"set":null},{"k":75,"c":5,"r":5,"t":"hill","st":"reck","own":0,"seed":0.9811,"set":null},{"k":76,"c":6,"r":5,"t":"hill","st":"reck","own":0,"seed":0.6207,"set":null},{"k":77,"c":7,"r":5,"t":"hill","st":"reck","own":0,"seed":0.5189,"set":null},{"k":78,"c":8,"r":5,"t":"forest","st":"wild","own":null,"seed":0.0844,"set":{"own":0,"pop":136,"band":2}},{"k":79,"c":9,"r":5,"t":"forest","st":"reck","own":0,"seed":0.3916,"set":null},{"k":80,"c":10,"r":5,"t":"forest","st":"wild","own":null,"seed":0.909,"set":{"own":0,"pop":931,"band":4}},{"k":81,"c":11,"r":5,"t":"forest","st":"reck","own":0,"seed":0.7653,"set":null},{"k":82,"c":12,"r":5,"t":"plain","st":"reck","own":0,"seed":0.7763,"set":null},{"k":83,"c":13,"r":5,"t":"water","st":"wild","own":null,"seed":0.18,"set":null},{"k":84,"c":0,"r":6,"t":"water","st":"wild","own":null,"seed":0.3564,"set":null},{"k":85,"c":1,"r":6,"t":"plain","st":"wild","own":null,"seed":0.8792,"set":{"own":1,"pop":1536,"band":4}},{"k":86,"c":2,"r":6,"t":"forest","st":"reck","own":1,"seed":0.6895,"set":null},{"k":87,"c":3,"r":6,"t":"forest","st":"reck","own":1,"seed":0.2279,"set":null},{"k":88,"c":4,"r":6,"t":"forest","st":"wild","own":null,"seed":0.3237,"set":{"own":1,"pop":468,"band":3}},{"k":89,"c":5,"r":6,"t":"water","st":"wild","own":null,"seed":0.2022,"set":null},{"k":90,"c":6,"r":6,"t":"hill","st":"wild","own":null,"seed":0.6855,"set":{"own":0,"pop":183,"band":3}},{"k":91,"c":7,"r":6,"t":"hill","st":"reck","own":0,"seed":0.5504,"set":null},{"k":92,"c":8,"r":6,"t":"forest","st":"reck","own":0,"seed":0.25,"set":null},{"k":93,"c":9,"r":6,"t":"forest","st":"reck","own":0,"seed":0.9036,"set":null},{"k":94,"c":10,"r":6,"t":"forest","st":"reck","own":0,"seed":0.5351,"set":null},{"k":95,"c":11,"r":6,"t":"forest","st":"reck","own":0,"seed":0.3751,"set":null},{"k":96,"c":12,"r":6,"t":"plain","st":"wild","own":null,"seed":0.786,"set":{"own":0,"pop":2600,"band":4}},{"k":97,"c":13,"r":6,"t":"water","st":"wild","own":null,"seed":0.1892,"set":null},{"k":98,"c":0,"r":7,"t":"water","st":"wild","own":null,"seed":0.9372,"set":null},{"k":99,"c":1,"r":7,"t":"plain","st":"reck","own":1,"seed":0.95,"set":null},{"k":100,"c":2,"r":7,"t":"plain","st":"wild","own":null,"seed":0.2182,"set":{"own":1,"pop":307,"band":3}},{"k":101,"c":3,"r":7,"t":"plain","st":"reck","own":1,"seed":0.6812,"set":null},{"k":102,"c":4,"r":7,"t":"plain","st":"reck","own":1,"seed":0.9326,"set":null},{"k":103,"c":5,"r":7,"t":"forest","st":"reck","own":0,"seed":0.6976,"set":null},{"k":104,"c":6,"r":7,"t":"forest","st":"reck","own":0,"seed":0.5967,"set":null},{"k":105,"c":7,"r":7,"t":"plain","st":"wild","own":null,"seed":0.5073,"set":{"own":0,"pop":79,"band":2}},{"k":106,"c":8,"r":7,"t":"plain","st":"reck","own":0,"seed":0.0776,"set":null},{"k":107,"c":9,"r":7,"t":"plain","st":"wild","own":null,"seed":0.0798,"set":{"own":0,"pop":1006,"band":4}},{"k":108,"c":10,"r":7,"t":"plain","st":"reck","own":0,"seed":0.7827,"set":null},{"k":109,"c":11,"r":7,"t":"forest","st":"reck","own":0,"seed":0.2943,"set":null},{"k":110,"c":12,"r":7,"t":"plain","st":"reck","own":0,"seed":0.931,"set":null},{"k":111,"c":13,"r":7,"t":"water","st":"wild","own":null,"seed":0.4559,"set":null},{"k":112,"c":0,"r":8,"t":"water","st":"wild","own":null,"seed":0.3377,"set":null},{"k":113,"c":1,"r":8,"t":"water","st":"wild","own":null,"seed":0.9679,"set":null},{"k":114,"c":2,"r":8,"t":"water","st":"wild","own":null,"seed":0.9861,"set":null},{"k":115,"c":3,"r":8,"t":"water","st":"wild","own":null,"seed":0.6273,"set":null},{"k":116,"c":4,"r":8,"t":"water","st":"wild","own":null,"seed":0.6877,"set":null},{"k":117,"c":5,"r":8,"t":"water","st":"wild","own":null,"seed":0.0163,"set":null},{"k":118,"c":6,"r":8,"t":"water","st":"wild","own":null,"seed":0.2909,"set":null},{"k":119,"c":7,"r":8,"t":"water","st":"wild","own":null,"seed":0.2632,"set":null},{"k":120,"c":8,"r":8,"t":"water","st":"wild","own":null,"seed":0.6194,"set":null},{"k":121,"c":9,"r":8,"t":"water","st":"wild","own":null,"seed":0.3894,"set":null},{"k":122,"c":10,"r":8,"t":"water","st":"wild","own":null,"seed":0.3021,"set":null},{"k":123,"c":11,"r":8,"t":"water","st":"wild","own":null,"seed":0.8175,"set":null},{"k":124,"c":12,"r":8,"t":"water","st":"wild","own":null,"seed":0.551,"set":null},{"k":125,"c":13,"r":8,"t":"water","st":"wild","own":null,"seed":0.1787,"set":null}],"stones":[{"k":82,"own":0,"power":0,"live":false},{"k":67,"own":0,"power":0,"live":false},{"k":37,"own":0,"power":0,"live":false},{"k":87,"own":1,"power":0,"live":false}],"p":[{"pos":77},{"pos":104}],"armies":[{"at":103,"to":90,"n":494,"own":1},{"at":102,"to":90,"n":322,"own":1},{"at":22,"to":19,"n":138,"own":0},{"at":101,"to":90,"n":210,"own":1}],"refugees":[],"reach":1,"score":[{"h":0,"c":68,"s":39,"tot":107},{"h":0,"c":54,"s":27,"tot":81}],"log":[{"t":37,"x":"A levy has formed, and it is coming."},{"t":37,"x":"2 tiles of your blessing go out. It has been surveyed."},{"t":38,"x":"The ground goes over to you in 3 tiles."},{"t":38,"x":"They fell the wood and put the plough through it — 3 tiles in one season."},{"t":38,"x":"Theirs takes 2 tiles."},{"t":38,"x":"A levy has formed, and it is coming."},{"t":38,"x":"A settlement has passed seventy-seven. Nothing comes through there now."},{"t":38,"x":"Past a hundred and fifty. They begin working the ground outward."},{"t":39,"x":"The levy forms. It will be some years on the road."},{"t":39,"x":"Theirs takes 2 tiles."},{"t":39,"x":"A levy has formed, and it is coming."},{"t":39,"x":"A settlement has passed seventy-seven. Nothing comes through there now."}]}};
+const COLS = BOARD.cols, ROWS = BOARD.rows;
+
+/* ---------- state ---------- */
+let YR="mid", SZ=50, FC="vivid", OL="owner", SPARK=1, CROP=1, FG_SWAP=0,
+    TOK="stone", FURROW=1, FOLK=1;
+
+/* ---------- colour ---------- */
+function shift(hex,f){
+ const n=parseInt(hex.slice(1),16); const c=[n>>16,(n>>8)&255,n&255];
+ const m=v=> Math.max(0,Math.min(255, f>0 ? v+(255-v)*f : v*(1+f)));
+ return "#"+c.map(v=>Math.round(m(v)).toString(16).padStart(2,"0")).join("");
+}
+function relum(h){
+ const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255)
+   .map(x=> x<=0.04045 ? x/12.92 : ((x+0.055)/1.055)**2.4);
+ return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];
+}
+const contrast=(a,b)=>{const x=relum(a),y=relum(b);return ((Math.max(x,y)+0.05)/(Math.min(x,y)+0.05));};
+function mix(a,b,t){
+ const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+ const A=p(a),B=p(b);
+ return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("");
+}
+
+/* ---------- the warm palette (direction B) ---------- */
+const P = {
+ bg:"#16202B", seam:"#1E2A1C",
+ land:{water:"#274F6B",plain:"#6E7A3C",forest:"#3C5A2C",hill:"#8A7A4C",mount:"#7A7166"},
+ bless:{plain:"#88A448",forest:"#4E7A34",hill:"#A08E58"},
+ /* A settlement sits in worked ground, so it takes the farmland fill. The complex
+    on top is what tells you a settlement is there — not a change of hue. */
+ reck:"#C9A24A", set:"#C9A24A",
+ crops:["#C9A24A","#D8B45C","#7E8A34","#A88A38","#94A03E","#BE9440"],
+ tree:"#24421C", treeBless:"#2C5420",
+ stone:"#DCD2B4",                       /* limestone, before faction tint */
+ ink:"#F0E6CE"
+};
+const FACTIONS = {
+ classic:{ name:"gold · red",     col:["#E8C86A","#B25040"],
+           spark:[["#FFF0B4","#E8C86A","#FFD980"],["#FFC8B4","#E88A70","#FFA084"]] },
+ vivid:  { name:"neon · violet",  col:["#7CF04A","#A96BF0"],
+           spark:[["#E8FFC8","#7CF04A","#B4FF80"],["#F0E4FF","#A96BF0","#C89CFF"]] }
+};
+const F = () => FACTIONS[FC];
+
+/* ---------- geometry ---------- */
+const k = () => SZ/24;                       /* marks were authored at SZ 24 */
+const W = () => Math.sqrt(3)*SZ, VS = () => 1.5*SZ;
+const BW = () => W()*(COLS+0.5)+8*k(), BH = () => VS()*(ROWS-1)+2*SZ+8*k();
+const px = (c,r) => [W()*(c+0.5*(r&1))+W()/2+4*k(), VS()*r+SZ+4*k()];
+function verts(x,y,s){
+ const v=[]; for(let i=0;i<6;i++){ const a=Math.PI/180*(60*i-30);
+  v.push([x+s*Math.cos(a), y+s*Math.sin(a)]); } return v;
+}
+const poly = v => v.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join("")+"Z";
+const hexPath = (x,y,s) => poly(verts(x,y,s===undefined?SZ:s));
+function rng(seed){ let s=Math.floor(seed*99991)>>>0||7;
+ return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+
+/* neighbour offsets, in the same order as engine/hex.js, mapped to hex edges.
+   edge i runs from vertex i to vertex i+1: 0 E, 1 SE, 2 SW, 3 W, 4 NW, 5 NE. */
+const DIR = {
+ 0:[[1,0,0],[0,1,1],[-1,1,2],[-1,0,3],[-1,-1,4],[0,-1,5]],   /* even rows */
+ 1:[[1,0,0],[1,1,1],[0,1,2],[-1,0,3],[0,-1,4],[1,-1,5]]      /* odd rows  */
+};
+
+/* ---------- marks ---------- */
+function conifer(x,y,h,w,col,dark){
+ const K=k();
+ return `<path d="M${x} ${y-h*K} L${x+w*K} ${y} L${x-w*K} ${y} Z" fill="${col}"/>`
+      + `<path d="M${x} ${y-h*K} L${x} ${y} L${x-w*K} ${y} Z" fill="${dark}" opacity=".45"/>`;
+}
+/* fill is set as an attribute as well as animated, so a sparkle degrades to a
+   plain faction-coloured mark if the CSS never arrives instead of rendering black */
+function twinkle(x,y,r,cls,col){
+ const q=r*0.19;
+ return `<path class="sp ${cls}" fill="${col}" d="M${x} ${(y-r).toFixed(1)} Q${(x+q).toFixed(1)} ${(y-q).toFixed(1)}`
+  +` ${(x+r).toFixed(1)} ${y} Q${(x+q).toFixed(1)} ${(y+q).toFixed(1)} ${x} ${(y+r).toFixed(1)}`
+  +` Q${(x-q).toFixed(1)} ${(y+q).toFixed(1)} ${(x-r).toFixed(1)} ${y}`
+  +` Q${(x-q).toFixed(1)} ${(y-q).toFixed(1)} ${x} ${(y-r).toFixed(1)} Z"/>`;
+}
+/* Water. A real sine rather than three dashes, with the phase animated so the
+   crest travels, and the stroke cycling through the blues into white.
+   The shape is animated with SMIL because CSS `d` is not safe across browsers. */
+function wave(x,y,len,amp,phase){
+ const seg=len/4; let d=`M${(x-len/2).toFixed(1)} ${y.toFixed(1)}`;
+ for(let i=0;i<4;i++){
+  const dir = ((i+phase)%2===0) ? -1 : 1;
+  d+=`q${(seg/2).toFixed(1)} ${(amp*dir).toFixed(1)} ${seg.toFixed(1)} 0`;
+ }
+ return d;
+}
+function water(x,y,seed){
+ const K=k(), r=rng(seed+0.7);
+ const w1=shift(P.land.water,.22), w2=shift(P.land.water,.55), w3="#EAF4FF";
+ const rows=[[-6.5,15,1.9,0],[0.5,18,2.2,1],[7.5,13,1.7,0]];
+ let s=`<g style="--w1:${w1};--w2:${w2};--w3:${w3}" fill="none" stroke-linecap="round"
+   opacity=".72" stroke-width="${(1.7*K).toFixed(1)}">`;
+ rows.forEach((row,i)=>{
+  const [dy,len,amp,ph]=row, ox=x+(r()-0.5)*4*K, oy=y+dy*K;
+  const a=wave(ox,oy,len*K,amp*K,ph), b=wave(ox,oy,len*K,amp*K,ph+1);
+  s+=`<path class="wv wv${i+1}" stroke="${w1}" d="${a}">`
+   + `<animate attributeName="d" dur="${(3.4+i*0.7).toFixed(1)}s" repeatCount="indefinite"
+      values="${a};${b};${a}" calcMode="spline"
+      keySplines="0.4 0 0.6 1;0.4 0 0.6 1" keyTimes="0;0.5;1"/></path>`;
+ });
+ return s+`</g>`;
+}
+
+/* ---------- the people ----------
+   Speculative: no rule currently puts anyone anywhere. See OP-18.
+   Both kinds are drawn far smaller than the power's own silhouette — they
+   resemble it, they are not it, and the gap between the two scales is the point.
+
+   The distinction that matters is posture, not headcount. On blessed ground you
+   see *people*: few, upright, scattered, facing nothing in particular. On
+   farmland you see *work*: more of them, bent, aligned to the rows. Same
+   species, different relationship to the ground. The board shows the
+   transformation as a change in what a body is doing. */
+function person(fx,fy,h,col,dk,u){
+ return `<ellipse cx="${fx}" cy="${fy+u(0.4)}" rx="${u(2)}" ry="${u(0.7)}" fill="#000" opacity=".28"/>`
+  +`<g stroke="${dk}" stroke-width="${u(0.45)}" stroke-linejoin="round" fill="${col}">`
+  +`<path d="M${fx-h*1.5} ${fy} L${fx-h*0.9} ${fy-u(4.2)} L${fx+h*0.9} ${fy-u(4.2)}
+      L${fx+h*1.5} ${fy} Z"/>`
+  +`<circle cx="${fx}" cy="${fy-u(5.4)}" r="${u(1.15)}"/></g>`;
+}
+function stooped(fx,fy,col,dk,u,flip){
+ const d = flip ? -1 : 1;
+ return `<ellipse cx="${fx}" cy="${fy+u(0.4)}" rx="${u(2.4)}" ry="${u(0.7)}" fill="#000" opacity=".26"/>`
+  +`<g stroke="${dk}" stroke-width="${u(0.5)}" stroke-linejoin="round" stroke-linecap="round" fill="${col}">`
+  +`<path d="M${fx-d*u(1.4)} ${fy} L${fx-d*u(1.7)} ${fy-u(3.4)} L${fx+d*u(2.6)} ${fy-u(5.2)}
+      L${fx+d*u(3.4)} ${fy-u(3.4)} L${fx+d*u(0.5)} ${fy-u(2.1)} L${fx+d*u(0.8)} ${fy} Z"/>`
+  +`<circle cx="${fx+d*u(4.1)}" cy="${fy-u(5)}" r="${u(1.15)}"/>`
+  +`<path d="M${fx+d*u(3.6)} ${fy-u(3.6)} L${fx+d*u(4.6)} ${fy-u(1.2)}" fill="none"/></g>`;
+}
+function wildFolk(x,y,own,seed){
+ if(!FOLK) return "";
+ const K=k(), u=n=>n*K, col=F().col[own], dk="#1A1508", r=rng(seed+4.1);
+ const n = r()<0.42 ? 2 : 1;
+ let s="";
+ for(let i=0;i<n;i++)
+  s+=person(x+u(1.5+i*5.5+r()*3), y+u(7.5-r()*2.5), u(0.9+r()*0.25), col, dk, u);
+ return s;
+}
+/* Drawn inside the rotated furrow group, so the workers stand in the rows they
+   are working. More of them than there are wild folk, and never upright. */
+function fieldHands(x,y,own,seed){
+ if(!FOLK) return "";
+ const K=k(), u=n=>n*K, col=shift(F().col[own],-.14), dk="#1A1508", r=rng(seed+8.6);
+ const n = 2 + Math.floor(r()*3);
+ let s="";
+ for(let i=0;i<n;i++){
+  const row = Math.floor(r()*4);
+  s+=stooped(x+u(-8+r()*16), y+u(-6.4+row*5.4)+u(3.1), col, dk, u, r()<0.4);
+ }
+ return s;
+}
+
+/* ---------- what says a field is owned ----------
+   Four candidates on a switch. The short version of the argument: a boundary
+   stone is the only one that is *about reckoning* rather than merely about
+   ownership. */
+function farmToken(x,y,own,seed){
+ if(TOK==="none") return "";
+ const K=k(), u=n=>n*K, col=F().col[own], dk="#1A1508", r=rng(seed+1.3);
+ const ox = x + u(-7 + r()*4), oy = y + u(6.5);
+
+ if(TOK==="stone"){
+  /* A kudurru. Squared, upright, inscribed — everything the menhirs are not.
+     Same object class as a sacred stone, opposite meaning: one is a place you
+     are heard, the other is where the land was written down. */
+  const st=mix("#CFC4A6",col,0.46);
+  return `<ellipse cx="${ox}" cy="${oy+u(0.6)}" rx="${u(3.8)}" ry="${u(1.1)}" fill="#000" opacity=".32"/>`
+   +`<path d="M${ox-u(2.9)} ${oy} L${ox-u(2.6)} ${oy-u(8)} Q${ox} ${oy-u(10)} ${ox+u(2.6)} ${oy-u(8)}
+      L${ox+u(2.9)} ${oy} Z" fill="${st}" stroke="${dk}" stroke-width="${u(0.7)}"/>`
+   +`<path d="M${ox-u(2.72)} ${oy-u(6.2)} Q${ox} ${oy-u(10)} ${ox+u(2.72)} ${oy-u(6.2)}
+      L${ox+u(2.6)} ${oy-u(4.9)} Q${ox} ${oy-u(8.4)} ${ox-u(2.6)} ${oy-u(4.9)} Z" fill="${col}"/>`
+   +`<g stroke="${shift(col,-.42)}" stroke-width="${u(0.8)}" stroke-linecap="round" opacity=".95">`
+   +`<path d="M${ox-u(1.6)} ${oy-u(3.8)} h${u(3.2)}"/><path d="M${ox-u(1.6)} ${oy-u(2.2)} h${u(3.2)}"/>`
+   +`<path d="M${ox-u(1.6)} ${oy-u(0.7)} h${u(2.1)}"/></g>`;
+ }
+ if(TOK==="flag"){
+  return `<rect x="${ox-u(0.4)}" y="${oy-u(9)}" width="${u(0.9)}" height="${u(9)}" fill="#3A3020"/>`
+   +`<path d="M${ox+u(0.5)} ${oy-u(8.8)} l${u(5)} ${u(1.6)} l${u(-5)} ${u(1.8)} Z"
+      fill="${col}" stroke="${dk}" stroke-width="${u(0.5)}"/>`;
+ }
+ /* a ploughman and his ox */
+ return `<g stroke="${dk}" stroke-width="${u(0.5)}" stroke-linejoin="round">`
+  +`<path d="M${ox-u(1)} ${oy} l0 ${u(-3.6)} l${u(2.2)} 0 l0 ${u(3.6)} Z" fill="${col}"/>`
+  +`<circle cx="${ox+u(0.1)}" cy="${oy-u(4.9)}" r="${u(1.3)}" fill="${col}"/>`
+  +`<path d="M${ox+u(3.4)} ${oy-u(1)} l${u(5.4)} 0 l0 ${u(-3)} l${u(-5.4)} 0 Z" fill="${shift(col,-.38)}"/>`
+  +`<path d="M${ox+u(8.8)} ${oy-u(3.6)} l${u(1.8)} ${u(-0.5)} l0 ${u(2.6)} l${u(-1.8)} ${u(-0.5)} Z"
+     fill="${shift(col,-.38)}"/>`
+  +`<path d="M${ox+u(1.4)} ${oy-u(2.8)} l${u(2.2)} ${u(0.8)}" fill="none"/></g>`;
+}
+
+/* ---------- the settled: temple complexes ----------
+   Four stages, and the stage is read from the size of the complex rather than
+   from counting roofs. Under seventy-seven there is no temple at all — which is
+   the point of the Seventy-Seven, and now it is on the board. */
+function banner(x,yTop,h,col,seed){
+ const K=k(), pole=`<rect x="${(x-0.5*K).toFixed(1)}" y="${yTop.toFixed(1)}"
+   width="${(1.1*K).toFixed(1)}" height="${h.toFixed(1)}" fill="#3A3020"/>`;
+ const w=5.2*K, hh=3.6*K, y0=yTop+0.6*K;
+ const f=(b)=>`M${(x+0.5*K).toFixed(1)} ${y0.toFixed(1)}`
+  +`q${(w*0.5).toFixed(1)} ${(b*1.5).toFixed(1)} ${w.toFixed(1)} ${(-b*0.6).toFixed(1)}`
+  +`l0 ${hh.toFixed(1)}`
+  +`q${(-w*0.5).toFixed(1)} ${(-b*0.6+b*1.4).toFixed(1)} ${(-w).toFixed(1)} ${(b*0.6).toFixed(1)}Z`;
+ const a=f(1.1*K), b=f(-1.1*K);
+ return pole+`<path fill="${col}" stroke="#2A2114" stroke-width="${(0.6*K).toFixed(1)}" d="${a}">`
+  +`<animate attributeName="d" dur="${(1.5+((seed*7)%10)/10).toFixed(2)}s" repeatCount="indefinite"
+    values="${a};${b};${a}" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1"
+    keyTimes="0;0.5;1"/></path>`;
+}
+function temple(x,y,band,col,seed){
+ const K=k(), u=(n)=>n*K;
+ const stone=mix(P.stone,col,0.30), lit=shift(stone,.20), dark=shift(stone,-.34),
+       deep="#2A2114", trim=shift(col,-.1);
+ const slab=(x0,x1,yT,yB)=>
+   `<rect x="${u(x0)+x}" y="${u(yT)+y}" width="${u(x1-x0)}" height="${u(yB-yT)}" fill="${stone}"/>`
+  +`<rect x="${u(x0)+x}" y="${u(yT)+y}" width="${u(x1-x0)}" height="${u(1)}" fill="${lit}"/>`
+  +`<rect x="${u(x0)+x}" y="${u(yB)+y-u(0.9)}" width="${u(x1-x0)}" height="${u(0.9)}" fill="${dark}"/>`;
+ const door=(cx,w,yT,yB)=>
+   `<rect x="${u(cx-w/2)+x}" y="${u(yT)+y}" width="${u(w)}" height="${u(yB-yT)}" fill="${deep}"/>`;
+ const cols=(x0,x1,yT,yB,n)=>{
+  let o=""; for(let i=0;i<n;i++){ const cx=x0+(x1-x0)*(i+0.5)/n;
+   o+=`<rect x="${u(cx-0.6)+x}" y="${u(yT)+y}" width="${u(1.2)}" height="${u(yB-yT)}" fill="${lit}"/>`; }
+  return o; };
+ let s=`<ellipse cx="${x}" cy="${y+u(9)}" rx="${u(15)}" ry="${u(3.4)}" fill="#000" opacity=".24"/>`;
+
+ if(band===0){                                   /* the Seventy-Seven — no temple */
+  const r=rng(seed);
+  for(let i=0;i<3;i++){
+   const ax=x+u(-7+i*7+(r()-0.5)*1.5), ay=y+u(7-(i===1?2.5:0));
+   s+=`<path d="M${ax} ${ay-u(6.5)} l${u(4.2)} ${u(6.5)} l${u(-8.4)} 0 Z" fill="${stone}"
+        stroke="${deep}" stroke-width="${u(0.6)}"/>`
+    +`<path d="M${ax} ${ay-u(6.5)} l0 ${u(6.5)} l${u(-4.2)} 0 Z" fill="${dark}" opacity=".6"/>`;
+  }
+  return s;
+ }
+ if(band===1){                                   /* a shrine */
+  s+=slab(-8,8,5,8.5)+slab(-5.5,5.5,-1,5)+door(0,2.6,1.2,5)
+   +`<path d="M${x-u(6.5)} ${y-u(1)} L${x} ${y-u(5)} L${x+u(6.5)} ${y-u(1)} Z" fill="${trim}"
+      stroke="${deep}" stroke-width="${u(0.6)}"/>`;
+  return s;
+ }
+ if(band===2){                                   /* a temple on a platform */
+  s+=slab(-12,12,4.5,8.5)+slab(-8.5,8.5,-0.5,4.5)+cols(-7.5,7.5,0.4,4.5,4)
+   +slab(-5,5,-5.5,-0.5)+door(0,2.8,-3.4,-0.5)
+   +`<path d="M${x-u(6.6)} ${y-u(5.5)} L${x} ${y-u(9.5)} L${x+u(6.6)} ${y-u(5.5)} Z" fill="${trim}"
+      stroke="${deep}" stroke-width="${u(0.6)}"/>`
+   +`<rect x="${x-u(2)}" y="${y+u(4.5)}" width="${u(4)}" height="${u(4)}" fill="${lit}" opacity=".8"/>`;
+  s+=banner(x+u(11),y-u(4),u(12.5),col,seed);
+  return s;
+ }
+ /* band 3 — a stepped complex with a forecourt */
+ s+=slab(-15.5,15.5,4.5,9)+slab(-12,12,0.5,4.5)+cols(-11,11,1.4,4.5,6)
+  +slab(-8,8,-4,0.5)+cols(-7,7,-3.2,0.5,4)
+  +slab(-4.5,4.5,-9,-4)+door(0,3,-7.2,-4)
+  +`<path d="M${x-u(6)} ${y-u(9)} L${x} ${y-u(13.5)} L${x+u(6)} ${y-u(9)} Z" fill="${trim}"
+     stroke="${deep}" stroke-width="${u(0.7)}"/>`
+  +`<rect x="${x-u(2.6)}" y="${y+u(0.5)}" width="${u(5.2)}" height="${u(8.5)}" fill="${lit}" opacity=".75"/>`;
+ s+=banner(x-u(14),y-u(8),u(13),col,seed)+banner(x+u(14),y-u(8),u(13),col,seed+3);
+ return s;
+}
+
+/* ---------- the powers, as figures ----------
+   Drawn from the roster in concept/Player-character-inspiration: the arms-raised
+   epiphany gesture of the Minoan goddesses, and the horned Cernunnos type. */
+function figureF(x,y,col){                        /* arms raised, flounced skirt */
+ const K=k(), u=n=>n*K, dk="#1A1508";
+ return `<g stroke="${dk}" stroke-width="${u(0.75)}" stroke-linejoin="round" fill="${col}">`
+  +`<path d="M${x-u(6.5)} ${y-u(4)} L${x-u(4.4)} ${y-u(11.6)} L${x-u(2.2)} ${y-u(11)}
+      L${x-u(3.4)} ${y-u(4)} Z"/>`
+  +`<path d="M${x+u(6.5)} ${y-u(4)} L${x+u(4.4)} ${y-u(11.6)} L${x+u(2.2)} ${y-u(11)}
+      L${x+u(3.4)} ${y-u(4)} Z"/>`
+  +`<path d="M${x-u(2.8)} ${y-u(9.5)} L${x+u(2.8)} ${y-u(9.5)} L${x+u(2.1)} ${y-u(2)}
+      L${x-u(2.1)} ${y-u(2)} Z"/>`
+  +`<path d="M${x-u(2.4)} ${y-u(2)} L${x+u(2.4)} ${y-u(2)} L${x+u(6.2)} ${y+u(9)}
+      L${x-u(6.2)} ${y+u(9)} Z"/>`
+  +`<circle cx="${x}" cy="${y-u(11.8)}" r="${u(2.5)}"/>`
+  +`</g><g fill="none" stroke="${dk}" stroke-width="${u(0.7)}" opacity=".8">`
+  +`<path d="M${x-u(3.4)} ${y+u(2)} L${x+u(3.4)} ${y+u(2)}"/>`
+  +`<path d="M${x-u(4.8)} ${y+u(5.6)} L${x+u(4.8)} ${y+u(5.6)}"/></g>`;
+}
+function figureM(x,y,col){                        /* horned, broad, holding a stave */
+ const K=k(), u=n=>n*K, dk="#1A1508";
+ return `<rect x="${x+u(5.2)}" y="${y-u(13)}" width="${u(1.3)}" height="${u(21.5)}" rx="${u(0.6)}"
+      fill="#4A3B24" stroke="${dk}" stroke-width="${u(0.55)}"/>`
+  +`<g stroke="${dk}" stroke-width="${u(0.75)}" stroke-linejoin="round" stroke-linecap="round" fill="${col}">`
+  +`<path d="M${x-u(4.6)} ${y-u(4.4)} L${x+u(4.6)} ${y-u(4.4)} L${x+u(3.2)} ${y+u(1.6)}
+      L${x-u(3.2)} ${y+u(1.6)} Z"/>`
+  +`<path d="M${x-u(4.3)} ${y-u(3.8)} L${x-u(6.1)} ${y+u(2.6)} L${x-u(4.3)} ${y+u(3.2)}
+      L${x-u(2.6)} ${y-u(3.2)} Z"/>`
+  +`<path d="M${x+u(4.3)} ${y-u(3.8)} L${x+u(6.3)} ${y+u(0.4)} L${x+u(4.8)} ${y+u(1.4)}
+      L${x+u(2.6)} ${y-u(3.2)} Z"/>`
+  +`<path d="M${x-u(3.1)} ${y+u(1.6)} L${x-u(0.6)} ${y+u(1.6)} L${x-u(0.9)} ${y+u(9.2)}
+      L${x-u(3.9)} ${y+u(9.2)} Z"/>`
+  +`<path d="M${x+u(3.1)} ${y+u(1.6)} L${x+u(0.6)} ${y+u(1.6)} L${x+u(0.9)} ${y+u(9.2)}
+      L${x+u(3.9)} ${y+u(9.2)} Z"/>`
+  +`<circle cx="${x}" cy="${y-u(7.4)}" r="${u(2.7)}"/>`
+  +`<path d="M${x-u(2.1)} ${y-u(9)} q${u(-3.6)} ${u(-1.2)} ${u(-4)} ${u(-5.2)}
+      q${u(2.4)} ${u(2.6)} ${u(3.4)} ${u(3)} Z"/>`
+  +`<path d="M${x+u(2.1)} ${y-u(9)} q${u(3.6)} ${u(-1.2)} ${u(4)} ${u(-5.2)}
+      q${u(-2.4)} ${u(2.6)} ${u(-3.4)} ${u(3)} Z"/>`
+  +`</g>`;
+}
+
+function menhir(x,y,h,w,seed,opt){
+ opt=opt||{}; const r=rng(seed), lean=opt.lean||0, j=a=>(r()-0.5)*a*k();
+ const tw=w*(0.52+r()*0.16), lx=lean*h;
+ const p=[[x-w/2+j(1.4),y],[x-w/2*(0.86+r()*0.2)+j(1),y-h*0.34],
+   [x-tw/2+lx*0.85+j(1),y-h*0.72],[x+j(1.6)+lx,y-h],
+   [x+tw/2+lx*0.85+j(1),y-h*0.70],[x+w/2*(0.88+r()*0.2)+j(1),y-h*0.36],[x+w/2+j(1.4),y]];
+ let s=`<path d="${poly(p)}" fill="${opt.fill}"/>`;
+ s+=`<path d="M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)} L${p[1][0].toFixed(1)} ${p[1][1].toFixed(1)}`
+  +` L${p[2][0].toFixed(1)} ${p[2][1].toFixed(1)} L${p[3][0].toFixed(1)} ${p[3][1].toFixed(1)}`
+  +` L${(x+lx*0.3).toFixed(1)} ${y.toFixed(1)} Z" fill="${shift(opt.fill,.26)}"/>`;
+ if(opt.crack) s+=`<path d="M${(x-1*k()+lx*0.6).toFixed(1)} ${(y-h*0.62).toFixed(1)}`
+  +` l${(2.4*k()).toFixed(1)} ${(h*0.2).toFixed(1)} l${(-1.6*k()).toFixed(1)} ${(h*0.16).toFixed(1)}"`
+  +` stroke="${shift(opt.fill,-.42)}" stroke-width="${(1*k()).toFixed(1)}" fill="none"/>`;
+ return s;
+}
+function stoneGroup(x,y,st){
+ const K=k(), live=st.live, base = live ? (st.own===0?"#E4DCC0":"#DCD4C0") : "#7E8079";
+ let s=`<ellipse cx="${x}" cy="${y+9*K}" rx="${12*K}" ry="${3.4*K}" fill="#000" opacity=".26"/>`;
+ const r=rng(st.k*0.017+0.3);
+ for(let i=0;i<3;i++)
+  s+=menhir(x-11*K+i*11*K+(r()-0.5)*3*K, y+8*K-(i===1?2*K:0), (5+r()*2.5)*K, 3.4*K,
+      st.k*0.31+i, {fill:shift(base,-0.3)});
+ if(live && st.power>=12){
+  s+=menhir(x-6.5*K,y+7*K,15*K,5.5*K,st.k*0.11,{fill:base});
+  s+=menhir(x+6.5*K,y+7*K,15*K,5.5*K,st.k*0.53,{fill:base});
+  s+=`<path d="M${x-11*K} ${y-8*K} L${x+11*K} ${y-9.4*K} L${x+11*K} ${y-5.6*K} L${x-11*K} ${y-4.4*K} Z"
+      fill="${shift(base,.1)}"/>`;
+ } else s+=menhir(x,y+7*K,(live?17:13)*K,8*K,st.k*0.07,{fill:base,lean:live?0:0.20,crack:!live});
+ if(live){
+  const sp=F().spark[st.own];
+  s+=`<g style="--s1:${sp[0]};--s2:${sp[1]};--s3:${sp[2]}">`
+   + twinkle(x-13*K,y-6*K,2.6*K,"sp1",sp[0]) + twinkle(x+12*K,y-12*K,2.2*K,"sp3",sp[1])
+   + twinkle(x+3*K,y-17*K,2.4*K,"sp2",sp[2]) + `</g>`;
+ }
+ return s;
+}
+
+/* ---------- one tile ---------- */
+function tile(t){
+ const [x,y]=px(t.c,t.r), K=k();
+ const blessed = t.st==="bless" && t.t!=="water" && t.t!=="mount";
+ let fill = P.land[t.t];
+ if(blessed) fill = P.bless[t.t]||fill;
+ if(t.st==="reck") fill = P.reck;
+ if(t.set) fill = P.set;
+ let s=`<path d="${hexPath(x,y)}" fill="${fill}" stroke="${P.seam}" stroke-width="${(0.7*K).toFixed(1)}"/>`;
+ const r=rng(t.seed);
+
+ if(t.t==="water") s+=water(x,y,t.seed);
+ if(t.t==="mount"){
+  s+=`<path d="M${x-12*K} ${y+8*K} L${x-3*K} ${y-9*K} L${x+3*K} ${y-1*K} L${x+7*K} ${y-7*K} L${x+13*K} ${y+8*K} Z"
+      fill="${shift(P.land.mount,.16)}"/>`
+   +`<path d="M${x-3*K} ${y-9*K} L${x+1*K} ${y-2*K} L${x-6*K} ${y+2*K} Z" fill="${shift(P.land.mount,.5)}"/>`
+   +`<path d="M${x-3*K} ${y-9*K} L${x-12*K} ${y+8*K} L${x-5*K} ${y+8*K} Z" fill="${shift(P.land.mount,-.3)}"/>`;
+ }
+ if(t.t==="forest" && t.st!=="reck" && !t.set){
+  const col=blessed?P.treeBless:P.tree, dk=shift(col,-.35);
+  s+=conifer(x-6*K+r()*2*K, y+7*K, 10,4.4,col,dk);
+  s+=conifer(x+5*K-r()*2*K, y+5*K, 8.5,3.8,col,dk);
+  s+=conifer(x+0+r()*3*K,   y+10*K,7.5,3.4,col,dk);
+ }
+ if(t.t==="hill" && t.st!=="reck" && !t.set){
+  const col = blessed ? shift(P.bless[t.t],-.40) : shift(P.land.hill,-.34);
+  s+=`<path d="M${x-11*K} ${y+7*K} q${5.5*K} ${-11*K} ${11*K} 0 Z" fill="${col}"/>`
+   +`<path d="M${x-1*K} ${y+8*K} q${5*K} ${-13*K} ${11*K} 0 Z" fill="${shift(col,.20)}"/>`
+   +`<path d="M${x-11*K} ${y+7*K} q${5.5*K} ${-11*K} ${11*K} 0" fill="none"
+      stroke="${shift(col,-.3)}" stroke-width="${0.9*K}"/>`;
+ }
+ /* Farmland — strips of different crop, some green, some fallow. Drawn on
+    settlement tiles too, so the complex stands in its own fields.
+    Strips stay inside a radius of 0.64·SZ, so they can be rotated to any angle
+    without leaving the hex and without a clip path per tile. */
+ if(t.st==="reck" || t.set){
+  const own = t.set ? t.set.own : t.own;
+  const ang = FURROW ? (own===0 ? -32 : 30) : 0;
+  const n=4, hgt=3.1*K, gap=5.4*K, top=y-8.6*K;
+  s+=`<g transform="rotate(${ang} ${x.toFixed(1)} ${y.toFixed(1)})">`;
+  for(let i=0;i<n;i++){
+   const c = CROP ? P.crops[Math.floor(r()*P.crops.length)] : shift(P.reck,-.16);
+   const wdt = (i===0||i===n-1) ? 17*K : 22*K;
+   s+=`<rect x="${(x-wdt/2).toFixed(1)}" y="${(top+i*gap).toFixed(1)}" width="${wdt.toFixed(1)}"
+        height="${hgt.toFixed(1)}" rx="${(1*K).toFixed(1)}" fill="${c}" opacity=".9"/>`;
+   s+=`<rect x="${(x-wdt/2).toFixed(1)}" y="${(top+i*gap+hgt).toFixed(1)}" width="${wdt.toFixed(1)}"
+        height="${(1.1*K).toFixed(1)}" fill="#000" opacity=".16"/>`;
+  }
+  if(!t.set) s+=fieldHands(x,y,own,t.seed);
+  s+=`</g>`;
+  if(!t.set) s+=farmToken(x,y,own,t.seed);
+ }
+ if(blessed && !t.set){
+  const sp=F().spark[t.own===0?0:1];
+  s+=`<g style="--s1:${sp[0]};--s2:${sp[1]};--s3:${sp[2]}">`
+   + twinkle(x-9*K+r()*4*K, y-7*K+r()*3*K, 4.4*K, "sp"+(1+Math.floor(r()*4)), sp[0])
+   + twinkle(x+7*K-r()*4*K, y-1*K+r()*4*K, 3.4*K, "sp"+(1+Math.floor(r()*4)), sp[1])
+   + twinkle(x-3*K+r()*6*K, y+8*K-r()*3*K, 3.9*K, "sp"+(1+Math.floor(r()*4)), sp[2])
+   + twinkle(x+2*K+r()*5*K, y-9*K+r()*3*K, 2.6*K, "sp"+(1+Math.floor(r()*4)), sp[0])
+   + `</g>`;
+  s+=wildFolk(x,y,t.own,t.seed);
+ }
+ return s;
+}
+
+/* ---------- settlements / columns / powers ---------- */
+function settlement(t){
+ const [x,y]=px(t.c,t.r), K=k(), col=F().col[t.set.own];
+ let s=temple(x,y-2*K,t.set.band,col,t.seed);
+ s+=`<text x="${x}" y="${y+SZ-3.5*K}" text-anchor="middle" font-size="${(10*K).toFixed(1)}"
+     font-weight="600" font-family="IBM Plex Sans Condensed,sans-serif" fill="${P.ink}"
+     stroke="#000" stroke-width="${2.4*K}" paint-order="stroke" stroke-opacity=".6">${t.set.pop}</text>`;
+ return s;
+}
+let TILE={};
+function column(a,kind){
+ const K=k(), t=TILE[a.at], d=TILE[a.to];
+ const [x,y]=px(t.c,t.r), [dx,dy]=px(d.c,d.r);
+ const col = kind==="army" ? shift(F().col[a.own],-.15) : F().spark[a.own][1];
+ let s=`<line x1="${x}" y1="${y}" x2="${dx}" y2="${dy}" stroke="${col}" stroke-width="${1.2*K}"
+        stroke-dasharray="${kind==="army"?3*K+" "+4*K:1*K+" "+5*K}" opacity=".6"/>`;
+ s += kind==="army"
+  ? `<path d="M${x} ${y-9*K} l${7.5*K} ${13*K} l${-15*K} 0 Z" fill="${col}" stroke="#000" stroke-width="${0.8*K}"/>`
+  : `<circle cx="${x}" cy="${y-3*K}" r="${7.4*K}" fill="${col}" stroke="#000" stroke-width="${0.8*K}"/>`;
+ s+=`<text x="${x}" y="${y+(kind==="army"?2*K:-1*K)}" text-anchor="middle" font-size="${8*K}"
+     font-weight="700" font-family="IBM Plex Sans Condensed,sans-serif" fill="#12181A">${a.n}</text>`;
+ return s;
+}
+function power(w,pos){
+ const K=k(), t=TILE[pos], [x,y]=px(t.c,t.r), col=F().col[w];
+ const female = FG_SWAP ? (w===1) : (w===0);
+ return `<circle cx="${x}" cy="${y}" r="${17*K}" fill="none" stroke="#000" stroke-width="${3.6*K}" opacity=".35"/>`
+  +`<circle cx="${x}" cy="${y}" r="${17*K}" fill="none" stroke="${col}" stroke-width="${1.9*K}"
+    stroke-dasharray="${5*K} ${3.4*K}" opacity=".95"/>`
+  +`<ellipse cx="${x}" cy="${y+9.6*K}" rx="${7.5*K}" ry="${2.2*K}" fill="#000" opacity=".3"/>`
+  +(female ? figureF(x,y,col) : figureM(x,y,col));
+}
+
+/* ---------- boundaries ----------
+   groupKey decides what counts as "the same region". By owner, a blessed tile and
+   the farmland beside it are one group and the boundary between them disappears —
+   which is the whole risk. By owner+state, the outline around your blessed ground
+   is exactly the connected region a stone's power is measured over. */
+function groupKey(t){
+ const owner = t.set ? t.set.own : (t.st==="wild" ? null : t.own);
+ if(owner===null) return null;
+ if(OL==="owner") return "o"+owner;
+ return "o"+owner+"/"+(t.set ? "set" : t.st);
+}
+function boundaries(S){
+ const K=k(), by={};
+ S.tiles.forEach(t=>{ by[t.r*COLS+t.c]=t; });
+ const segs={};    /* faction -> path data */
+ S.tiles.forEach(t=>{
+  const g=groupKey(t); if(!g) return;
+  const owner = t.set ? t.set.own : t.own;
+  const [x,y]=px(t.c,t.r);
+  const v=verts(x,y,SZ-1.2*K);
+  DIR[t.r&1].forEach(([dc,dr,edge])=>{
+   const nc=t.c+dc, nr=t.r+dr;
+   const nb = (nc>=0&&nc<COLS&&nr>=0&&nr<ROWS) ? by[nr*COLS+nc] : null;
+   if(nb && groupKey(nb)===g) return;                  /* interior edge, skip */
+   const a=v[edge], b=v[(edge+1)%6];
+   segs[owner]=(segs[owner]||"")
+    +`M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+  });
+ });
+ let out="";
+ Object.keys(segs).forEach(o=>{
+  const col=F().col[o];
+  /* a raised ridge: dark shadow dropped a pixel, colour on top */
+  out+=`<g transform="translate(0,${(1.6*K).toFixed(1)})" opacity=".55">`
+    +`<path d="${segs[o]}" fill="none" stroke="#1A1508" stroke-width="${(3.4*K).toFixed(1)}"
+      stroke-linecap="round" stroke-linejoin="round"/></g>`
+    +`<path d="${segs[o]}" fill="none" stroke="${shift(col,-.3)}" stroke-width="${(3.4*K).toFixed(1)}"
+      stroke-linecap="round" stroke-linejoin="round"/>`
+    +`<path d="${segs[o]}" fill="none" stroke="${shift(col,.25)}" stroke-width="${(1.5*K).toFixed(1)}"
+      stroke-linecap="round" stroke-linejoin="round"/>`;
+ });
+ return out;
+}
+function perTileBorders(S){
+ const K=k(); let out="";
+ S.tiles.forEach(t=>{
+  const owner = t.set ? t.set.own : (t.st==="wild" ? null : t.own);
+  if(owner===null) return;
+  const [x,y]=px(t.c,t.r), col=F().col[owner], v=verts(x,y,SZ-1.4*K);
+  const seg=a=>a.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join("");
+  out+=`<path d="${seg([v[3],v[4],v[5],v[0]])}" fill="none" stroke="${shift(col,.45)}"
+        stroke-width="${2.6*K}" stroke-linejoin="round" stroke-linecap="round"/>`
+   +`<path d="${seg([v[0],v[1],v[2],v[3]])}" fill="none" stroke="${shift(col,-.45)}"
+      stroke-width="${2.6*K}" stroke-linejoin="round" stroke-linecap="round"/>`
+   +`<path d="${hexPath(x,y,SZ-2.6*K)}" fill="none" stroke="${col}" stroke-width="${1.5*K}"
+      opacity=".92" stroke-linejoin="round"/>`;
+ });
+ return out;
+}
+
+/* ---------- frame ---------- */
+function frame(){
+ const K=k(), FR=19*K, w=BW()+FR*2, h=BH()+FR*2;
+ const boss=(cx,cy)=>`<circle cx="${cx}" cy="${cy}" r="${5.4*K}" fill="#6E5A36" stroke="#2A2114"
+   stroke-width="${1*K}"/><circle cx="${cx-1*K}" cy="${cy-1.2*K}" r="${2*K}" fill="#B9A063"/>`;
+ return {pad:FR,
+  back:`<rect width="${w}" height="${h}" fill="#4A3C24"/>`
+   +`<rect x="${2.5*K}" y="${2.5*K}" width="${w-5*K}" height="${h-5*K}" fill="none" stroke="#8A7346" stroke-width="${2.4*K}"/>`
+   +`<rect x="${7*K}" y="${7*K}" width="${w-14*K}" height="${h-14*K}" fill="none" stroke="#2A2114" stroke-width="${2*K}"/>`
+   +`<rect x="${10.5*K}" y="${10.5*K}" width="${w-21*K}" height="${h-21*K}" fill="#5C4A2C"/>`
+   +`<rect x="${FR-2.5*K}" y="${FR-2.5*K}" width="${BW()+5*K}" height="${BH()+5*K}" fill="#12140F"
+      stroke="#241C10" stroke-width="${3*K}"/>`,
+  front:`<rect x="${FR-2.5*K}" y="${FR-2.5*K}" width="${BW()+5*K}" height="${BH()+5*K}" fill="none"
+      stroke="#8A7346" stroke-width="${1.2*K}" opacity=".55"/>`
+   + boss(FR/2,FR/2)+boss(w-FR/2,FR/2)+boss(FR/2,h-FR/2)+boss(w-FR/2,h-FR/2)};
+}
+
+/* ---------- render ---------- */
+function render(){
+ const S=BOARD[YR]; TILE={}; S.tiles.forEach(t=>TILE[t.k]=t);
+ const Fm=frame(), w=BW()+Fm.pad*2, h=BH()+Fm.pad*2;
+ let g="";
+ S.tiles.forEach(t=>{ g+=tile(t); });
+ g += OL==="tile" ? perTileBorders(S) : boundaries(S);
+ S.tiles.filter(t=>t.set).forEach(t=>{ g+=settlement(t); });
+ S.stones.forEach(st=>{ const t=TILE[st.k],[x,y]=px(t.c,t.r); g+=stoneGroup(x,y,st); });
+ S.armies.forEach(a=>{ g+=column(a,"army"); });
+ S.refugees.forEach(f=>{ g+=column(f,"refugee"); });
+ g += power(0,S.p[0].pos)+power(1,S.p[1].pos);
+
+ document.getElementById("board").innerHTML =
+  `<svg class="${SPARK?"":"still"}" viewBox="0 0 ${w.toFixed(0)} ${h.toFixed(0)}"
+    width="${w.toFixed(0)}" height="${h.toFixed(0)}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="${w}" height="${h}" fill="${P.bg}"/>${Fm.back}
+    <g transform="translate(${Fm.pad.toFixed(1)},${Fm.pad.toFixed(1)})">${g}</g>${Fm.front}</svg>`;
+
+ document.getElementById("dims").textContent =
+  `board ${BW().toFixed(0)} × ${BH().toFixed(0)}   ·   with frame ${w.toFixed(0)} × ${h.toFixed(0)}`
+  + `   ·   hex ${(Math.sqrt(3)*SZ).toFixed(0)} × ${(2*SZ).toFixed(0)}px`;
+
+ /* --- notes that react to the settings --- */
+ const S2=BOARD[YR];
+ const anim = S2.tiles.filter(t=>t.st==="bless"&&!t.set).length*4
+            + S2.tiles.filter(t=>t.t==="water").length*3
+            + S2.tiles.filter(t=>t.set&&t.set.band>=2).reduce((a,t)=>a+(t.set.band>=3?2:1),0)
+            + S2.stones.filter(s=>s.live).length*3;
+ const n=[];
+ if(OL==="owner") n.push(["ok",
+  "By owner alone. This was the wrong call a version ago and is the right one now: once a "
+ +"settlement takes the farmland fill and blessing carries a faction-coloured sparkle, the "
+ +"blessing/farmland boundary is held by the fill and does not need a line as well. Fewer lines, "
+ +"and the board reads as territory rather than as a control map."]);
+ if(OL==="state") n.push(["",
+  "By owner + state. The one thing this buys that <em>by owner</em> does not: the outline around "
+ +"your blessed ground is exactly the connected region a stone's power is measured over (§5), so "
+ +"a severing attack becomes visible. If that turns out to matter in play, it wants to come back "
+ +"as a thin secondary line rather than as the primary boundary."]);
+ if(OL==="tile") n.push(["",
+  "Every tile outlined. Legible, but at hex 50 it is a great deal of line."]);
+ if(!SPARK) n.push(["",
+  "Stilled — this is also what a reader with <code>prefers-reduced-motion</code> gets. The board "
+ +"is still fully legible, which is the requirement: sparkle, banners and water may add to a "
+ +"reading but must never be the only thing carrying it. Ownership survives here because the "
+ +"outline carries it independently."]);
+ if(SPARK) n.push(["ok",
+  `About <b>${anim}</b> animated nodes at this year — sparkle, water, banners. Only opacity, fill `
+ +"and small path morphs, no transforms and no filters. The tablet is the target, so the tablet "
+ +"is where this gets checked."]);
+ if(FC==="vivid") n.push(["",
+  `Neon against violet separates at ${contrast("#7CF04A","#A96BF0").toFixed(2)}, and neon against `
+ +`blessed green at ${contrast("#7CF04A",P.bless.plain).toFixed(2)} — so green-on-green, the thing `
+ +"worth worrying about, holds."]);
+ if(FOLK) n.push(["",
+  "<b>People — speculative, no rule produces these.</b> But they explain a rule that already "
+ +"exists: §3 will not let you Found until 85% of the country within two tiles is blessed, which "
+ +"has always looked arbitrary. Under the lore it is not a gate — the people are already there, and "
+ +"a settlement is those people deciding to stop moving. See OP-18."]);
+ if(FOLK) n.push(["ok",
+  "The two kinds differ by <em>posture</em>, not headcount. On blessed ground: few, upright, "
+ +"scattered, facing nothing in particular — you see people. On farmland: more of them, bent, "
+ +"aligned to the rows, rotating with the furrows — you see work. Same species, different "
+ +"relationship to the ground, and the transformation reads as a change in what a body is doing."]);
+ if(FOLK && YR==="late") n.push(["",
+  "Year 40. No blessed ground left, so nobody is standing upright in open country anywhere on the "
+ +"board except you. Everyone else is bent to a row. Nothing draws that; it falls out of the state."]);
+ if(TOK==="stone") n.push(["ok",
+  "A <b>kudurru</b> — the Mesopotamian boundary stone, carved and inscribed, set at a field edge "
+ +"to record who the land was granted to. It is the only candidate that is about <em>reckoning</em> "
+ +"rather than merely about ownership, and it rhymes with the thing it destroys: your menhirs are "
+ +"irregular and uncarved, theirs are squared and written on. Same object, opposite meaning."]);
+ if(TOK==="flag") n.push(["bad",
+  "Flags read as military control, which is the one thing farmland is not. The threat here is not "
+ +"conquest, it is people getting on with things. This is the most legible option and the most "
+ +"tonally wrong."]);
+ if(TOK==="plough") n.push(["",
+  "Warm, and it makes farmland look desirable, which the design wants. Two costs: at year 40 there "
+ +"are sixty of these and they draw the eye to the tiles that should feel most ordinary; and right "
+ +"now <em>the only person on the board is you</em>. Putting mortals at a similar scale spends that "
+ +"for free. See the entry in <code>registers/ideas.md</code> for the version that turns it into "
+ +"the point instead."]);
+ if(FURROW) n.push(["ok",
+  "Furrows angled by faction. Costs no token on any tile and reads at region scale rather than tile "
+ +"scale, which is the distance the boundary stone cannot cover. The two work at different ranges "
+ +"and are probably the answer together."]);
+ if(SZ<40) n.push(["bad",
+  "At hex 24 the temple complexes lose their stages and the figures become smudges. Everything "
+ +"here was authored for hex 50; this setting is the old build, kept for comparison only."]);
+ if(SZ>=50) n.push(["ok",
+  `At hex ${SZ} a tile is ${(Math.sqrt(3)*SZ).toFixed(0)}×${2*SZ}px — `
+ +`${((SZ/24)**2).toFixed(1)}× the drawing area of the old build. That is the sprite budget.`]);
+ document.getElementById("notes").innerHTML =
+  n.map(([c,t])=>`<p class="note ${c}">${t}</p>`).join("");
+
+ /* --- contrast table --- */
+ const rows=[
+  ["blessed plain vs wild plain", P.bless.plain, P.land.plain],
+  ["blessed hill vs farmland",    P.bless.hill,  P.reck],
+  ["blessed forest vs wild forest",P.bless.forest,P.land.forest],
+  ["farmland vs wild plain",      P.reck,        P.land.plain],
+  ["faction A vs faction B",      F().col[0],    F().col[1]],
+  ["faction A vs blessed plain",  F().col[0],    P.bless.plain],
+  ["faction B vs blessed plain",  F().col[1],    P.bless.plain]
+ ];
+ document.getElementById("contrast").innerHTML =
+  `<table><tr><th>pair</th><th>contrast</th><th></th></tr>`
+  + rows.map(([n,a,b])=>{ const c=contrast(a,b);
+     return `<tr><td>${n}</td><td><b>${c.toFixed(2)}</b></td>
+      <td><span style="display:inline-block;width:26px;height:12px;background:${a};
+      border:1px solid #000"></span><span style="display:inline-block;width:26px;height:12px;
+      background:${b};border:1px solid #000"></span></td></tr>`; }).join("")
+  + `</table>`;
+}
+
+document.querySelectorAll(".ctl button").forEach(b=>{
+ b.onclick=()=>{
+  const key=Object.keys(b.dataset)[0];
+  document.querySelectorAll(`.ctl button[data-${key}]`).forEach(o=>o.classList.remove("on"));
+  b.classList.add("on");
+  const v=b.dataset[key];
+  ({yr:()=>YR=v, sz:()=>SZ=+v, fc:()=>FC=v, ol:()=>OL=v, sp:()=>SPARK=+v,
+    cr:()=>CROP=+v, fg:()=>FG_SWAP=+v, tok:()=>TOK=v, fu:()=>FURROW=+v,
+    fk:()=>FOLK=+v})[key]();
+  render();
+ };
+});
+render();
+</script>
+</body>
+</html>
