@@ -13,6 +13,11 @@ needing to ask, and then stop being able to hear.
 You want to be remembered. The only thing capable of remembering you at scale is
 the same thing that makes you inaudible.
 
+**And you knew.** You did not have this done to you — you put the people in the
+blessed country yourself, few and wild and able to hear, knowing exactly what
+grows from them. You are not a victim of the arc. You are a parent standing at the
+near end of it. See `concept/lore.md`.
+
 ## The one sentence
 
 > **You can only be remembered by the thing that deafens you.**
@@ -28,6 +33,17 @@ rather than in the game.
 - Not a tragedy on rails. The fading is caused by choices, including yours, and a
   well-played game can hold a great deal of it off.
 - Not melancholy without teeth. Competition is the point, not a concession.
+
+## The dilemma underneath the dilemma
+
+Stated as resources it is *blessing versus farmland*. Stated as people it is:
+
+> **The people you love are not the people who will remember you.**
+
+Wild folk hear you and build nothing that lasts. Their descendants will build
+something that lasts and will not hear a word of it. Every settlement is a choice
+to convert the first into the second, deliberately, because only the second can
+carry a memory at scale.
 
 ## Sources
 

@@ -63,6 +63,22 @@ Cities and 24% across all matchups; Haunt, the pure-blessing line, wins 13% and
 40%. The old figures of 33% and 42–56% came from a simulator that was not this
 game. Cities wins 78% of everything it plays.
 
+### What this question actually is
+
+Reframed by `concept/lore.md`, and larger than it looked. The powers disagree
+about whether settling should ever have been allowed — refusers against convinced
+— and a doctrine is that disagreement expressed as a strategy rather than a
+mechanical label.
+
+Which makes the table in §10 **the game's own verdict on its central argument**,
+delivered in a dropdown labelled with the disputants' names. At 78% against 24%,
+the current build says the convinced were right and the refusers were fools.
+
+That is not a tuning imbalance. It is the design answering by fiat a question the
+fiction requires to stay open, and it is the reason this is the highest-value open
+point in the register. A refuser should be able to keep a few hundred wild folk
+who hear it, build almost nothing, and win a reasonable share of the time.
+
 The central dilemma is currently decorative. Two things confounded it. One is now
 resolved, and it turned out to matter for only one of the two magical doctrines.
 
@@ -254,6 +270,53 @@ OP-09.
 
 **Settled by:** writing all of them and reading the endings of forty simulated
 games. If one fires in 80% of them, the set is wrong.
+
+## OP-18 · medium · Do the wild folk exist in the rules, or only in the fiction?
+
+`concept/lore.md` says the powers put people into the blessed country: few, wild,
+living in forest and hill, able to hear because the country is quiet.
+
+**Most of this needs no new mechanic, because the rules already say it.** §3
+requires 85% blessed country within two tiles before you may Found, and calls the
+blessing requirement load-bearing: *all expansion begins with blessing*. That gate
+has always been arbitrary-looking. Under the lore it is not a gate at all — it is
+the statement that people are already there, and a settlement is those people
+deciding to stop moving. The cheapest possible change is **zero rules and a
+drawing**: put wild folk on blessed tiles and §3 explains itself.
+
+What is genuinely open is whether they should carry a number.
+
+**The proposal.** A settlement is founded with a population drawn from the wild
+folk in range rather than a flat 30. Where you blessed, and how long ago, decides
+how strong the founding is.
+
+Why it is worth measuring rather than dismissing:
+
+- It gives blessing a **second output**, and OP-06 is the standing evidence that
+  blessing needs one. Bands wins 8% and Haunt 22% with seeds split. A-09 already
+  identified "make blessing worth more" as the lever that actually moves this, and
+  this is that lever in a form that is thematic rather than a tuned constant.
+- It is **additive and generative**, which is the direction every playtest has
+  pushed toward and every subtractive mechanic has failed in.
+- It makes *where and when* you bless matter, which currently it barely does —
+  blessing is close to fungible once you have enough of it.
+
+Why it might be wrong:
+
+- `concept/concept.md` says **no economy to manage**. A visible population pool on
+  wild ground is an economy, and the moment it has a number the player will farm
+  it. The version that survives this objection is one where the player never sees
+  a count and never spends it — it is only read at the moment of founding.
+- It may make founding *automatic* rather than chosen: bless, wait, settle,
+  repeat. If the wild folk simply accumulate, the decision drains out of it.
+
+**Settled by:** implementing the founding-population version behind a tune flag
+and re-running the matrix, watching Bands and Haunt specifically. If it does not
+move OP-06, it is decoration and should stay in the fiction and the artwork only.
+
+**Do not let this settle OP-06 by fiat.** See the caution at the end of
+`concept/lore.md`: the powers believe the settled path is the next thing, and the
+rules must not agree with them, or the competition becomes ceremonial.
 
 ## OP-17 · medium · Art direction was never chosen
 

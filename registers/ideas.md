@@ -116,3 +116,30 @@ advance.)*
 
 **Show the year's events as a small illuminated marginalia** rather than a log
 list.
+
+**A living board, in the manner of the first Settlers** — figures walking to and
+from the settlements, working the fields, moving under the tree canopies. Very
+appealing and correctly flagged as a risk to the mystical register at the moment
+it was proposed: a valley busy with cheerful little people is a different game's
+tone, and it would make the ordinary business of farming the most eye-catching
+thing on a board where farmland is supposed to be quietly, unglamorously winning.
+
+There is a version that turns the risk into the point. **Right now the only person
+visible on the board is you.** That is doing an enormous amount of work for free.
+So: begin with an empty valley and let the figures *arrive* — none at all in the
+first decade, a few by the middle, the fields and roads busy by year forty, at
+which point you are one silhouette among hundreds and no longer the only thing on
+the map that is clearly a person.
+
+Read entirely from state that already exists — settlement count, reckoned tiles —
+so it needs no new counter, which is the same test OP-15 sets for endings. It is
+the fade rendered as the population of the *image* rather than as colour, and
+nothing has to narrate it. Expensive, late, and worth doing properly or not at
+all.
+
+**Faction furrows** — each side ploughs at its own angle, so ownership of a whole
+region reads at a glance with no token added to any tile. Cheapest idea in this
+file and diegetic: two peoples with two ways of laying out a field. Pairs with
+boundary stones, which read at tile scale where this reads at region scale.
+
+**Speech bubbles** — one or two a year for flavor and a bit of information, weighted by proximity/relevance/novelty; corpus and selection rule in registers/speech-bubbles.md
