@@ -9,28 +9,52 @@
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
- --ground:#12181A;--panel:#1A2123;--line:#283134;--soft:#20282A;
- --ink:#D9DACE;--dim:#99A096;--faint:#69706A;
- --gold:#C8B37E;--bless:#9A7BC8;--reck:#C79A52;
- --rbless:#5FA0A8;--rust:#9B4A44;--moss:#7E9166;
+ --ground:#12140F;--panel:#1C1E16;--line:#33362C;--soft:#252820;
+ --ink:#F0E6CE;--dim:#A99C7E;--faint:#786C55;
+ --gold:#7CF04A;--bless:#B4FF80;--reck:#C9A24A;
+ --rbless:#A96BF0;--rust:#C4443A;--moss:#94A03E;
 }
 *{box-sizing:border-box}
 body{margin:0;padding:0 20px 70px;background:var(--ground);color:var(--ink);
  font-family:'Spectral',Georgia,serif;font-weight:300;font-size:15.5px;line-height:1.6}
-.wrap{max-width:1180px;margin:0 auto}
+/* Wide enough that the 1272px board gets its full width beside the 330px
+   sidebar, so a hex is drawn at the 50px it was authored for. Narrower screens
+   scale the SVG down gracefully; below 1180 the columns stack and the board
+   takes the full width. */
+.wrap{max-width:1660px;margin:0 auto}
 header{padding:30px 0 12px;border-bottom:1px solid var(--line)}
 h1{font-size:26px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:lowercase}
 .sub{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.22em;
  text-transform:uppercase;color:var(--faint);margin-top:5px}
 .q{max-width:68ch;color:var(--dim);margin:16px 0 20px;font-size:15px}
 .cols{display:grid;grid-template-columns:1fr 330px;gap:32px;align-items:start}
-@media(max-width:940px){.cols{grid-template-columns:1fr}}
+@media(max-width:1180px){.cols{grid-template-columns:1fr}}
 h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:10.5px;
  letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 10px;
  padding-bottom:7px;border-bottom:1px solid var(--soft)}
 .blk{margin-bottom:22px}
-svg.map{display:block;width:100%;height:auto;background:#0B1113;border:1px solid var(--line)}
+svg.map{display:block;width:100%;height:auto;background:#16202B;border:1px solid var(--line)}
 .hx{cursor:pointer}.hx.no{cursor:default}
+
+/* Sparkle on blessed ground, and the water. Only opacity, fill and small path
+   morphs — no transforms, no filters. The phase of each sparkle is seeded from
+   its tile in ui.js, so redrawing the map on a click does not resynchronise the
+   whole field into one blink.
+
+   Nothing here is the sole carrier of any information: ownership is on the
+   boundary, settlement stage is in the silhouette, land state is in the fill.
+   Motion always adds to a reading that already works without it — which is what
+   makes the reduced-motion rule below safe. */
+@keyframes tw{0%,100%{opacity:.28}42%{opacity:1}60%{opacity:.62}}
+@keyframes wv{0%,100%{stroke:var(--w1)}40%{stroke:var(--w2)}70%{stroke:var(--w3)}}
+.sp{animation:tw 2.4s ease-in-out infinite}
+.wv{animation:wv 6.5s ease-in-out infinite}
+.wv1{animation-delay:-.8s}.wv2{animation-delay:-2.6s}.wv3{animation-delay:-4.3s}
+@media (prefers-reduced-motion: reduce){
+ .sp{animation:none;opacity:.92}
+ .wv{animation:none}
+ animate{display:none}
+}
 .bar{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--line);margin-bottom:14px}
 .c{flex:1 1 70px;padding:11px 10px 11px 0;min-width:70px}
 .c .l{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:9.5px;letter-spacing:.15em;
@@ -100,16 +124,16 @@ people have to go somewhere, and where they go, they grow.</p>
 <div class="cols">
 <div>
   <div class="bar" id="bar"></div>
-  <svg class="map" id="map" viewBox="0 0 632 352" role="img">
-    <title>The contested valley</title><desc>Hex map. Fill shows the land — woodland, blessed woodland, farmland, mountains, settlements. Borders show who holds each tile. Marching armies and columns of refugees are drawn as moving tokens.</desc>
+  <svg class="map" id="map" viewBox="0 0 1272 717" role="img">
+    <title>The contested valley</title><desc>Hex map. Fill shows the land — woodland, blessed woodland, farmland, mountains, settlements. A raised border runs around each contiguous stretch of one power's ground. Blessed ground carries wild folk and a faction-coloured sparkle; farmland carries boundary stones, furrows angled by faction, and people bent to the rows. Marching armies and columns of refugees are drawn as moving tokens.</desc>
   </svg>
   <div class="key">
-    <span><i style="background:#1F2C1E;border:1px solid #2A3530"></i>woodland</span>
-    <span><i style="background:#2A3040;border:1px solid #9A7BC8"></i>blessed</span>
-    <span><i style="background:#6B5A2E;border:1px solid #8A7440"></i>farmland</span>
-    <span><i style="background:#514F52;border:1px solid #6D6A6E"></i>mountain</span>
-    <span><i style="border:2px solid #C8B37E"></i>yours</span>
-    <span><i style="border:2px solid #5FA0A8"></i>theirs</span>
+    <span><i style="background:#3C5A2C;border:1px solid #1E2A1C"></i>woodland</span>
+    <span><i style="background:#88A448;border:1px solid #1E2A1C"></i>blessed</span>
+    <span><i style="background:#C9A24A;border:1px solid #1E2A1C"></i>farmland</span>
+    <span><i style="background:#7A7166;border:1px solid #1E2A1C"></i>mountain</span>
+    <span><i style="border:2px solid #7CF04A"></i>yours</span>
+    <span><i style="border:2px solid #A96BF0"></i>theirs</span>
   </div>
   <div class="row">
     <button id="bless">Bless</button><button id="stone">Raise a stone</button>
@@ -129,9 +153,9 @@ people have to go somewhere, and where they go, they grow.</p>
   <div class="blk"><h2>the two of you</h2>
    <svg id="chart" width="100%" viewBox="0 0 300 130" role="img">
     <title>Score over time</title><desc>Your total, their total, and how far you can walk, across the years.</desc></svg>
-   <div class="key"><span><i style="background:#C8B37E"></i>you</span>
-    <span><i style="background:#5FA0A8"></i>them</span>
-    <span><i style="background:#7E9166"></i>where you can walk</span></div>
+   <div class="key"><span><i style="background:#7CF04A"></i>you</span>
+    <span><i style="background:#A96BF0"></i>them</span>
+    <span><i style="background:#C9A24A"></i>where you can walk</span></div>
   </div>
   <div class="blk"><h2>your stones</h2><ul class="sl" id="st"></ul></div>
   <div class="blk"><h2>their doctrine</h2>

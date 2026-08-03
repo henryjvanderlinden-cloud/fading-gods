@@ -149,8 +149,21 @@ fighting it.
 3. Add TypeScript and a seeded RNG. *The seeded RNG was pulled forward into step
    1 — the harness is worthless without reproducible games — so this step is now
    only TypeScript, and the build step that comes with it.*
-4. Split the renderer properly. `game/ui.js` is one 300-line function plus
-   wiring; it wants breaking into a state-to-SVG function and an input layer.
+4. Split the renderer properly. `game/ui.js` is one long function plus wiring; it
+   wants breaking into a state-to-SVG function and an input layer. *Partly forced
+   by OP-17.* The map is now three layers — land, scrim, tokens — and the land is
+   cached against a fingerprint of everything it reads, because at hex 50 it is
+   ~3,400 SVG nodes and re-parsing them on every click was the single most
+   expensive thing the build did. Moving your token or arming an intervention now
+   touches only the cheap two layers. The cache key is pure state, so the
+   renderer still owns no rules.
+
+   Measured in jsdom on a year-40 board, which is the worst case: 450kB of
+   markup, 3,442 nodes, ~298 animated. A full render went 272ms → 159ms and a
+   redraw with the board unchanged is 135ms. **A browser will be several times
+   faster than jsdom at all of these**, and the remaining cost is mostly the side
+   panels and the engine queries behind them — nine `targets()` calls per render
+   — rather than the map. That is the next thing to look at if it ever matters.
 
 ---
 

@@ -8,6 +8,15 @@ It is a description, and it is now up for revision like everything else.
 
 | File | What it is |
 |---|---|
+**This is in the game.** `game/index.html` and `game/ui.js` carry the whole
+direction as of now; `sim/smoke.js` passes 11,744 checks including a full game
+played through the build's own click handlers. Open `game/index.html` — the
+workshop below is now a place to try changes, not the place to see the result.
+
+| File | What it is |
+|---|---|
+| `in-the-build.png` | The real build at years 9, 27 and 40. Still, so it undersells itself. |
+| `in-the-build-detail.png` | Closer, at year 27. |
 | `warm-workshop.html` | The direction with every open decision on a switch — for trying things before touching `ui.js`. |
 | `board-year-27.png` | Where it stands. Still, so it undersells itself. |
 | `temples-and-figures.png` | The four settlement stages and the two powers, large. |

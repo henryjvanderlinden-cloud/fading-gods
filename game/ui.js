@@ -2,6 +2,12 @@
 //
 // Everything this file knows about the game it asks the engine for. If a rule
 // appears in here, it is in the wrong file and the simulator will not see it.
+//
+// Art direction: concept/art-direction/README.md. Warm painted earth, flat hexes,
+// boundaries embossed per contiguous group, Bronze Age temple complexes, the two
+// powers drawn as figures. Everything below is read from engine state — the wild
+// folk and the field hands are presentation over `t.st`, not a mechanic. See
+// OP-18 for the version of them that would be.
 "use strict";
 (function () {
 const {COLS, ROWS, DIVINE, CIVIC, T, ring, reach, score, targets, region,
@@ -9,31 +15,338 @@ const {COLS, ROWS, DIVINE, CIVIC, T, ring, reach, score, targets, region,
        civicOpen, band, blessGain, canStone, canFound, canSplit, stoneBlock,
        foundBlock, impassable, walkStep, doAct, doIntervene} = FG;
 
-const SZ = 24, W = Math.sqrt(3) * SZ, VS = 1.5 * SZ;
+const SZ = 50, W = Math.sqrt(3) * SZ, VS = 1.5 * SZ, U = SZ / 24;
+const BW = W * (COLS + 0.5) + 8 * U, BH = VS * (ROWS - 1) + 2 * SZ + 8 * U;
 let ARM = null;   // the intervention currently armed, awaiting a target
+let LAND = {key: null, html: ""};   // cached land layer, see render()
 
 const $ = id => document.getElementById(id);
-function px(c, r) { return [W * (c + 0.5 * (r & 1)) + W / 2 + 4, VS * r + SZ + 4]; }
-function hexPath(x, y, s) {
- s = s || SZ; let p = "";
- for (let i = 0; i < 6; i++) {
-  const a = Math.PI / 180 * (60 * i - 30);
-  p += (i ? "L" : "M") + (x + s * Math.cos(a)).toFixed(1) + " " + (y + s * Math.sin(a)).toFixed(1);
+const u = n => n * U;                       // marks were authored against a 24px hex
+function px(c, r) { return [W * (c + 0.5 * (r & 1)) + W / 2 + u(4), VS * r + SZ + u(4)]; }
+function verts(x, y, s) {
+ const v = [];
+ for (let i = 0; i < 6; i++) { const a = Math.PI / 180 * (60 * i - 30);
+  v.push([x + s * Math.cos(a), y + s * Math.sin(a)]); }
+ return v;                                  // 0 r-up 1 r-dn 2 btm 3 l-dn 4 l-up 5 top
+}
+const poly = v => v.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join("") + "Z";
+const hexPath = (x, y, s) => poly(verts(x, y, s === undefined ? SZ : s));
+
+function shift(hex, f) {
+ const n = parseInt(hex.slice(1), 16), c = [n >> 16, (n >> 8) & 255, n & 255];
+ const m = v => Math.max(0, Math.min(255, f > 0 ? v + (255 - v) * f : v * (1 + f)));
+ return "#" + c.map(v => Math.round(m(v)).toString(16).padStart(2, "0")).join("");
+}
+function mix(a, b, t) {
+ const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+ const A = p(a), B = p(b);
+ return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join("");
+}
+// deterministic per-tile jitter, so a stone looks the same every render
+function rng(seed) { let s = Math.floor(seed * 99991) >>> 0 || 7;
+ return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+
+// ---------------------------------------------------------------- palette
+const P = {
+ land:  {water: "#274F6B", plain: "#6E7A3C", forest: "#3C5A2C", hill: "#8A7A4C", mount: "#7A7166"},
+ bless: {plain: "#88A448", forest: "#4E7A34", hill: "#A08E58"},
+ reck: "#C9A24A", seam: "#1E2A1C", stone: "#DCD2B4",
+ crops: ["#C9A24A", "#D8B45C", "#7E8A34", "#A88A38", "#94A03E", "#BE9440"],
+ tree: "#24421C", treeBless: "#2C5420", ink: "#F0E6CE"
+};
+const COL = ["#7CF04A", "#A96BF0"];                          // you, them
+const SPARK = [["#E8FFC8", "#7CF04A", "#B4FF80"], ["#F0E4FF", "#A96BF0", "#C89CFF"]];
+
+// ------------------------------------------------------------------ marks
+function conifer(x, y, h, w, col, dark) {
+ return `<path d="M${x} ${y - u(h)} L${x + u(w)} ${y} L${x - u(w)} ${y} Z" fill="${col}"/>`
+      + `<path d="M${x} ${y - u(h)} L${x} ${y} L${x - u(w)} ${y} Z" fill="${dark}" opacity=".45"/>`;
+}
+// Sparkle phase is seeded rather than fixed, so that re-rendering the map on
+// every click does not resynchronise the whole field into one blink.
+function twinkle(x, y, r, col, ph) {
+ const q = r * 0.19;
+ return `<path class="sp" fill="${col}" style="animation-delay:${(-ph * 2.4).toFixed(2)}s,${(-ph * 5.2).toFixed(2)}s"`
+  + ` d="M${x.toFixed(1)} ${(y - r).toFixed(1)} Q${(x + q).toFixed(1)} ${(y - q).toFixed(1)}`
+  + ` ${(x + r).toFixed(1)} ${y.toFixed(1)} Q${(x + q).toFixed(1)} ${(y + q).toFixed(1)} ${x.toFixed(1)} ${(y + r).toFixed(1)}`
+  + ` Q${(x - q).toFixed(1)} ${(y + q).toFixed(1)} ${(x - r).toFixed(1)} ${y.toFixed(1)}`
+  + ` Q${(x - q).toFixed(1)} ${(y - q).toFixed(1)} ${x.toFixed(1)} ${(y - r).toFixed(1)} Z"/>`;
+}
+function wavePath(x, y, len, amp, phase) {
+ const seg = len / 4; let d = `M${(x - len / 2).toFixed(1)} ${y.toFixed(1)}`;
+ for (let i = 0; i < 4; i++) {
+  const dir = ((i + phase) % 2 === 0) ? -1 : 1;
+  d += `q${(seg / 2).toFixed(1)} ${(amp * dir).toFixed(1)} ${seg.toFixed(1)} 0`;
  }
- return p + "Z";
+ return d;
+}
+function water(x, y, seed) {
+ const r = rng(seed + 0.7);
+ const w1 = shift(P.land.water, .22), w2 = shift(P.land.water, .55);
+ let s = `<g style="--w1:${w1};--w2:${w2};--w3:#EAF4FF" fill="none" stroke-linecap="round"
+   opacity=".72" stroke-width="${u(1.7).toFixed(1)}">`;
+ [[-6.5, 15, 1.9, 0], [0.5, 18, 2.2, 1], [7.5, 13, 1.7, 0]].forEach((row, i) => {
+  const [dy, len, amp, ph] = row, ox = x + (r() - 0.5) * u(4), oy = y + u(dy);
+  const a = wavePath(ox, oy, u(len), u(amp), ph), b = wavePath(ox, oy, u(len), u(amp), ph + 1);
+  s += `<path class="wv wv${i + 1}" stroke="${w1}" d="${a}">`
+    + `<animate attributeName="d" dur="${(3.4 + i * 0.7).toFixed(1)}s" repeatCount="indefinite"
+       values="${a};${b};${a}" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" keyTimes="0;0.5;1"/></path>`;
+ });
+ return s + `</g>`;
+}
+// Megalithic: irregular tapered slab, no straight edges, seeded so it is stable.
+function menhir(x, y, h, w, seed, opt) {
+ const r = rng(seed), lean = opt.lean || 0, j = a => (r() - 0.5) * u(a);
+ const tw = w * (0.52 + r() * 0.16), lx = lean * h;
+ const p = [[x - w / 2 + j(1.4), y], [x - w / 2 * (0.86 + r() * 0.2) + j(1), y - h * 0.34],
+   [x - tw / 2 + lx * 0.85 + j(1), y - h * 0.72], [x + j(1.6) + lx, y - h],
+   [x + tw / 2 + lx * 0.85 + j(1), y - h * 0.70], [x + w / 2 * (0.88 + r() * 0.2) + j(1), y - h * 0.36],
+   [x + w / 2 + j(1.4), y]];
+ let s = `<path d="${poly(p)}" fill="${opt.fill}"/>`;
+ s += `<path d="M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)} L${p[1][0].toFixed(1)} ${p[1][1].toFixed(1)}`
+   + ` L${p[2][0].toFixed(1)} ${p[2][1].toFixed(1)} L${p[3][0].toFixed(1)} ${p[3][1].toFixed(1)}`
+   + ` L${(x + lx * 0.3).toFixed(1)} ${y.toFixed(1)} Z" fill="${shift(opt.fill, .26)}"/>`;
+ if (opt.crack) s += `<path d="M${(x - u(1) + lx * 0.6).toFixed(1)} ${(y - h * 0.62).toFixed(1)}`
+   + ` l${u(2.4).toFixed(1)} ${(h * 0.2).toFixed(1)} l${u(-1.6).toFixed(1)} ${(h * 0.16).toFixed(1)}"`
+   + ` stroke="${shift(opt.fill, -.42)}" stroke-width="${u(1).toFixed(1)}" fill="none"/>`;
+ return s;
+}
+function stoneGroup(x, y, k, who, power) {
+ const live = power >= 6, base = live ? (who === 0 ? "#E4DCC0" : "#DCD4C0") : "#7E8079";
+ let s = `<ellipse cx="${x}" cy="${y + u(9)}" rx="${u(12)}" ry="${u(3.4)}" fill="#000" opacity=".26"/>`;
+ const r = rng(k * 0.017 + 0.3);
+ for (let i = 0; i < 3; i++)
+  s += menhir(x - u(11) + i * u(11) + (r() - 0.5) * u(3), y + u(8) - (i === 1 ? u(2) : 0),
+       u(5 + r() * 2.5), u(3.4), k * 0.31 + i, {fill: shift(base, -0.3)});
+ if (live && power >= 12) {
+  s += menhir(x - u(6.5), y + u(7), u(15), u(5.5), k * 0.11, {fill: base});
+  s += menhir(x + u(6.5), y + u(7), u(15), u(5.5), k * 0.53, {fill: base});
+  s += `<path d="M${x - u(11)} ${y - u(8)} L${x + u(11)} ${y - u(9.4)} L${x + u(11)} ${y - u(5.6)}
+        L${x - u(11)} ${y - u(4.4)} Z" fill="${shift(base, .1)}"/>`;
+ } else s += menhir(x, y + u(7), u(live ? 17 : 13), u(8), k * 0.07,
+      {fill: base, lean: live ? 0 : 0.20, crack: !live});
+ if (live) { const sp = SPARK[who];
+  s += twinkle(x - u(13), y - u(6), u(2.6), sp[0], r())
+     + twinkle(x + u(12), y - u(12), u(2.2), sp[1], r())
+     + twinkle(x + u(3), y - u(17), u(2.4), sp[2], r());
+ }
+ return s;
+}
+// The people. Blessed ground shows people — few, upright, scattered. Farmland
+// shows work — more of them, bent, aligned to the rows. Same species, different
+// relationship to the ground.
+function person(fx, fy, h, col) {
+ return `<ellipse cx="${fx}" cy="${fy + u(0.4)}" rx="${u(2)}" ry="${u(0.7)}" fill="#000" opacity=".28"/>`
+  + `<g stroke="#1A1508" stroke-width="${u(0.45)}" stroke-linejoin="round" fill="${col}">`
+  + `<path d="M${fx - h * 1.5} ${fy} L${fx - h * 0.9} ${fy - u(4.2)} L${fx + h * 0.9} ${fy - u(4.2)}
+      L${fx + h * 1.5} ${fy} Z"/><circle cx="${fx}" cy="${fy - u(5.4)}" r="${u(1.15)}"/></g>`;
+}
+function stooped(fx, fy, col, flip) {
+ const d = flip ? -1 : 1;
+ return `<ellipse cx="${fx}" cy="${fy + u(0.4)}" rx="${u(2.4)}" ry="${u(0.7)}" fill="#000" opacity=".26"/>`
+  + `<g stroke="#1A1508" stroke-width="${u(0.5)}" stroke-linejoin="round" stroke-linecap="round" fill="${col}">`
+  + `<path d="M${fx - d * u(1.4)} ${fy} L${fx - d * u(1.7)} ${fy - u(3.4)} L${fx + d * u(2.6)} ${fy - u(5.2)}
+      L${fx + d * u(3.4)} ${fy - u(3.4)} L${fx + d * u(0.5)} ${fy - u(2.1)} L${fx + d * u(0.8)} ${fy} Z"/>`
+  + `<circle cx="${fx + d * u(4.1)}" cy="${fy - u(5)}" r="${u(1.15)}"/>`
+  + `<path d="M${fx + d * u(3.6)} ${fy - u(3.6)} L${fx + d * u(4.6)} ${fy - u(1.2)}" fill="none"/></g>`;
+}
+// A kudurru — squared, upright, inscribed. Everything the menhirs are not.
+function boundaryStone(x, y, own, seed) {
+ const col = COL[own], r = rng(seed + 1.3);
+ const ox = x + u(-7 + r() * 4), oy = y + u(6.5), st = mix("#CFC4A6", col, 0.46);
+ return `<ellipse cx="${ox}" cy="${oy + u(0.6)}" rx="${u(3.8)}" ry="${u(1.1)}" fill="#000" opacity=".32"/>`
+  + `<path d="M${ox - u(2.9)} ${oy} L${ox - u(2.6)} ${oy - u(8)} Q${ox} ${oy - u(10)} ${ox + u(2.6)} ${oy - u(8)}
+      L${ox + u(2.9)} ${oy} Z" fill="${st}" stroke="#1A1508" stroke-width="${u(0.7)}"/>`
+  + `<path d="M${ox - u(2.72)} ${oy - u(6.2)} Q${ox} ${oy - u(10)} ${ox + u(2.72)} ${oy - u(6.2)}
+      L${ox + u(2.6)} ${oy - u(4.9)} Q${ox} ${oy - u(8.4)} ${ox - u(2.6)} ${oy - u(4.9)} Z" fill="${col}"/>`
+  + `<g stroke="${shift(col, -.42)}" stroke-width="${u(0.8)}" stroke-linecap="round" opacity=".95">`
+  + `<path d="M${ox - u(1.6)} ${oy - u(3.8)} h${u(3.2)}"/><path d="M${ox - u(1.6)} ${oy - u(2.2)} h${u(3.2)}"/>`
+  + `<path d="M${ox - u(1.6)} ${oy - u(0.7)} h${u(2.1)}"/></g>`;
+}
+function banner(x, yTop, h, col, seed) {
+ const pole = `<rect x="${(x - u(0.5)).toFixed(1)}" y="${yTop.toFixed(1)}"
+   width="${u(1.1).toFixed(1)}" height="${h.toFixed(1)}" fill="#3A3020"/>`;
+ const w = u(5.2), hh = u(3.6), y0 = yTop + u(0.6);
+ const f = b => `M${(x + u(0.5)).toFixed(1)} ${y0.toFixed(1)}`
+  + `q${(w * 0.5).toFixed(1)} ${(b * 1.5).toFixed(1)} ${w.toFixed(1)} ${(-b * 0.6).toFixed(1)}`
+  + `l0 ${hh.toFixed(1)}q${(-w * 0.5).toFixed(1)} ${(b * 0.8).toFixed(1)} ${(-w).toFixed(1)} ${(b * 0.6).toFixed(1)}Z`;
+ const a = f(u(1.1)), b = f(u(-1.1));
+ return pole + `<path fill="${col}" stroke="#2A2114" stroke-width="${u(0.6).toFixed(1)}" d="${a}">`
+  + `<animate attributeName="d" dur="${(1.5 + ((seed * 7) % 10) / 10).toFixed(2)}s" repeatCount="indefinite"
+     values="${a};${b};${a}" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" keyTimes="0;0.5;1"/></path>`;
+}
+// Four stages, and the stage is read from the size of the complex. Under
+// seventy-seven there is no temple at all, which is the point of the custom.
+function temple(x, y, b, col, seed) {
+ const stone = mix(P.stone, col, 0.30), lit = shift(stone, .20), dark = shift(stone, -.34),
+       deep = "#2A2114", trim = shift(col, -.1);
+ const slab = (x0, x1, yT, yB) =>
+   `<rect x="${x + u(x0)}" y="${y + u(yT)}" width="${u(x1 - x0)}" height="${u(yB - yT)}" fill="${stone}"/>`
+  + `<rect x="${x + u(x0)}" y="${y + u(yT)}" width="${u(x1 - x0)}" height="${u(1)}" fill="${lit}"/>`
+  + `<rect x="${x + u(x0)}" y="${y + u(yB) - u(0.9)}" width="${u(x1 - x0)}" height="${u(0.9)}" fill="${dark}"/>`;
+ const door = (w, yT, yB) => `<rect x="${x - u(w / 2)}" y="${y + u(yT)}" width="${u(w)}" height="${u(yB - yT)}" fill="${deep}"/>`;
+ const cols = (x0, x1, yT, yB, n) => { let o = "";
+  for (let i = 0; i < n; i++) { const cx = x0 + (x1 - x0) * (i + 0.5) / n;
+   o += `<rect x="${x + u(cx - 0.6)}" y="${y + u(yT)}" width="${u(1.2)}" height="${u(yB - yT)}" fill="${lit}"/>`; }
+  return o; };
+ let s = `<ellipse cx="${x}" cy="${y + u(9)}" rx="${u(15)}" ry="${u(3.4)}" fill="#000" opacity=".24"/>`;
+
+ if (b === 0) {                                         // the Seventy-Seven — no temple
+  const r = rng(seed);
+  for (let i = 0; i < 3; i++) {
+   const ax = x + u(-7 + i * 7 + (r() - 0.5) * 1.5), ay = y + u(7 - (i === 1 ? 2.5 : 0));
+   s += `<path d="M${ax} ${ay - u(6.5)} l${u(4.2)} ${u(6.5)} l${u(-8.4)} 0 Z" fill="${stone}"
+         stroke="${deep}" stroke-width="${u(0.6)}"/>`
+     + `<path d="M${ax} ${ay - u(6.5)} l0 ${u(6.5)} l${u(-4.2)} 0 Z" fill="${dark}" opacity=".6"/>`;
+  }
+  return s;
+ }
+ if (b === 1) return s + slab(-8, 8, 5, 8.5) + slab(-5.5, 5.5, -1, 5) + door(2.6, 1.2, 5)
+  + `<path d="M${x - u(6.5)} ${y - u(1)} L${x} ${y - u(5)} L${x + u(6.5)} ${y - u(1)} Z"
+     fill="${trim}" stroke="${deep}" stroke-width="${u(0.6)}"/>`;
+ if (b === 2) {
+  s += slab(-12, 12, 4.5, 8.5) + slab(-8.5, 8.5, -0.5, 4.5) + cols(-7.5, 7.5, 0.4, 4.5, 4)
+    + slab(-5, 5, -5.5, -0.5) + door(2.8, -3.4, -0.5)
+    + `<path d="M${x - u(6.6)} ${y - u(5.5)} L${x} ${y - u(9.5)} L${x + u(6.6)} ${y - u(5.5)} Z"
+       fill="${trim}" stroke="${deep}" stroke-width="${u(0.6)}"/>`;
+  return s + banner(x + u(11), y - u(4), u(12.5), col, seed);
+ }
+ s += slab(-15.5, 15.5, 4.5, 9) + slab(-12, 12, 0.5, 4.5) + cols(-11, 11, 1.4, 4.5, 6)
+   + slab(-8, 8, -4, 0.5) + cols(-7, 7, -3.2, 0.5, 4) + slab(-4.5, 4.5, -9, -4) + door(3, -7.2, -4)
+   + `<path d="M${x - u(6)} ${y - u(9)} L${x} ${y - u(13.5)} L${x + u(6)} ${y - u(9)} Z"
+      fill="${trim}" stroke="${deep}" stroke-width="${u(0.7)}"/>`;
+ return s + banner(x - u(14), y - u(8), u(13), col, seed) + banner(x + u(14), y - u(8), u(13), col, seed + 3);
+}
+// The powers. Drawn from the roster in concept/Player-character-inspiration:
+// the arms-raised epiphany gesture, and the horned Cernunnos type.
+function figureF(x, y, col) {
+ return `<g stroke="#1A1508" stroke-width="${u(0.75)}" stroke-linejoin="round" fill="${col}">`
+  + `<path d="M${x - u(6.5)} ${y - u(4)} L${x - u(4.4)} ${y - u(11.6)} L${x - u(2.2)} ${y - u(11)} L${x - u(3.4)} ${y - u(4)} Z"/>`
+  + `<path d="M${x + u(6.5)} ${y - u(4)} L${x + u(4.4)} ${y - u(11.6)} L${x + u(2.2)} ${y - u(11)} L${x + u(3.4)} ${y - u(4)} Z"/>`
+  + `<path d="M${x - u(2.8)} ${y - u(9.5)} L${x + u(2.8)} ${y - u(9.5)} L${x + u(2.1)} ${y - u(2)} L${x - u(2.1)} ${y - u(2)} Z"/>`
+  + `<path d="M${x - u(2.4)} ${y - u(2)} L${x + u(2.4)} ${y - u(2)} L${x + u(6.2)} ${y + u(9)} L${x - u(6.2)} ${y + u(9)} Z"/>`
+  + `<circle cx="${x}" cy="${y - u(11.8)}" r="${u(2.5)}"/></g>`
+  + `<g fill="none" stroke="#1A1508" stroke-width="${u(0.7)}" opacity=".8">`
+  + `<path d="M${x - u(3.4)} ${y + u(2)} L${x + u(3.4)} ${y + u(2)}"/>`
+  + `<path d="M${x - u(4.8)} ${y + u(5.6)} L${x + u(4.8)} ${y + u(5.6)}"/></g>`;
+}
+function figureM(x, y, col) {
+ return `<rect x="${x + u(5.2)}" y="${y - u(13)}" width="${u(1.3)}" height="${u(21.5)}" rx="${u(0.6)}"
+      fill="#4A3B24" stroke="#1A1508" stroke-width="${u(0.55)}"/>`
+  + `<g stroke="#1A1508" stroke-width="${u(0.75)}" stroke-linejoin="round" stroke-linecap="round" fill="${col}">`
+  + `<path d="M${x - u(4.6)} ${y - u(4.4)} L${x + u(4.6)} ${y - u(4.4)} L${x + u(3.2)} ${y + u(1.6)} L${x - u(3.2)} ${y + u(1.6)} Z"/>`
+  + `<path d="M${x - u(4.3)} ${y - u(3.8)} L${x - u(6.1)} ${y + u(2.6)} L${x - u(4.3)} ${y + u(3.2)} L${x - u(2.6)} ${y - u(3.2)} Z"/>`
+  + `<path d="M${x + u(4.3)} ${y - u(3.8)} L${x + u(6.3)} ${y + u(0.4)} L${x + u(4.8)} ${y + u(1.4)} L${x + u(2.6)} ${y - u(3.2)} Z"/>`
+  + `<path d="M${x - u(3.1)} ${y + u(1.6)} L${x - u(0.6)} ${y + u(1.6)} L${x - u(0.9)} ${y + u(9.2)} L${x - u(3.9)} ${y + u(9.2)} Z"/>`
+  + `<path d="M${x + u(3.1)} ${y + u(1.6)} L${x + u(0.6)} ${y + u(1.6)} L${x + u(0.9)} ${y + u(9.2)} L${x + u(3.9)} ${y + u(9.2)} Z"/>`
+  + `<circle cx="${x}" cy="${y - u(7.4)}" r="${u(2.7)}"/>`
+  + `<path d="M${x - u(2.1)} ${y - u(9)} q${u(-3.6)} ${u(-1.2)} ${u(-4)} ${u(-5.2)} q${u(2.4)} ${u(2.6)} ${u(3.4)} ${u(3)} Z"/>`
+  + `<path d="M${x + u(2.1)} ${y - u(9)} q${u(3.6)} ${u(-1.2)} ${u(4)} ${u(-5.2)} q${u(-2.4)} ${u(2.6)} ${u(-3.4)} ${u(3)} Z"/></g>`;
 }
 
-// Fill is the land. Border is who holds it.
-const FILL = {water:"#0D1517", plain:"#2C332B", forest:"#1F2C1E", hill:"#363A35", mount:"#514F52"};
-const BFILL = {plain:"#2E3040", forest:"#232E38", hill:"#383A46"};
+// ------------------------------------------------------------------ a tile
+function tileArt(t, k) {
+ const [x, y] = px(t.c, t.r), r = rng(t.seed);
+ const blessed = t.st === "bless" && !impassable(t);
+ let fill = P.land[t.t];
+ if (blessed) fill = P.bless[t.t] || fill;
+ if (t.st === "reck") fill = P.reck;
+ if (t.set) fill = P.reck;                 // a settlement stands in its own fields
+ let s = `<path class="hx" d="${hexPath(x, y)}" fill="${fill}" stroke="${P.seam}"
+   stroke-width="${u(0.7).toFixed(1)}" data-k="${k}"/>`;
+
+ if (t.t === "water") s += water(x, y, t.seed);
+ if (t.t === "mount")
+  s += `<path d="M${x - u(12)} ${y + u(8)} L${x - u(3)} ${y - u(9)} L${x + u(3)} ${y - u(1)}
+        L${x + u(7)} ${y - u(7)} L${x + u(13)} ${y + u(8)} Z" fill="${shift(P.land.mount, .16)}"/>`
+    + `<path d="M${x - u(3)} ${y - u(9)} L${x + u(1)} ${y - u(2)} L${x - u(6)} ${y + u(2)} Z" fill="${shift(P.land.mount, .5)}"/>`
+    + `<path d="M${x - u(3)} ${y - u(9)} L${x - u(12)} ${y + u(8)} L${x - u(5)} ${y + u(8)} Z" fill="${shift(P.land.mount, -.3)}"/>`;
+ if (t.t === "forest" && t.st !== "reck" && !t.set) {
+  const col = blessed ? P.treeBless : P.tree, dk = shift(col, -.35);
+  s += conifer(x - u(6) + r() * u(2), y + u(7), 10, 4.4, col, dk)
+     + conifer(x + u(5) - r() * u(2), y + u(5), 8.5, 3.8, col, dk)
+     + conifer(x + r() * u(3), y + u(10), 7.5, 3.4, col, dk);
+ }
+ if (t.t === "hill" && t.st !== "reck" && !t.set) {
+  const col = blessed ? shift(P.bless.hill, -.40) : shift(P.land.hill, -.34);
+  s += `<path d="M${x - u(11)} ${y + u(7)} q${u(5.5)} ${u(-11)} ${u(11)} 0 Z" fill="${col}"/>`
+    + `<path d="M${x - u(1)} ${y + u(8)} q${u(5)} ${u(-13)} ${u(11)} 0 Z" fill="${shift(col, .20)}"/>`
+    + `<path d="M${x - u(11)} ${y + u(7)} q${u(5.5)} ${u(-11)} ${u(11)} 0" fill="none"
+       stroke="${shift(col, -.3)}" stroke-width="${u(0.9)}"/>`;
+ }
+ // Farmland: strips of different crop, some green, some fallow, angled by
+ // faction. Strips stay inside 0.64·SZ so they rotate without leaving the hex.
+ if (t.st === "reck" || t.set) {
+  const own = t.set ? t.set.own : t.own, ang = own === 0 ? -32 : 30;
+  const gap = u(5.4), top = y - u(8.6), hgt = u(3.1);
+  s += `<g transform="rotate(${ang} ${x.toFixed(1)} ${y.toFixed(1)})">`;
+  for (let i = 0; i < 4; i++) {
+   const c = P.crops[Math.floor(r() * P.crops.length)], wd = (i === 0 || i === 3) ? u(17) : u(22);
+   s += `<rect x="${(x - wd / 2).toFixed(1)}" y="${(top + i * gap).toFixed(1)}" width="${wd.toFixed(1)}"
+         height="${hgt.toFixed(1)}" rx="${u(1).toFixed(1)}" fill="${c}" opacity=".9"/>`
+     + `<rect x="${(x - wd / 2).toFixed(1)}" y="${(top + i * gap + hgt).toFixed(1)}" width="${wd.toFixed(1)}"
+         height="${u(1.1).toFixed(1)}" fill="#000" opacity=".16"/>`;
+  }
+  if (!t.set) { const n = 2 + Math.floor(r() * 3), col = shift(COL[own], -.14);
+   for (let i = 0; i < n; i++)
+    s += stooped(x + u(-8 + r() * 16), y + u(-6.4 + Math.floor(r() * 4) * 5.4) + u(3.1), col, r() < 0.4);
+  }
+  s += `</g>`;
+  if (!t.set) s += boundaryStone(x, y, own, t.seed);
+ }
+ if (blessed && !t.set) {
+  const sp = SPARK[t.own === 0 ? 0 : 1];
+  s += twinkle(x - u(9) + r() * u(4), y - u(7) + r() * u(3), u(4.4), sp[0], r())
+     + twinkle(x + u(7) - r() * u(4), y - u(1) + r() * u(4), u(3.4), sp[1], r())
+     + twinkle(x - u(3) + r() * u(6), y + u(8) - r() * u(3), u(3.9), sp[2], r())
+     + twinkle(x + u(2) + r() * u(5), y - u(9) + r() * u(3), u(2.6), sp[0], r());
+  const nf = r() < 0.42 ? 2 : 1;              // wild folk — presentation, see OP-18
+  for (let i = 0; i < nf; i++)
+   s += person(x + u(1.5 + i * 5.5 + r() * 3), y + u(7.5 - r() * 2.5), u(0.9 + r() * 0.25), COL[t.own]);
+ }
+ return s;
+}
+
+// Boundaries drawn once per contiguous group of one owner's ground, rather than
+// around every tile. The blessing/farmland edge is carried by the fill.
+const DIR = {
+ 0: [[1, 0, 0], [0, 1, 1], [-1, 1, 2], [-1, 0, 3], [-1, -1, 4], [0, -1, 5]],   // even rows
+ 1: [[1, 0, 0], [1, 1, 1], [0, 1, 2], [-1, 0, 3], [0, -1, 4], [1, -1, 5]]      // odd rows
+};
+function boundaries(G) {
+ const owner = t => t.set ? t.set.own : (t.st === "wild" ? null : t.own);
+ const segs = {};
+ G.T.forEach(t => {
+  const o = owner(t); if (o === null) return;
+  const [x, y] = px(t.c, t.r), v = verts(x, y, SZ - u(1.2));
+  DIR[t.r & 1].forEach(([dc, dr, edge]) => {
+   const nc = t.c + dc, nr = t.r + dr;
+   const nb = (nc >= 0 && nc < COLS && nr >= 0 && nr < ROWS) ? G.T[nr * COLS + nc] : null;
+   if (nb && owner(nb) === o) return;                       // interior edge
+   const a = v[edge], b = v[(edge + 1) % 6];
+   segs[o] = (segs[o] || "") + `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+  });
+ });
+ let out = "";
+ Object.keys(segs).forEach(o => {
+  const col = COL[o];
+  out += `<g transform="translate(0,${u(1.6).toFixed(1)})" opacity=".55"><path d="${segs[o]}" fill="none"
+      stroke="#1A1508" stroke-width="${u(3.4).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/></g>`
+   + `<path d="${segs[o]}" fill="none" stroke="${shift(col, -.3)}" stroke-width="${u(3.4).toFixed(1)}"
+      stroke-linecap="round" stroke-linejoin="round"/>`
+   + `<path d="${segs[o]}" fill="none" stroke="${shift(col, .25)}" stroke-width="${u(1.5).toFixed(1)}"
+      stroke-linecap="round" stroke-linejoin="round"/>`;
+ });
+ return out;
+}
 
 function newGame() {
  ARM = null;
+ LAND = {key: null, html: ""};      // a new board is always a new land layer
  FG.createGame({them: $("doc").value});
  $("done").innerHTML = "";
  render();
 }
-
 function endTurn() {
  if (FG.G.over) return;
  ARM = null;
@@ -57,100 +370,86 @@ function render() {
  <div class="c"><div class="l">you</div><div class="v g">${S[0].tot}</div></div>
  <div class="c"><div class="l">them</div><div class="v ${threat ? "r" : "rv"}">${S[1].tot}</div></div>`;
 
- let h = "", over = "";
+ // The land and its borders are 3,400-odd nodes and change only when the board
+ // does — not when you move your token or arm an intervention, which is most of
+ // what a click is. Cached against everything tileArt and boundaries actually
+ // read, so this stays a pure function of state and owns no rules.
+ let over = "", scrim = "";
+ const key = G.T.map(t => t.t + t.st + (t.own === null ? "-" : t.own)
+   + (t.set ? "s" + t.set.own + Math.round(t.set.pop) : "")).join("")
+   + "|" + G.stones.map(a => a.join(",")).join("/");
+ const landStale = key !== LAND.key;
+ if (landStale) {
+  let art = "";
+  G.T.forEach((t, k) => { art += tileArt(t, k); });
+  LAND = {key, html: art + boundaries(G)};
+ }
  G.T.forEach((t, k) => {
   const [x, y] = px(t.c, t.r);
-  let fill = FILL[t.t];
-  if (t.st === "bless" && !impassable(t)) fill = BFILL[t.t];
-  if (t.st === "reck") fill = "#6B5A2E";
-  if (t.set) fill = "#4A4238";
-  const owner = t.set ? t.set.own : (t.st === "wild" ? null : t.own);
-  const stroke = owner === 0 ? "#C8B37E" : owner === 1 ? "#5FA0A8" : "#2A3530";
-  const sw = owner === null ? 0.8 : 2;
   const go = tg ? tg.has(k) : (R[k] !== undefined && k !== G.p[0].pos);
-  h += `<path class="hx${go ? "" : " no"}" d="${hexPath(x, y)}" fill="${fill}"
-   stroke="${stroke}" stroke-width="${sw}" opacity="${impassable(t) ? 1 : (go || tg ? 1 : .88)}" data-k="${k}"/>`;
-
-  if (t.t === "mount")
-   over += `<path d="M${x - 11} ${y + 7} l6 -12 l4 6 l3 -5 l6 11 Z" fill="#7A767C" opacity=".85"
-    stroke="#918C94" stroke-width=".8" pointer-events="none"/>`;
-  if (t.t === "forest" && t.st !== "reck" && !t.set) {
-   const c1 = t.seed * 6;
-   over += `<path d="M${x - 7 + c1} ${y + 5} l3.5 -9 l3.5 9 Z M${x + 2 + c1 * 0.4} ${y + 7} l3 -7.5 l3 7.5 Z"
-    fill="${t.st === "bless" ? "#6E7FA8" : "#3A4A36"}" opacity=".65" pointer-events="none"/>`;
-  }
-  if (t.t === "hill" && t.st !== "reck" && !t.set)
-   over += `<path d="M${x - 8} ${y + 5} l5 -6 l4 4 l4 -5 l5 7 Z" fill="${t.st === "bless" ? "#6E7FA8" : "#4A4E48"}"
-    opacity=".55" pointer-events="none"/>`;
-  if (t.st === "bless" && !t.set) {
-   const s = t.seed;
-   over += `<g opacity=".9" pointer-events="none" fill="${t.own === 0 ? "#B79AE0" : "#7FC2CA"}">
-    <circle cx="${x - 9 + s * 4}" cy="${y - 8 + s * 3}" r="1.3"/><circle cx="${x + 7 - s * 5}" cy="${y - 3 + s * 4}" r="1"/>
-    <circle cx="${x - 2 + s * 6}" cy="${y + 9 - s * 3}" r="1.2"/></g>`;
-  }
-  if (t.st === "reck" && !t.set)
-   over += `<g opacity=".35" stroke="${t.own === 0 ? "#8A7440" : "#7A6A50"}" stroke-width="1" pointer-events="none">
-    <line x1="${x - 10}" y1="${y - 4}" x2="${x + 10}" y2="${y - 4}"/>
-    <line x1="${x - 10}" y1="${y + 1}" x2="${x + 10}" y2="${y + 1}"/>
-    <line x1="${x - 10}" y1="${y + 6}" x2="${x + 10}" y2="${y + 6}"/></g>`;
-  if (go && !tg) over += `<circle cx="${x}" cy="${y}" r="2.2" fill="#C8B37E" opacity=".4" pointer-events="none"/>`;
-  if (go && tg) over += `<path d="${hexPath(x, y, SZ - 3)}" fill="none" stroke="${isCivic ? "#C79A52" : "#9A7BC8"}"
-   stroke-width="1.6" opacity=".9" pointer-events="none"/>`;
+  if (!go) scrim += `<path d="${hexPath(x, y)}" fill="#0B0E08" opacity="${tg ? ".34" : ".2"}" pointer-events="none"/>`;
+  if (go && tg) over += `<path d="${hexPath(x, y, SZ - u(3))}" fill="none"
+    stroke="${isCivic ? "#F0C060" : "#FFFFFF"}" stroke-width="${u(1.8)}" opacity=".95" pointer-events="none"/>`;
  });
 
- // settlements — roofs multiply as the place grows
- G.T.forEach((t, k) => {
+ // settlements — the complex says what stage it is
+ G.T.forEach(t => {
   if (!t.set) return;
   const [x, y] = px(t.c, t.r), b = band(t.set.pop)[1];
-  const col = t.set.own === 0 ? "#C8B37E" : "#5FA0A8";
-  let roofs = "";
-  for (let i = 0; i < Math.min(b + 1, 5); i++) {
-   const ax = x - 9 + i * 4.6, ay = y + 4 - (i % 2) * 4;
-   roofs += `<path d="M${ax} ${ay} l3 -4 l3 4 Z" fill="${col}" opacity=".92"/>`;
-  }
-  over += `<g pointer-events="none">${roofs}
-   <text x="${x}" y="${y + SZ - 4}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
-   font-size="10" fill="#D9DACE" opacity=".75">${Math.round(t.set.pop)}</text></g>`;
+  over += `<g pointer-events="none">${temple(x, y - u(2), b, COL[t.set.own], t.seed)}
+   <text x="${x}" y="${y + SZ - u(3.5)}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
+   font-size="${u(10).toFixed(1)}" font-weight="600" fill="${P.ink}" stroke="#000"
+   stroke-width="${u(2.4)}" paint-order="stroke" stroke-opacity=".6">${Math.round(t.set.pop)}</text></g>`;
  });
 
- // stones — pale while they still answer, grey when they do not
+ // stones — pale while they still answer, leaning and cracked when they do not
  [0, 1].forEach(who => G.stones[who].forEach(sk => {
-  const t = T(sk), [x, y] = px(t.c, t.r), P = region(sk, who).length;
-  const live = P >= 6, col = who === 0 ? (live ? "#E4D5A8" : "#6A716A") : (live ? "#A8D6DC" : "#6A716A");
-  over += `<path d="M${x - 4} ${y + 9} L${x - 3} ${y - 10} L${x + 3} ${y - 11} L${x + 4} ${y + 9} Z"
-   fill="${col}" opacity="${live ? .98 : .55}" pointer-events="none"/>`;
+  const t = T(sk), [x, y] = px(t.c, t.r);
+  over += `<g pointer-events="none">${stoneGroup(x, y, sk, who, region(sk, who).length)}</g>`;
  }));
 
  // marching columns
  G.armies.forEach(a => {
   const t = T(a.at), [x, y] = px(t.c, t.r), d = T(a.to), [dx, dy] = px(d.c, d.r);
-  const col = a.own === 0 ? "#C8B37E" : "#9B4A44";
-  over += `<line x1="${x}" y1="${y}" x2="${dx}" y2="${dy}" stroke="${col}" stroke-width="1"
-   stroke-dasharray="3 4" opacity=".55" pointer-events="none"/>
-   <g pointer-events="none"><path d="M${x} ${y - 9} l7 12 l-14 0 Z" fill="${col}" opacity=".95"/>
-   <text x="${x}" y="${y + 2}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
-   font-size="8" font-weight="600" fill="#12181A">${Math.round(a.n)}</text></g>`;
+  const col = a.own === 0 ? shift(COL[0], -.15) : "#C4443A";
+  over += `<g pointer-events="none"><line x1="${x}" y1="${y}" x2="${dx}" y2="${dy}" stroke="${col}"
+   stroke-width="${u(1.2)}" stroke-dasharray="${u(3)} ${u(4)}" opacity=".6"/>
+   <path d="M${x} ${y - u(9)} l${u(7.5)} ${u(13)} l${u(-15)} 0 Z" fill="${col}" stroke="#000" stroke-width="${u(0.8)}"/>
+   <text x="${x}" y="${y + u(2)}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
+   font-size="${u(8).toFixed(1)}" font-weight="700" fill="#12181A">${Math.round(a.n)}</text></g>`;
  });
  G.refugees.forEach(f => {
   const t = T(f.at), [x, y] = px(t.c, t.r), d = T(f.to), [dx, dy] = px(d.c, d.r);
-  const col = f.own === 0 ? "#B79AE0" : "#7FC2CA";
-  over += `<line x1="${x}" y1="${y}" x2="${dx}" y2="${dy}" stroke="${col}" stroke-width="1"
-   stroke-dasharray="1 5" opacity=".5" pointer-events="none"/>
-   <g pointer-events="none"><circle cx="${x}" cy="${y - 3}" r="7" fill="${col}" opacity=".9"/>
-   <text x="${x}" y="${y - 1}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
-   font-size="8" font-weight="600" fill="#12181A">${Math.round(f.n)}</text></g>`;
+  const col = SPARK[f.own][1];
+  over += `<g pointer-events="none"><line x1="${x}" y1="${y}" x2="${dx}" y2="${dy}" stroke="${col}"
+   stroke-width="${u(1.2)}" stroke-dasharray="${u(1)} ${u(5)}" opacity=".55"/>
+   <circle cx="${x}" cy="${y - u(3)}" r="${u(7.4)}" fill="${col}" stroke="#000" stroke-width="${u(0.8)}"/>
+   <text x="${x}" y="${y - u(1)}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
+   font-size="${u(8).toFixed(1)}" font-weight="700" fill="#12181A">${Math.round(f.n)}</text></g>`;
  });
 
- // the two powers
+ // the two powers, as figures
  [0, 1].forEach(w => {
-  const t = T(G.p[w].pos), [x, y] = px(t.c, t.r), col = w === 0 ? "#C8B37E" : "#5FA0A8";
-  over += `<circle cx="${x}" cy="${y}" r="16" fill="none" stroke="${col}" stroke-width="1.7"
-   opacity=".9" pointer-events="none"/><circle cx="${x}" cy="${y}" r="3.4" fill="${col}" pointer-events="none"/>`;
+  const t = T(G.p[w].pos), [x, y] = px(t.c, t.r), col = COL[w];
+  over += `<g pointer-events="none">
+   <circle cx="${x}" cy="${y}" r="${u(17)}" fill="none" stroke="#000" stroke-width="${u(3.6)}" opacity=".35"/>
+   <circle cx="${x}" cy="${y}" r="${u(17)}" fill="none" stroke="${col}" stroke-width="${u(1.9)}"
+    stroke-dasharray="${u(5)} ${u(3.4)}" opacity=".95"/>
+   <ellipse cx="${x}" cy="${y + u(9.6)}" rx="${u(7.5)}" ry="${u(2.2)}" fill="#000" opacity=".3"/>
+   ${w === 0 ? figureF(x, y, col) : figureM(x, y, col)}</g>`;
  });
 
+ // Three layers, written independently. Replacing the land is ~3,400 nodes for
+ // the browser to parse; the scrim and the tokens are a few dozen. Moving your
+ // token or arming an intervention touches only the cheap two.
  const m = $("map");
- m.innerHTML = '<title>The contested valley</title><desc>Hex map with marching columns.</desc>' + h + over;
- m.querySelectorAll(".hx").forEach(e => {
+ if (landStale) {
+  m.innerHTML = '<title>The contested valley</title><desc>Hex map with marching columns.</desc>'
+    + `<g>${LAND.html}</g><g id="mscrim"></g><g id="mover"></g>`;
+ }
+ $("mscrim").innerHTML = scrim;
+ $("mover").innerHTML = over;
+ if (landStale) m.querySelectorAll(".hx").forEach(e => {
   e.onclick = () => {
    const k = +e.dataset.k;
    if (FG.G.over) return;
@@ -215,15 +514,15 @@ function render() {
   const p = f => H.map((o, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + f(o).toFixed(1)).join(" ");
   $("chart").innerHTML =
    `<title>Score over time</title><desc>Your total, their total, and how far you can walk.</desc>
-    <path d="${p(o => YR(o.r))}" fill="none" stroke="#7E9166" stroke-width="1.3" opacity=".75"/>
-    <path d="${p(o => Y(o.s[1].tot))}" fill="none" stroke="#5FA0A8" stroke-width="1.8"/>
-    <path d="${p(o => Y(o.s[0].tot))}" fill="none" stroke="#C8B37E" stroke-width="1.8"/>`;
+    <path d="${p(o => YR(o.r))}" fill="none" stroke="#C9A24A" stroke-width="1.3" opacity=".75"/>
+    <path d="${p(o => Y(o.s[1].tot))}" fill="none" stroke="${COL[1]}" stroke-width="1.8"/>
+    <path d="${p(o => Y(o.s[0].tot))}" fill="none" stroke="${COL[0]}" stroke-width="1.8"/>`;
  }
 
  $("st").innerHTML = G.stones[0].map((k, i) => {
-  const P = region(k, 0).length;
-  return `<li><span class="${P < 6 ? "dead" : "b1"}">stone ${i + 1} — ${P < 6 ? "gone quiet" : "holds one back"}</span>
-   <span>${P} tiles · reach ${P < 6 ? 0 : stoneRange(P)}</span></li>`;
+  const Pw = region(k, 0).length;
+  return `<li><span class="${Pw < 6 ? "dead" : "b1"}">stone ${i + 1} — ${Pw < 6 ? "gone quiet" : "holds one back"}</span>
+   <span>${Pw} tiles · reach ${Pw < 6 ? 0 : stoneRange(Pw)}</span></li>`;
  }).join("") || '<li style="color:var(--faint);border:none">none raised</li>';
 
  $("sl").innerHTML = G.T.filter(t => t.set).sort((a, b) => b.set.pop - a.set.pop)
@@ -298,6 +597,9 @@ $("pass").onclick = () => { FG.G.p[0].acted = true; render(); };
 $("end").onclick = endTurn;
 $("restart").onclick = newGame;
 $("doc").onchange = () => { if (FG.G) FG.G.p[1].doc = $("doc").value; };
+
+// The map's own viewBox, so the geometry above is the single source of it.
+$("map").setAttribute("viewBox", `0 0 ${BW.toFixed(0)} ${BH.toFixed(0)}`);
 
 newGame();
 })();

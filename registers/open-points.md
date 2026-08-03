@@ -344,10 +344,23 @@ Hex goes 24 → 50, board 611 × 344 → 1272 × 717, tile area **4.3×**. The g
 stays 14 × 9 — §1 marks the size load-bearing and 18 × 11 measured 0%
 interference.
 
+**In the build as of now.** `game/index.html` and `game/ui.js` carry the whole
+direction — hex 50, warm palette, group boundaries, temple complexes, figures,
+sparkle, boundary stones, faction furrows, wild folk and field hands.
+`sim/smoke.js` passes 11,744 checks including a full game played through the
+build's own click handlers, so the port did not disturb the engine.
+
 **Settled by:** playing a full game in it. Stills cannot answer OP-03 or OP-05,
 and both are partly art questions. Note that a still is now *worse* than the
 running game, since sparkle carries real information — this build must not be
 judged from screenshots.
+
+**What the port did not fix, and knowingly:** blessed hill against farmland is
+still 1.35 luminance and blessed plain against wild plain 1.65. In the build the
+distinction is carried by content rather than colour — sparkle and standing
+figures on blessed ground, furrows, boundary stones and bent figures on
+farmland. That works, and it is worth knowing that it is what is doing the work,
+because anything that thins the marks will bring the problem straight back.
 
 ## OP-16 · low · What silences a stone, and can anything bring one back?
 
