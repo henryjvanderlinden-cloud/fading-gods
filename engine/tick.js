@@ -146,6 +146,20 @@ function worldTick(snap) {
    return;
   }
   const o = t.set.own, rad = t.set.pop < 800 ? 1 : 2;
+  if (FG.R2.exitLane) {
+   // OP-19. Slower in the first ring, and never over the last way out.
+   const cap = Math.min(rad === 1 ? FG.R2TUNE.spread1 : FG.TUNE.spread.v,
+                        FG.TUNE.budget.v - t.set.spent);
+   let n = 0;
+   for (const x of ring(k, rad)) {
+    if (n >= cap) break;
+    const q = T(x);
+    if (impassable(q) || q.set || (q.st === "reck" && q.own === o)) continue;
+    if (FG.wouldSeal(x)) continue;
+    q.st = "reck"; q.own = o; t.set.spent++; n++;
+   }
+   return;
+  }
   // Clamped to what is left of the budget as well as to the year's rate. Without
   // the first clamp a settlement overshoots its lifetime limit by up to
   // spread-1 tiles, which A-14 calls load-bearing and which went unnoticed until
@@ -184,10 +198,26 @@ function worldTick(snap) {
  const after = Object.keys(reach(0)).length;
  if (after <= 6 && snap.before > 6) say("There is very little country left that you can walk into.", "bad");
 
+ // OP-14. The toll. Crossing ploughed ground is free; still being in it when the
+ // year turns is not. Charged to both powers, and to the rival too, so a doctrine
+ // that lives in the fields pays for it.
+ if (FG.R2.fade) [0, 1].forEach(who => {
+  const p = FG.G.p[who];
+  if (p.body === undefined) p.body = 1;
+  if (T(p.pos).st !== "reck") return;
+  const before = FG.manifestMp(who);
+  p.body = Math.max(0, p.body - FG.R2TUNE.toll);
+  if (who !== 0) return;
+  say("You spent the year standing in their furrows, and there is less of you than there was.", "bad");
+  if (FG.manifestMp(0) < before)
+   say("You do not cover the ground you used to.", "bad");
+ });
+
  if (FG.G.turn >= FG.TUNE.turns.v) { FG.G.over = true; return true; }
  FG.G.turn++;
  FG.G.claims = {};
- FG.G.p[0].mp = 3; FG.G.p[0].acted = false; FG.G.p[0].cast = false;
+ FG.G.p[0].mp = FG.manifestMp(0); FG.G.p[0].acted = false; FG.G.p[0].cast = false;
+ FG.G.p[1].mp = FG.manifestMp(1);
  return false;
 }
 

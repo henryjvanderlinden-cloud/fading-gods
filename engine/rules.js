@@ -11,9 +11,34 @@ const {NB, K, ring, T, impassable, MINREG, ROWS, DIVINE} = FG;
 // proposes pricing these walls instead of removing them.
 function cost(t, who) {
  if (impassable(t)) return 99;
- if (t.st === "reck") return FG.SOFT ? 3 : 99;
+ // OP-14. Ploughed ground is walkable once the toll exists — it costs nothing to
+ // cross and 10% of your manifestation to still be standing in it at year's end,
+ // which is charged in tick.js. Their blessing stays shut: a wall of belief is
+ // not a wall of hedges.
+ if (t.st === "reck") return FG.R2.fade ? 1 : (FG.SOFT ? 3 : 99);
  if (t.st === "bless" && t.own !== who) return FG.SOFT ? 3 : 99;
  return 1;
+}
+
+// OP-14. What is left of you, and what it buys. The slope rather than the cliff:
+// three tiles at full manifestation, two at two thirds, one at a third, and never
+// less than one — you are not stranded, only slowed. Whether it should instead do
+// nothing at all until zero is the sub-question OP-14 still holds open.
+const manifest = who => (FG.G.p[who].body === undefined ? 1 : FG.G.p[who].body);
+const manifestMp = who =>
+ FG.R2.fade ? Math.max(1, Math.round(FG.R2TUNE.mp * manifest(who))) : FG.R2TUNE.mp;
+
+// OP-19. A tile may not be ploughed if it is the last way out of a settlement.
+// The fields close, but they never quite close over — without this, founding a
+// place and teaching it while you stand on it seals you onto one tile forever,
+// which is what the first stage-1 measurement found happening in half of all
+// player-years.
+function wouldSeal(x) {
+ return NB[x].some(sk => {
+  const s = T(sk);
+  if (!s.set) return false;
+  return !NB[sk].some(y => y !== x && !impassable(T(y)) && T(y).st !== "reck");
+ });
 }
 
 // Every tile the player can reach this year, keyed by movement spent.
@@ -266,7 +291,7 @@ Object.assign(FG, {cost, reach, walkStep, region, stoneRange, working, settlemen
  bigCount, hugeCount, civicStrength, taughtCount, carryCap, lostCount, divineLeft,
  civicOpen, divineReach, blessFrac, foundBlock, canFound, blessGain, canSplit,
  stoneBlock, canStone, mountainLine, targets, teachTargets, teachTargetsAt,
- nearestSource, score, band});
+ nearestSource, score, band, manifest, manifestMp, wouldSeal});
 
 if (typeof module !== "undefined" && module.exports) module.exports = FG;
 })(typeof globalThis !== "undefined" ? globalThis : this);

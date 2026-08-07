@@ -73,7 +73,8 @@ FG.R2 = {
  encircle:   false,  // 1.9   a ring of blessing takes a settlement; the taboo
  landGates:  false,  // 1.10  works unlock on tilled land, not on population
  pathFrac:   false,  // 1.11  blessFrac counts path distance (A-18)
- barren3:    false   // 1.12  withered ground stays barren three years
+ barren3:    false,  // 1.12  withered ground stays barren three years
+ exitLane:   false   // 1.15  the fields close slowly, and never seal a place in
 };
 
 FG.R2all = function (on) {
@@ -91,7 +92,10 @@ FG.R2TUNE = {
  decline:  0.28,  // most a forbidden settlement may lose in a year
  wither:   3,     // years withered ground stays barren
  splitRad: 2,     // path distance, not ring distance
- encircle: 2      // years a settlement must stay ringed before it changes hands
+ encircle: 2,     // years a settlement must stay ringed before it changes hands
+ spread1:  1,     // tiles a settlement ploughs a year in its own first ring
+ toll:     0.10,  // of your corporeal being, for ending a year in their fields
+ mp:       3      // movement at full manifestation
 };
 
 // A-17, first candidate fix — rejected. Ground both powers take in the same

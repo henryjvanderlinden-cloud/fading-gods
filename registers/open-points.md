@@ -214,7 +214,57 @@ fiction and should be stated here too: **a magical victory should be possible, a
 hard.** If Bands is still in single digits with all of this in, the model is wrong
 and not merely untuned.
 
-### First measurement — built, and it overshoots badly
+### Measured — and with two fixes in, the model works
+
+| Flags | Cities | Mixed | Haunt | Bands |
+|---|---|---|---|---|
+| baseline, all off | 50% | 43% | **20%** | **8%** |
+| `logistic` only | 48% | 43% | 57% | 40% |
+| stage 1, first cut | 15% | 60% | 100% | 93% |
+| **stage 1 `+exitLane +fade`** | **50%** | **50%** | **80%** | **60%** |
+
+**The spread goes from 54 points to 30, and every doctrine is viable.** Bands 8 →
+60, Haunt 20 → 80, Cities unchanged at 50 in its own mirror. OP-06 asked whether an
+ascetic strategy can ever win; against this build it can.
+
+**It has overshot in the other direction and now needs tuning down, not
+rebuilding.** Haunt is the strongest doctrine at 80%, and the goal is *possible,
+and hard*. `r`, the three caps, and the value of blessing are the knobs; none of
+them has been touched yet.
+
+Two fixes were needed to get here, and both were found by measurement rather than
+argument. They are recorded below because the intermediate numbers are misleading
+without them.
+
+### The two things that had to be fixed first
+
+**Entombment — a rule interaction.** You found a settlement, which puts your token
+on it; you teach it, because you are standing there; it ploughs its own radius-1
+ring that same year; reckoned ground is impassable; you are sealed onto one tile
+forever. Cities spent **50% of all player-years with a reach of zero**.
+
+Fixed by `exitLane` and `fade` together — the fields close one tile a year in the
+first ring instead of three, a tile may never be ploughed if it is the last way out
+of a settlement, and ploughed ground became walkable at the OP-14 toll. Zero-reach
+player-years fell from **50% to 4%**.
+
+**The teaching pull — an AI artefact, and much the larger effect.** The first cut
+gave the chooser a bonus for standing near any untaught settlement of its own, so
+that it would walk somewhere it could teach. Weighted at 6 per settlement and
+counting *every* untaught one, this held the token loitering among its own villages
+— where founding is illegal and the ground is already blessed. Cities went from
+**8.8 foundings a game to 2.0**, and every conclusion drawn from that run was
+wrong.
+
+The rule was innocent. Gating the bonus on settlements actually ready for the
+plough and cutting its weight to 3 restored founding to 7.7 and moved Cities from
+15% to 50%.
+
+**This is OP-01, and it is the sharpest demonstration of it in the project so far.**
+A twelve-line change to the chooser was worth 35 percentage points — more than any
+rule in the batch. Every number in this section carries that caveat.
+
+### First measurement — the first cut, kept for the record
 
 Stage 1 only: logistic growth, teaching, the wonder trigger, the audible
 Seventy-Seven. `FG.R2` in `engine/constants.js`; 40 games per matchup, seeds split

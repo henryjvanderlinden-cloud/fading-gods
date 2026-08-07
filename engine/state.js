@@ -41,8 +41,11 @@ FG.createGame = function (opts) {
   G = {T: gen(), turn: 1, over: false, log: [], hist: [],
        stones: [[], []], warned: 0, armies: [], refugees: [], claims: {},
        seed: (opts.seed === undefined ? null : opts.seed),
-       p: [{pos:0, mp:3, acted:false, cast:false, doc: opts.you  || null},
-           {pos:0, mp:3, acted:false, cast:false, doc: opts.them || "cities"}]};
+       // `body` is what is left of your manifestation — OP-14. It is only read
+       // when FG.R2.fade is on, but it is always present, so state stays one
+       // shape whatever the flags say.
+       p: [{pos:0, mp:3, body:1, acted:false, cast:false, doc: opts.you  || null},
+           {pos:0, mp:3, body:1, acted:false, cast:false, doc: opts.them || "cities"}]};
   tries++;
  } while (G.T.filter(t => !impassable(t)).length < 64 && tries < 50);
 

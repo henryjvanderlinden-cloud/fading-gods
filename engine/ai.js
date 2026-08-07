@@ -16,11 +16,17 @@ const {T, ring, reach, canFound, canSplit, canStone, blessGain,
 // of weights and becomes a theology. A refuser never teaches, so its people stay
 // at Dunbar for forty years and keep hearing it. See concept/lore.md — the
 // dropdown is now labelled with the disputants' positions, not their tactics.
+// `tillAt` is when a doctrine judges a place ready for the plough. It exists
+// because the first measurement of OP-19 found the greedy chooser teaching every
+// settlement the year it founded it, which immediately ploughs the blessing that
+// the 85% founding rule needs — so Cities destroyed its own preconditions and
+// founded 1.6 times a game instead of 8.8. Waiting is not a subtlety here; it is
+// most of the doctrine. See OP-01.
 const DOCTRINE = {
- cities: {found:12, bless:3,   split:0,  stone:4,  till:1,   kill:1},
- bands:  {found:5,  bless:4,   split:14, stone:16, till:0,   kill:0},
- mixed:  {found:8,  bless:3.5, split:6,  stone:10, till:0.6, kill:0.5},
- haunt:  {found:2,  bless:9,   split:2,  stone:12, till:0,   kill:0},
+ cities: {found:12, bless:3,   split:0,  stone:4,  till:1,   kill:1,   tillAt:130},
+ bands:  {found:5,  bless:4,   split:14, stone:16, till:0,   kill:0,   tillAt:0},
+ mixed:  {found:8,  bless:3.5, split:6,  stone:10, till:0.6, kill:0.5, tillAt:140},
+ haunt:  {found:2,  bless:9,   split:2,  stone:12, till:0,   kill:0,   tillAt:0},
  passive:null
 };
 
@@ -49,11 +55,16 @@ function aiTurn(who) {
   // standing next to something teachable is worth a detour, whatever else the
   // act turns out to be — including doing nothing at all when there is nothing
   // else worth doing there
+  // Only for places actually judged ready, and only as a nudge. An earlier
+  // version counted every untaught settlement and weighted it at 6, which held
+  // the token loitering among its own villages — where founding is illegal and
+  // the ground is already blessed — and cut Cities from 8.8 foundings a game to
+  // 2.0. The rule was innocent; the chooser was not. OP-01.
   let pull = 0;
   if (wantsTeach) {
-   const t1 = FG.teachTargetsAt(k, "till", who).length * w.till;
-   const t2 = FG.teachTargetsAt(k, "kill", who).length * w.kill;
-   pull = (t1 + t2) * 6;
+   const ready = id => FG.teachTargetsAt(k, id, who)
+                        .filter(x => T(x).set.pop >= (w.tillAt || 0)).length;
+   pull = (ready("till") * w.till + ready("kill") * w.kill) * 3;
    if (pull && !c.length) c.push([0, "none"]);
   }
   c.forEach(([v, a]) => {
@@ -85,7 +96,9 @@ function aiTurn(who) {
   for (const id of ["till", "kill"]) {
    if (!w[id]) continue;
    if (id === "till" && FG.rand() > w[id]) continue;   // mixed teaches some, not all
-   const tg = targets(id, who);
+   // not before the place is judged ready — teaching ploughs the blessing that
+   // the next founding needs
+   const tg = targets(id, who).filter(k => T(k).set.pop >= (w.tillAt || 0));
    if (tg.length) { doIntervene(id, tg[0], who); return; }
   }
  }
