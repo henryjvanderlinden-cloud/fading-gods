@@ -29,8 +29,10 @@ FG.claim = function (k, who) {
 };
 
 // opts.them  — doctrine string for player 1 ("cities" | "bands" | "mixed" |
-//              "haunt" | "passive")
+//              "haunt" | "passive"), or null for a second person at the board
 // opts.you   — doctrine for player 0, or null for a human at the controls
+// opts.pvp   — two people at one board. The only thing the engine does with it
+//              is decline to play seat 1 itself. OP-21.
 // opts.seed  — if given, the whole game is reproducible from it
 FG.createGame = function (opts) {
  opts = opts || {};
@@ -41,11 +43,13 @@ FG.createGame = function (opts) {
   G = {T: gen(), turn: 1, over: false, log: [], hist: [],
        stones: [[], []], warned: 0, armies: [], refugees: [], claims: {},
        seed: (opts.seed === undefined ? null : opts.seed),
+       pvp: !!opts.pvp,
        // `body` is what is left of your manifestation — OP-14. It is only read
        // when FG.R2.fade is on, but it is always present, so state stays one
        // shape whatever the flags say.
        p: [{pos:0, mp:3, body:1, acted:false, cast:false, doc: opts.you  || null},
-           {pos:0, mp:3, body:1, acted:false, cast:false, doc: opts.them || "cities"}]};
+           {pos:0, mp:3, body:1, acted:false, cast:false,
+            doc: opts.pvp ? null : (opts.them || "cities")}]};
   tries++;
  } while (G.T.filter(t => !impassable(t)).length < 64 && tries < 50);
 
@@ -56,6 +60,32 @@ FG.createGame = function (opts) {
  G.p[1].pos = (right.length ? right : land)[Math.floor((right.length ? right : land).length / 2)].k;
 
  FG.G = G;
+
+ // OP-07. The left-hand seat finishes +4.0 ± 1.4 points ahead over 1,160 mirror
+ // games, from map generation alone — the exclusion falloff in gen() is not
+ // symmetric on a grid whose odd rows are offset half a hex. Tolerable when the
+ // right-hand seat is a machine; not tolerable between two people.
+ //
+ // A blessed tile is worth 3, which is very nearly the measured margin. It is a
+ // patch on the symptom and it is deliberately one: the generator is the thing
+ // that is wrong, and fixing it is OP-07's own business. Zero by default, so
+ // nothing measured so far changes.
+ //
+ // Note what it cannot fix. The turn-order swing (A-17) is 14.9 points for
+ // Cities and 30.9 for Haunt, and its *sign depends on the doctrine* — Cities
+ // wants to act first, blessing doctrines want to act second. No static handout
+ // to one seat corrects a bias that points both ways. This corrects the one
+ // that does not.
+ if (FG.HANDICAP > 0) {
+  let n = 0;
+  for (const x of FG.ring(G.p[1].pos, 1)) {
+   if (n >= FG.HANDICAP) break;
+   const q = G.T[x];
+   if (!FG.takeable(q, 1)) continue;
+   q.st = "bless"; q.own = 1; n++;
+  }
+ }
+
  FG.say("You come down on one side of the valley. Something else comes down on the other.", "big");
  return G;
 };

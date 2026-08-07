@@ -48,19 +48,25 @@ two people. The likely cause is already identified — the exclusion falloff in
 
 Less than it looks in the engine and more than it looks in the interface.
 
-- **`engine/tick.js:229`** — `endYear()` hardcodes `FG.aiTurn(1)`. The engine's only
-  structural assumption about who is human.
-- **`engine/tick.js:219–220`** — the year reset clears `acted` and `cast` for seat 0
-  only, because the AI never reads them. Both seats need the full reset.
-- **`game/ui.js`** — 52 call sites pass a literal `0` and 18 read `G.p[0]`. Mechanical,
-  but it is most of the file, and it wants doing as *one* change to a `SEAT`
-  variable rather than as 70 edits.
-- **The chronicle is the real problem, and it is not plumbing.** Every `say()` in
-  `actions.js` and `tick.js` branches on `me = who === 0` and writes to *you* about
-  *theirs*. Two players means either two logs or a neutral voice, and a neutral
-  voice loses the thing `concept/concept.md` specifies as the chronicle — short
-  declarative sentences, past tense, addressed to a god. **Two logs is probably
-  right and nobody has thought about what a hotseat does when both are on screen.**
+- ~~**`engine/tick.js:229`** — `endYear()` hardcodes `FG.aiTurn(1)`.~~ **Done.** Gated
+  on `G.pvp`. `aiTurn` already no-ops on a null doctrine, so the guard is belt and
+  braces; it is written out because the assumption is the thing worth being
+  explicit about.
+- ~~**`engine/tick.js:219–220`** — the year reset clears `acted` and `cast` for seat 0
+  only.~~ **Done.** Both seats. Provably neutral to every number measured so far:
+  `engine/ai.js` never reads either field, and `node sim/matrix.js 40 40 cities`
+  reproduces §10 exactly — 57 / 8 / 43 / 13.
+- ~~**`game/ui.js`** — 52 call sites pass a literal `0` and 18 read `G.p[0]`.~~ **Done**,
+  as one `SEAT` variable. The map click handler reads `SEAT` at click time rather
+  than closing over it, so the cached land layer survives a hand-over.
+- **The chronicle is still the real problem, and it is not plumbing.** Every `say()`
+  in `actions.js` and `tick.js` branches on `me = who === 0` and writes to *you*
+  about *theirs*. Two players means either two logs or a neutral voice, and a
+  neutral voice loses the thing `concept/concept.md` specifies as the chronicle.
+  **Not done, and deliberately.** In a two-player game the log is folded shut and
+  labelled *told from the left hand*, which is honest and costs nothing. Doing it
+  properly is a mechanical change to ~40 call sites — `say(who, mine, theirs)`
+  rather than a pre-framed string — and it should be done as its own pass.
 
 ### The turn should hand itself over
 
@@ -86,6 +92,47 @@ their last move, and taking that away to save a click is a bad trade.
 **Settled by:** building it. Then three games between two people, watching
 specifically whether either of them ever declines to teach — which is the one
 observation nothing else in this project can currently make.
+
+---
+
+### Built, August 2026
+
+In the build. *A second person, at this board* is an option in the doctrine
+dropdown; choosing it restarts, because it changes the shape of a year rather
+than the strength of an opponent. The year goes left seat → hand over → right
+seat → the world moves. `sim/smoke.js` plays a full two-seat game through the
+build's own buttons and asserts the thing that matters — that handing over does
+*not* move the world — at 11,758 checks.
+
+**Hotseat is much cheaper here than hotseat usually is, and the reason is worth
+recording: there is no hidden information in this game.** No fog, and the wonder
+count is derivable from the board, so no curtain is needed between turns. What
+would normally be the expensive part of a hotseat does not exist.
+
+**The active seat is carried by colour across the full width of the board**, not
+by a label in a side panel. On a shared screen that banner is the only thing
+standing between one player and somebody else's year.
+
+**Two things went in as toggles and one of them is not validated.** The hand-over
+stays a toggle, as written above. The compensating tile does not have the number
+it was argued to have — see OP-07.
+
+### What is still open
+
+- **The chronicle.** One log, folded shut and labelled. See above.
+- **A-17 still has no fourth answer**, and PvP is the case that needs one. A
+  candidate the register has never considered, and which costs no engine change:
+  **let the second player choose their seat.** The turn-order bias is
+  doctrine-dependent and opposite-signed — Cities wants to act first, blessing
+  doctrines want to act second — so seat choice converts the asymmetry into a
+  decision rather than a handicap. That is A-10's move exactly: a timer is
+  weather, an exchange is a decision. Unmeasured, and cheap enough to try.
+- **The board is 1272 × 717 at hex 50 and an 11-inch iPad is 1194 points wide**,
+  before the side panels. Deferred deliberately.
+- **Mis-tapping.** A year is one act and one intervention, and on touch a stray
+  tap spends one irreversibly with an opponent watching. The engine reproduces a
+  game exactly from a seed, so an undo-within-turn is available in principle.
+  Deferred until it is shown to be a problem in play.
 
 ## OP-01 · high · The rival AI is one-ply greedy
 
@@ -664,6 +711,50 @@ a hex to the right. The two sides are not mirror images.
 that is now cheap — `sim/order.js <doctrine> years` on a few hundred games, with
 the margin expected to be zero. Seed control already exists, so a good map can be
 replayed.
+
+### A patch exists, and measuring it did not go as argued
+
+`FG.HANDICAP` blesses N tiles for the right-hand seat at year one, exposed in the
+build as *even the map* and **off by default**. It was put in for OP-21 on a
+clean-looking argument: a blessed tile is worth 3, the measured bias is +4.0, so
+one tile very nearly cancels it.
+
+**The argument does not survive contact with `sim/handicap.js`.** Mirror matches,
+seeds split between both orders so turn order cancels, mean margin left minus
+right:
+
+| Doctrine | No tile | One tile | Moved by | Games/cell |
+|---|---|---|---|---|
+| Cities | +6.8 ± 4.1 | +3.5 ± 4.1 | −3.3 | 160 |
+| Haunt | +0.2 ± 3.5 | −7.7 ± 3.3 | −7.9 | 160 |
+| Bands | −0.4 ± 2.8 | +2.6 ± 2.6 | **+3.0** | 400 |
+
+Three things, and the third is the one that matters.
+
+**It is not worth a flat 3 points.** Haunt moved nearly 8. A blessed tile is not
+only 3 points of score — it enlarges the connected region a stone's power is
+measured over, and it gives a tile to bless outward from.
+
+**It may not even point the same way for every doctrine.** Bands moved the wrong
+way. At 160 games that looked like +10.8 and alarming; at 400 it is +3.0 ± 3.8
+and is noise. Which is the honest state: **not resolved**, not refuted.
+
+**Nothing here is resolved at these sample sizes.** OP-07's own +4.0 ± 1.4 took
+1,160 games. These cells are 160 and 400, and every difference above is inside
+one to two standard errors. The likely mechanism is OP-01 again: a pre-blessed
+start tile lowers `blessGain` where the token is standing, so a one-ply chooser
+takes a different first act and the game diverges from there. That is an AI
+effect, not a fairness effect.
+
+**Disposition: the toggle ships, off, and is documented as unvalidated.** If the
+doctrine-dependence is real it has exactly the disease A-17's bias has — a bias
+whose sign depends on how you play cannot be corrected by a static handout to one
+seat — and the answer for both is the same one, in OP-21: let the second player
+choose their seat.
+
+**Settled by:** ~1,000 games a cell across all four doctrines, which is an
+overnight run and nobody has done it. Until then the generator is still the thing
+that is actually wrong, and fixing `gen()` beats compensating for it.
 
 ## OP-08 · low · Twenty turns or forty?
 

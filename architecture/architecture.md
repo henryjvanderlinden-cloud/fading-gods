@@ -5,6 +5,14 @@
 **One engine, imported by both the game and the simulator.** Steps 1 and 2 of the
 migration below are done.
 
+The engine no longer assumes which seat is human. `endYear()` used to call
+`FG.aiTurn(1)` unconditionally and the year reset cleared `acted` and `cast` for
+seat 0 only; both are gone, and `game/ui.js` addresses one `SEAT` variable rather
+than 52 hardcoded literals. That was OP-21's whole cost in the engine, and it is
+worth noting how it was checked: `node sim/matrix.js 40 40 cities` reproduces §10
+exactly — 57 / 8 / 43 / 13 — so the change is provably neutral to every number
+measured so far.
+
 ```
 engine/          the rules. No DOM, no rendering, no input.
   constants.js   tunables, intervention lists, seeded randomness

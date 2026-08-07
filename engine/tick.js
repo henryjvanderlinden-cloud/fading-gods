@@ -216,17 +216,25 @@ function worldTick(snap) {
  if (FG.G.turn >= FG.TUNE.turns.v) { FG.G.over = true; return true; }
  FG.G.turn++;
  FG.G.claims = {};
- FG.G.p[0].mp = FG.manifestMp(0); FG.G.p[0].acted = false; FG.G.p[0].cast = false;
- FG.G.p[1].mp = FG.manifestMp(1);
+ // Both seats, always. This used to clear `acted` and `cast` for seat 0 only,
+ // on the reasoning that the AI never reads them — true, and it made the engine
+ // quietly unable to carry a second person. OP-21.
+ [0, 1].forEach(who => { const p = FG.G.p[who];
+  p.mp = FG.manifestMp(who); p.acted = false; p.cast = false; });
  return false;
 }
 
-// One whole year, from the moment you have finished acting. Returns true if
-// that was the last one.
+// One whole year, from the moment the human seat — or in a two-player game,
+// both of them — has finished acting. Returns true if that was the last one.
+//
+// This was `FG.aiTurn(1)` unconditionally, and OP-21 named it the engine's only
+// structural assumption about who is human. `aiTurn` already no-ops on a null
+// doctrine, so the guard is belt and braces; it is written out because the
+// assumption is the thing worth being explicit about.
 function endYear() {
  if (FG.G.over) return true;
  const snap = snapshot();
- FG.aiTurn(1);
+ if (!FG.G.pvp) FG.aiTurn(1);
  return worldTick(snap);
 }
 

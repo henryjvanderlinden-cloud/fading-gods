@@ -255,6 +255,16 @@ One opponent, running a fixed doctrine chosen from a dropdown:
 same seat against Passive. If your score barely differs, the two of you were never
 playing each other, and no amount of number-tuning fixes that.
 
+**Or a second person.** The other seat may be held by someone sitting next to you,
+in which case a year is: the left hand acts, hands over, the right hand acts, and
+only then does the world move. Nothing in the rules changes — the engine's only
+structural assumption about who was human was one line, and it is gone. OP-21.
+
+Note what the dropdown becomes when both seats are people: nothing. A doctrine is
+a theology (`concept/lore.md`), and two players simply hold theirs. Whether either
+of them ever *declines* to teach is the one observation this project cannot
+currently make any other way, and it is why OP-21 outranks OP-01.
+
 ---
 
 ## 10. Current balance

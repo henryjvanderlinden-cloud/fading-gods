@@ -20,6 +20,27 @@ const BW = W * (COLS + 0.5) + 8 * U, BH = VS * (ROWS - 1) + 2 * SZ + 8 * U;
 let ARM = null;   // the intervention currently armed, awaiting a target
 let LAND = {key: null, html: ""};   // cached land layer, see render()
 
+// OP-21. The seat whose year this is. In a single-player game it is always 0
+// and nothing below behaves differently. In a two-player game it flips 0 → 1,
+// and only then does the world tick.
+//
+// This is the one variable that replaced 52 hardcoded seat literals and 18
+// reads of G.p[0]. Everything the interface asks the engine, it asks about
+// SEAT — which is why it had to be done as one change rather than as seventy
+// edits, and why nothing in here may go back to naming a seat directly.
+let SEAT = 0;
+const other = s => 1 - s;
+// Off by default. On a shared screen the hand-over is what stops the previous
+// player carrying on tapping into somebody else's year — but some players want
+// to look at the board after their last move, and taking that away to save a
+// click is a bad trade. So it stays a choice.
+let AUTOPASS = false;
+
+// The names the two seats have when neither of them is "you". Deliberately
+// positional rather than mythological: the seats are where people are sitting.
+const SEATNAME = ["the left hand", "the right hand"];
+const pvp = () => !!(FG.G && FG.G.pvp);
+
 const $ = id => document.getElementById(id);
 const u = n => n * U;                       // marks were authored against a 24px hex
 function px(c, r) { return [W * (c + 0.5 * (r & 1)) + W / 2 + u(4), VS * r + SZ + u(4)]; }
@@ -348,39 +369,84 @@ function boundaries(G) {
 
 function newGame() {
  ARM = null;
+ SEAT = 0;
  LAND = {key: null, html: ""};      // a new board is always a new land layer
- FG.createGame({them: $("doc").value});
+ const doc = $("doc").value, human = doc === "human";
+ FG.HANDICAP = $("even").checked ? 1 : 0;
+ FG.createGame({them: human ? null : doc, pvp: human});
  $("done").innerHTML = "";
  render();
 }
+
+// The end of a seat's year. In a single-player game that is the end of the
+// year outright. In a two-player game the first seat hands over and the world
+// does not move until the second has finished too.
 function endTurn() {
  if (FG.G.over) return;
  ARM = null;
+ if (pvp() && SEAT === 0) { SEAT = 1; render(); return; }
  if (FG.endYear()) finish();
+ SEAT = 0;
  render();
 }
 
+// OP-21's condition, and it is deliberately not "everything is used". Waiting
+// for movement, act and intervention all to be spent hangs forever whenever a
+// player has no legal intervention or does not want to walk their last tile. A
+// player who has acted and has nothing left to call has finished their year in
+// every sense that matters, so movement does not gate it.
+function canStillIntervene(seat) {
+ const G = FG.G;
+ if (G.p[seat].cast || G.over) return false;
+ if (FG.R2.teaching && FG.TEACH.some(s => targets(s.id, seat).length)) return true;
+ const lostN = lostCount(seat);
+ if (DIVINE.some((s, i) => i >= lostN && targets(s.id, seat).length)) return true;
+ const open = civicOpen(seat);
+ return CIVIC.some(s => open.includes(s.id) && targets(s.id, seat).length);
+}
+const nothingFurther = seat => FG.G.p[seat].acted && !canStillIntervene(seat);
+
+// Called at the end of every input handler rather than from render(), which
+// would recurse.
+function maybeHandOver() {
+ if (AUTOPASS && !FG.G.over && nothingFurther(SEAT)) endTurn();
+}
+
 function render() {
- const G = FG.G, TUNE = FG.TUNE;
- const R = reach(0), S = score(), walk = Object.keys(R).length - 1;
- const tg = ARM ? new Set(targets(ARM, 0)) : null;
+ const G = FG.G, TUNE = FG.TUNE, ME = SEAT, THEM = other(SEAT);
+ const R = reach(ME), S = score(), walk = Object.keys(R).length - 1;
+ const tg = ARM ? new Set(targets(ARM, ME)) : null;
  const isCivic = ARM && CIVIC.some(c => c.id === ARM);
- const threat = G.armies.some(a => a.own === 1);
+ const threat = G.armies.some(a => a.own === THEM);
+
+ // Whose year it is, in that seat's own colour, across the whole width of the
+ // board. On a shared screen this is the only thing standing between one
+ // player and somebody else's year, so it is not a label in a side panel.
+ const tb = $("turnbar");
+ if (pvp() && !G.over) {
+  tb.style.display = "block";
+  tb.style.background = COL[ME];
+  tb.innerHTML = `<span>${SEATNAME[ME]}</span><span class="yr">year ${G.turn}</span>`;
+ } else tb.style.display = "none";
+ $("map").style.borderColor = pvp() && !G.over ? COL[ME] : "";
+ $("map").style.borderWidth = pvp() && !G.over ? "3px" : "";
 
  $("bar").innerHTML = `
  <div class="c"><div class="l">year</div><div class="v">${G.turn}<span style="font-size:13px;color:var(--faint)"> / ${TUNE.turns.v}</span></div></div>
- <div class="c"><div class="l">moves</div><div class="v ${G.p[0].mp ? "" : "r"}">${G.p[0].mp}</div></div>`
+ <div class="c"><div class="l">moves</div><div class="v ${G.p[ME].mp ? "" : "r"}">${G.p[ME].mp}</div></div>`
  // OP-14. What is left of you. Only shown when there is something that can take
  // it — with the toll off, this is always 100% and is noise in the bar.
  + (FG.R2.fade ? `<div class="c"><div class="l">of you</div><div class="v ${
-     FG.manifest(0) <= 0.35 ? "r" : FG.manifest(0) < 1 ? "u" : ""
-   }">${Math.round(FG.manifest(0) * 100)}<span style="font-size:13px;color:var(--faint)">%</span></div></div>` : "")
+     FG.manifest(ME) <= 0.35 ? "r" : FG.manifest(ME) < 1 ? "u" : ""
+   }">${Math.round(FG.manifest(ME) * 100)}<span style="font-size:13px;color:var(--faint)">%</span></div></div>` : "")
  + `
  <div class="c"><div class="l">can walk to</div><div class="v ${walk <= 5 ? "r" : "m"}">${walk}</div></div>
- <div class="c"><div class="l">blessed</div><div class="v h">${S[0].h}</div></div>
- <div class="c"><div class="l">farmland</div><div class="v u">${S[0].c}</div></div>
- <div class="c"><div class="l">you</div><div class="v g">${S[0].tot}</div></div>
- <div class="c"><div class="l">them</div><div class="v ${threat ? "r" : "rv"}">${S[1].tot}</div></div>`;
+ <div class="c"><div class="l">blessed</div><div class="v h">${S[ME].h}</div></div>
+ <div class="c"><div class="l">farmland</div><div class="v u">${S[ME].c}</div></div>
+ <div class="c"><div class="l">${pvp() ? SEATNAME[ME] : "you"}</div>
+  <div class="v" style="color:${COL[ME]}">${S[ME].tot}</div></div>
+ <div class="c"><div class="l">${pvp() ? SEATNAME[THEM] : "them"}</div>
+  <div class="v ${threat ? "r" : ""}" style="${threat ? "" : "color:" + COL[THEM]}">${S[THEM].tot}</div></div>`;
 
  // The land and its borders are 3,400-odd nodes and change only when the board
  // does — not when you move your token or arm an intervention, which is most of
@@ -398,7 +464,7 @@ function render() {
  }
  G.T.forEach((t, k) => {
   const [x, y] = px(t.c, t.r);
-  const go = tg ? tg.has(k) : (R[k] !== undefined && k !== G.p[0].pos);
+  const go = tg ? tg.has(k) : (R[k] !== undefined && k !== G.p[ME].pos);
   if (!go) scrim += `<path d="${hexPath(x, y)}" fill="#0B0E08" opacity="${tg ? ".34" : ".2"}" pointer-events="none"/>`;
   if (go && tg) over += `<path d="${hexPath(x, y, SZ - u(3))}" fill="none"
     stroke="${isCivic ? "#F0C060" : "#FFFFFF"}" stroke-width="${u(1.8)}" opacity=".95" pointer-events="none"/>`;
@@ -461,18 +527,20 @@ function render() {
  }
  $("mscrim").innerHTML = scrim;
  $("mover").innerHTML = over;
+ // The handler reads SEAT at click time rather than closing over it, so the
+ // cached land layer can outlive a hand-over.
  if (landStale) m.querySelectorAll(".hx").forEach(e => {
   e.onclick = () => {
    const k = +e.dataset.k;
    if (FG.G.over) return;
    if (ARM) {
-    if (!targets(ARM, 0).includes(k)) return;
-    if (doIntervene(ARM, k, 0)) { FG.G.p[0].cast = true; ARM = null; }
-    render(); return;
+    if (!targets(ARM, SEAT).includes(k)) return;
+    if (doIntervene(ARM, k, SEAT)) { FG.G.p[SEAT].cast = true; ARM = null; }
+    render(); maybeHandOver(); return;
    }
-   const RR = reach(0);
-   if (RR[k] === undefined || k === FG.G.p[0].pos) return;
-   FG.G.p[0].mp -= RR[k]; FG.G.p[0].pos = k; render();
+   const RR = reach(SEAT);
+   if (RR[k] === undefined || k === FG.G.p[SEAT].pos) return;
+   FG.G.p[SEAT].mp -= RR[k]; FG.G.p[SEAT].pos = k; render();
   };
  });
 
@@ -484,52 +552,55 @@ function render() {
    while (c !== a.to && n < 40) { const s = walkStep(c, a.to); if (s === undefined) return null; c = s; n++; }
    return n;
   })();
-  road.push(`<li><span class="${a.own === 0 ? "b1" : "warn"}">${a.own === 0 ? "your levy" : "their levy"} · ${Math.round(a.n)} strong</span>
+  road.push(`<li><span class="${a.own === ME ? "b1" : "warn"}">${a.own === ME ? "your levy" : "their levy"} · ${Math.round(a.n)} strong</span>
    <span>${steps === null ? "no road" : steps + " year" + (steps === 1 ? "" : "s") + " away"}</span></li>`);
  });
- G.refugees.forEach(f => road.push(`<li><span class="b2">${f.own === 0 ? "your people on the road" : "their people"} · ${Math.round(f.n)}</span>
+ G.refugees.forEach(f => road.push(`<li><span class="b2">${f.own === ME ? "your people on the road" : "their people"} · ${Math.round(f.n)}</span>
    <span>${f.at === f.to ? "arriving" : "walking"}</span></li>`));
  $("march").innerHTML = road.join("") || '<li style="color:var(--faint);border:none">nobody is marching</li>';
 
  // interventions
- const lostN = lostCount(0), bg = bigCount(0), hg = hugeCount(0), wk = working(0).length, cs = civicStrength(0);
+ const lostN = lostCount(ME), bg = bigCount(ME), hg = hugeCount(ME),
+       wk = working(ME).length, cs = civicStrength(ME);
  $("tally").textContent =
-  (FG.R2.taughtLoss ? `${FG.taughtCount(0)} taught to till · ` : `${bg} past 150 · `)
+  (FG.R2.taughtLoss ? `${FG.taughtCount(ME)} taught to till · ` : `${bg} past 150 · `)
   + `${hg} past 800 · ${wk} working stone${wk === 1 ? "" : "s"} · strength ${cs}`
-  + (FG.R2.fade ? ` · ${Math.round(FG.manifest(0) * 100)}% of you left` : "")
-  + (G.p[0].cast ? " · intervened" : "");
+  + (FG.R2.fade ? ` · ${Math.round(FG.manifest(ME) * 100)}% of you left` : "")
+  + (G.p[ME].cast ? " · intervened" : "");
 
  // OP-19. The teachings — neither wonders nor works, and only present at all
  // when the rule is on. Drawn first, because they are the decision the batch is
  // about and they are done in person rather than called from anywhere.
  $("teach").innerHTML = !FG.R2.teaching ? "" : FG.TEACH.map(s => {
-  const n = targets(s.id, 0).length;
+  const n = targets(s.id, ME).length;
   return `<li><span class="nm">${s.n}</span><span class="ds">${s.d}</span>
    <button style="margin-top:5px" class="${ARM === s.id ? "arm" : ""}"
-    ${(G.p[0].cast || G.over || !n) ? "disabled" : ""} data-iv="${s.id}">
+    ${(G.p[ME].cast || G.over || !n) ? "disabled" : ""} data-iv="${s.id}">
     ${ARM === s.id ? "choose a settlement" : (n ? "teach · " + n : "none of yours in reach")}</button></li>`;
  }).join("");
 
- const open = civicOpen(0);
+ const open = civicOpen(ME);
  $("divine").innerHTML = DIVINE.map((s, i) => {
-  const gone = i < lostN, n = gone ? 0 : targets(s.id, 0).length;
+  const gone = i < lostN, n = gone ? 0 : targets(s.id, ME).length;
   return `<li class="${gone ? "gone" : ""}"><span class="nm">${s.n}</span><span class="ds">${s.d}</span>
    ${gone ? "" : `<button style="margin-top:5px" class="${ARM === s.id ? "arm" : ""}"
-    ${(G.p[0].cast || G.over || !n) ? "disabled" : ""} data-iv="${s.id}">
+    ${(G.p[ME].cast || G.over || !n) ? "disabled" : ""} data-iv="${s.id}">
     ${ARM === s.id ? "choose a tile" : (n ? "call · " + n : "nothing in reach")}</button>`}</li>`;
  }).join("");
  $("civic").innerHTML = CIVIC.map((s, i) => {
   const need = [TUNE.t1.v, TUNE.t2.v, TUNE.t3.v][i], ok = open.includes(s.id);
-  const n = ok ? targets(s.id, 0).length : 0;
+  const n = ok ? targets(s.id, ME).length : 0;
   return `<li class="${ok ? "" : "gone"}"><span class="nm">${s.n}</span><span class="ds">${s.d}</span>
    ${ok ? `<button style="margin-top:5px" class="${ARM === s.id ? "armc" : ""}"
-    ${(G.p[0].cast || G.over || !n) ? "disabled" : ""} data-iv="${s.id}">
+    ${(G.p[ME].cast || G.over || !n) ? "disabled" : ""} data-iv="${s.id}">
     ${ARM === s.id ? "choose a tile" : (n ? "do it · " + n : "nothing in range")}</button>`
    : `<span class="ds" style="color:var(--faint)">needs strength ${need}</span>`}</li>`;
  }).join("");
  document.querySelectorAll("[data-iv]").forEach(b => {
   b.onclick = () => { ARM = ARM === b.dataset.iv ? null : b.dataset.iv; render(); };
  });
+ // Arming an intervention that has exactly one target still needs the tile
+ // chosen, so hand-over is checked after the target is taken, not here.
 
  // the chart
  if (G.hist.length > 1) {
@@ -538,15 +609,21 @@ function render() {
   const mr = Math.max(...H.map(o => o.r), 1), n = TUNE.turns.v;
   const X = i => 6 + (i / (n - 1)) * 288, Y = v => 124 - (v / mx) * 116, YR = v => 124 - (v / mr) * 116;
   const p = f => H.map((o, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + f(o).toFixed(1)).join(" ");
+  // The acting seat's line goes on top, so the chart reads for whoever is
+  // holding the board.
   $("chart").innerHTML =
-   `<title>Score over time</title><desc>Your total, their total, and how far you can walk.</desc>
+   `<title>Score over time</title><desc>Both totals, and how far the acting seat can walk.</desc>
     <path d="${p(o => YR(o.r))}" fill="none" stroke="#C9A24A" stroke-width="1.3" opacity=".75"/>
-    <path d="${p(o => Y(o.s[1].tot))}" fill="none" stroke="${COL[1]}" stroke-width="1.8"/>
-    <path d="${p(o => Y(o.s[0].tot))}" fill="none" stroke="${COL[0]}" stroke-width="1.8"/>`;
+    <path d="${p(o => Y(o.s[THEM].tot))}" fill="none" stroke="${COL[THEM]}" stroke-width="1.8"/>
+    <path d="${p(o => Y(o.s[ME].tot))}" fill="none" stroke="${COL[ME]}" stroke-width="1.8"/>`;
  }
+ $("ckey").innerHTML =
+  `<span><i style="background:${COL[ME]}"></i>${pvp() ? SEATNAME[ME] : "you"}</span>
+   <span><i style="background:${COL[THEM]}"></i>${pvp() ? SEATNAME[THEM] : "them"}</span>
+   <span><i style="background:#C9A24A"></i>where you can walk</span>`;
 
- $("st").innerHTML = G.stones[0].map((k, i) => {
-  const Pw = region(k, 0).length;
+ $("st").innerHTML = G.stones[ME].map((k, i) => {
+  const Pw = region(k, ME).length;
   return `<li><span class="${Pw < 6 ? "dead" : "b1"}">stone ${i + 1} — ${Pw < 6 ? "gone quiet" : "holds one back"}</span>
    <span>${Pw} tiles · reach ${Pw < 6 ? 0 : stoneRange(Pw)}</span></li>`;
  }).join("") || '<li style="color:var(--faint);border:none">none raised</li>';
@@ -554,26 +631,36 @@ function render() {
  $("sl").innerHTML = G.T.filter(t => t.set).sort((a, b) => b.set.pop - a.set.pop)
   .slice(0, 10).map(t => {
    const [n, b] = band(t.set.pop);
-   return `<li><span class="b${b}">${t.set.own === 0 ? "" : "their "}${n}${t.set.done ? " · spent" : ""}</span><span>${Math.round(t.set.pop)}</span></li>`;
+   return `<li><span class="b${b}">${t.set.own === ME ? "" : "their "}${n}${t.set.done ? " · spent" : ""}</span><span>${Math.round(t.set.pop)}</span></li>`;
   }).join("") || '<li style="color:var(--faint);border:none">none yet</li>';
 
+ // The chronicle is written from the left-hand seat and says "you" about it.
+ // In a two-player game that is somebody else's chronicle half the time, so it
+ // is labelled and folded away rather than presented as yours. Two properly
+ // addressed logs means changing every say() in actions.js and tick.js, which
+ // is a larger and separate piece of work — see OP-21.
  const L = $("log");
  L.innerHTML = G.log.slice(-45).map(l => `<p class="${l.cls}"><b>y${l.t}</b>${l.x}</p>`).join("");
  L.scrollTop = L.scrollHeight;
+ $("logwrap").open = !pvp();
+ $("logsum").textContent = pvp() ? "what happened · told from the left hand" : "what happened";
 
- const k = G.p[0].pos, a = G.p[0].acted || G.over;
- $("bless").disabled = a || !!ARM || !blessGain(k, 0);
- $("stone").disabled = a || !!ARM || !canStone(k, 0);
- $("found").disabled = a || !!ARM || !canFound(k, 0);
- $("split").disabled = a || !!ARM || !canSplit(k, 0);
+ const k = G.p[ME].pos, a = G.p[ME].acted || G.over;
+ $("bless").disabled = a || !!ARM || !blessGain(k, ME);
+ $("stone").disabled = a || !!ARM || !canStone(k, ME);
+ $("found").disabled = a || !!ARM || !canFound(k, ME);
+ $("split").disabled = a || !!ARM || !canSplit(k, ME);
  $("pass").disabled = a || !!ARM;
  $("end").disabled = G.over;
+ $("end").textContent = !pvp() ? "End year"
+  : SEAT === 0 ? "Hand to the right" : "End the year";
 
  const hint = $("hint");
  hint.className = "hintline" + (ARM ? " arm" : "");
- const sb = stoneBlock(k, 0), fb = foundBlock(k, 0);
+ const sb = stoneBlock(k, ME), fb = foundBlock(k, ME);
  hint.textContent = G.over ? "" : ARM ? "Choose an outlined tile, or press the button again to put it down."
-  : a ? "Acted this year. You may still intervene, then end the year."
+  : a ? (pvp() && SEAT === 0 ? "Acted this year. You may still intervene, then hand over."
+                             : "Acted this year. You may still intervene, then end the year.")
   : walk === 0 ? "There is nowhere you can walk from here."
   : (fb && fb.indexOf("%") > 0 ? "Cannot found here: " + fb + "."
    : sb && sb.indexOf("connected") > 0 ? "No stone here: " + sb + "." : fb ? "Cannot found here: " + fb + "." : "");
@@ -581,16 +668,39 @@ function render() {
 
 function finish() {
  const G = FG.G, S = score(), H = G.hist;
- let peak = 0, pt = 0;
- H.forEach((o, i) => { if (o.s[0].h > peak) { peak = o.s[0].h; pt = i + 1; } });
- const lostN = lostCount(0), open = civicOpen(0), walk = Object.keys(reach(0)).length - 1;
+ const two = pvp();
  const mt = G.T.filter(t => t.t === "mount").length;
+ const line = who => {
+  let peak = 0, pt = 0;
+  H.forEach((o, i) => { if (o.s[who].h > peak) { peak = o.s[who].h; pt = i + 1; } });
+  return `<p><b style="color:${COL[who]}">${two ? SEATNAME[who] : (who === 0 ? "you" : "them")}</b> —
+   ${S[who].tot} points: ${S[who].h} blessed, ${S[who].c} farmland, ${S[who].s} settled.
+   Blessing peaked at ${peak} in year ${pt}. Ended with ${DIVINE.length - lostCount(who)} of six
+   wonders${FG.R2.taughtLoss ? ", " + FG.taughtCount(who) + " taught to till" : ""}
+   and ${civicOpen(who).length} of three works.</p>`;
+ };
+
+ if (two) {
+  const w = S[0].tot > S[1].tot ? 0 : S[1].tot > S[0].tot ? 1 : null;
+  $("done").innerHTML = `<div class="done">
+  <h3>${w === null ? "level" : SEATNAME[w] + " holds more"}</h3>
+  ${line(0)}${line(1)}
+  ${mt ? `<p>${mt} tiles of the valley are mountain that was not there when either of you came.</p>` : ""}
+  <p style="color:var(--faint);font-size:14px;margin-top:12px">The question OP-21 was opened for,
+  and the one nothing in the harness can ask: did either of you ever <i>decline</i> to teach a
+  settlement to till — knowing what it would have been worth, and what it would have cost to
+  hear?</p></div>`;
+  return;
+ }
+
+ const walk = Object.keys(reach(0)).length - 1;
  const doc = {cities:"Cities", bands:"Bands", mixed:"Mixed", haunt:"Haunt", passive:"Passive"}[G.p[1].doc];
  $("done").innerHTML = `<div class="done">
  <h3>${S[0].tot > S[1].tot ? "you hold more" : S[0].tot === S[1].tot ? "level" : "they hold more"}</h3>
  <p>${S[0].tot} to ${S[1].tot} against <b>${doc}</b>. ${S[0].h} blessed, ${S[0].c} farmland,
- ${S[0].s} settled. Your blessing peaked at ${peak} in year ${pt}.
- You ended with ${DIVINE.length - lostN} of six wonders and ${open.length} of three works.
+ ${S[0].s} settled. Your blessing peaked at ${H.reduce((m, o, i) => o.s[0].h > m[0] ? [o.s[0].h, i + 1] : m, [0, 0])[0]}
+ in year ${H.reduce((m, o, i) => o.s[0].h > m[0] ? [o.s[0].h, i + 1] : m, [0, 0])[1]}.
+ You ended with ${DIVINE.length - lostCount(0)} of six wonders and ${civicOpen(0).length} of three works.
  ${mt ? mt + " tiles of the valley are mountain that was not there when you came. " : ""}
  There ${walk === 1 ? "was one tile" : "were " + walk + " tiles"} you could still walk into.</p>
  <p style="color:var(--faint);font-size:14px;margin-top:12px">The question: when a levy was on the
@@ -644,8 +754,11 @@ function r2sync() {
   : on + " of " + R2BUILT.length + " built rules on";
 }
 // Same seed, so the only difference between two runs is the rules.
-function r2restart() { r2sync(); ARM = null; LAND = {key:null, html:""};
- FG.createGame({them: $("doc").value, seed: R2SEED.v}); $("done").innerHTML = ""; render(); }
+function r2restart() { r2sync(); ARM = null; SEAT = 0; LAND = {key:null, html:""};
+ const doc = $("doc").value, human = doc === "human";
+ FG.HANDICAP = $("even").checked ? 1 : 0;
+ FG.createGame({them: human ? null : doc, pvp: human, seed: R2SEED.v});
+ $("done").innerHTML = ""; render(); }
 r2w.querySelectorAll("[data-r2]").forEach(i => {
  i.onchange = () => { FG.R2[i.dataset.r2] = i.checked; r2restart(); };
 });
@@ -655,14 +768,25 @@ r2sync();
 
 ["bless", "stone", "found", "split"].forEach(a => {
  $(a).onclick = () => {
-  if (FG.G.p[0].acted || FG.G.over || ARM) return;
-  if (doAct(a, 0)) { FG.G.p[0].acted = true; render(); }
+  if (FG.G.p[SEAT].acted || FG.G.over || ARM) return;
+  if (doAct(a, SEAT)) { FG.G.p[SEAT].acted = true; render(); maybeHandOver(); }
  };
 });
-$("pass").onclick = () => { FG.G.p[0].acted = true; render(); };
+$("pass").onclick = () => { FG.G.p[SEAT].acted = true; render(); maybeHandOver(); };
 $("end").onclick = endTurn;
 $("restart").onclick = newGame;
-$("doc").onchange = () => { if (FG.G) FG.G.p[1].doc = $("doc").value; };
+
+// Choosing a second person changes the shape of a year rather than the strength
+// of an opponent, so it restarts. Picking one machine doctrine over another does
+// not, and never has.
+$("doc").onchange = () => {
+ const v = $("doc").value;
+ if (v === "human" || pvp()) { if ($("even").checked !== (v === "human")) $("even").checked = v === "human";
+  newGame(); return; }
+ if (FG.G) FG.G.p[1].doc = v;
+};
+$("even").onchange = () => { FG.HANDICAP = $("even").checked ? 1 : 0; newGame(); };
+$("autopass").onchange = e => { AUTOPASS = e.target.checked; };
 
 // The map's own viewBox, so the geometry above is the single source of it.
 $("map").setAttribute("viewBox", `0 0 ${BW.toFixed(0)} ${BH.toFixed(0)}`);

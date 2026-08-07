@@ -25,6 +25,38 @@ intervention column, which are done in person rather than called from anywhere; 
 **manifestation**, in the tally line, which is what is left of you after walking in
 somebody's fields.
 
+## Two people at one board
+
+Pick **a second person, at this board** in *the other seat*. That restarts, because
+it changes the shape of a year rather than the strength of an opponent.
+
+A year is then: the left hand acts, hands over, the right hand acts, and only then
+does the world move. The button says which. Whose year it is runs in that seat's own
+colour across the whole width of the board and around the map — on a shared screen
+that banner is the only thing standing between one player and somebody else's year,
+so it is not a label in a side panel.
+
+**No curtain between turns, because there is nothing to hide.** No fog, and the
+wonder count is derivable from the board, so both players can watch each other
+decide. For OP-21's purpose that is a feature rather than a concession: the whole
+reason the mode exists is to hear somebody reason out loud about whether to teach.
+
+Two toggles sit under the dropdown.
+
+**Hand over as soon as nothing further is possible** — off by default. The condition
+is deliberately *nothing further is possible* and not *everything is used*: waiting
+for movement, act and intervention all to be spent hangs forever whenever a player
+has no legal intervention. Movement does not gate it.
+
+**Even the map** — off by default, and **not validated**. It blesses one tile for the
+right-hand seat against OP-07's measured +4.0 point left-seat advantage. Measured
+with `node sim/handicap.js`, it is not worth the flat 3 points the argument assumed
+and may not point the same way for every doctrine. Read OP-07 before trusting it.
+
+The chronicle is written from the left-hand seat and says *you* about it. In a
+two-player game it is folded shut and labelled accordingly, which is honest and
+costs nothing; two properly addressed logs is a separate pass. See OP-21.
+
 An untaught settlement is drawn as blessed country with people in it — blessed
 fill, sparkle, no furrows. It only becomes farmland-ochre the year you teach it.
 That is the decision the batch is about, and the fill is the most legible thing on

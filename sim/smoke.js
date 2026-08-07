@@ -147,6 +147,50 @@ try {
  ok("restart begins a new game", win.FG.G.turn === 1 && !win.FG.G.over);
  ok("restart clears the ending panel", doc.getElementById("done").innerHTML === "");
 
+ // --- OP-21: two people at one board ------------------------------------
+ // Driven through the same buttons, because the whole of PvP lives in the
+ // interface and the engine barely knows about it. The thing being checked is
+ // that the world does not move until both seats have finished.
+ doc.getElementById("doc").value = "human";
+ doc.getElementById("even").checked = true;
+ doc.getElementById("restart").click();
+
+ const G = () => win.FG.G, end = doc.getElementById("end");
+ ok("a second person makes it a two-seat game", G().pvp === true && G().p[1].doc === null);
+ ok("the turn banner is shown", doc.getElementById("turnbar").style.display === "block");
+ ok("evening the map blesses one tile for the right hand",
+    G().T.filter(t => t.st === "bless" && t.own === 1).length === 1);
+ ok("the left hand is asked to hand over, not to end the year", /hand to the right/i.test(end.textContent));
+
+ const y0 = G().turn, seen = new Set([doc.getElementById("turnbar").style.background]);
+ doc.getElementById("bless").click();
+ end.click();                                    // hand over
+ seen.add(doc.getElementById("turnbar").style.background);
+ ok("handing over does not move the world", G().turn === y0);
+ ok("the right hand now holds the board", /end the year/i.test(end.textContent));
+ ok("the banner changes colour with the seat", seen.size === 2);
+ ok("the right hand has its own act to spend", G().p[1].acted === false);
+
+ doc.getElementById("bless").click();
+ ok("the right hand's act is its own", G().p[1].acted === true && G().p[0].acted === true);
+ end.click();                                    // now the year turns
+ ok("the year turns once both have acted", G().turn === y0 + 1);
+ ok("both seats are reset for the new year",
+    G().p[0].acted === false && G().p[1].acted === false
+    && G().p[0].cast === false && G().p[1].cast === false);
+ ok("the board comes back to the left hand", /hand to the right/i.test(end.textContent));
+
+ // and it plays to the end, both seats, without the AI ever being asked
+ for (let y = 0; y < 90; y++) {
+  const b = doc.getElementById("bless");
+  if (!b.disabled) b.click(); else doc.getElementById("pass").click();
+  if (end.disabled) break;
+  end.click();
+ }
+ ok("a two-player game plays out", G().over, `stopped at year ${G().turn}`);
+ ok("the two-seat ending names the seats",
+    /left hand|right hand/.test(doc.getElementById("done").textContent));
+
  console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
 } catch (e) {
  if (/Cannot find module 'jsdom'/.test(String(e))) {

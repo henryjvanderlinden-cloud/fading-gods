@@ -45,6 +45,29 @@ same order a browser would, and plays a full forty-year game by clicking the
 actual buttons. This is the only check that catches the renderer and the engine
 disagreeing. It needs `npm i jsdom` and skips cleanly without it.
 
+It then plays a **two-seat game** through the same buttons — OP-21. Almost all of
+that mode lives in the interface and the engine barely knows about it, so the
+interface is where it has to be checked. The assertion that matters is that
+handing over does *not* move the world: the year turns only once both seats have
+acted.
+
+## handicap.js
+
+What the compensating tile is actually worth — OP-07, and the toggle OP-21 added.
+
+```
+node sim/handicap.js [games] [doctrine ...]
+```
+
+Mirror matches with the seeds split between both orders, so the A-17 seat
+advantage cancels and what is left is the map. The statistic is the mean score
+margin with a standard error, as in `order.js`, and zero is fair.
+
+**It does not currently say what it was built expecting to say.** The tile is not
+worth a flat 3 points and may not point the same way for every doctrine. Nothing
+is resolved at 160–400 games a cell; OP-07's own figure took 1,160. Read OP-07
+before quoting anything from it.
+
 ## order.js
 
 Answered A-17: does the seat you sit in decide the game? Mirror matches, same

@@ -1,27 +1,54 @@
-OP-21: two players at one board, above OP-01
+OP-21: two people at one board, built
 
-Not a feature. The batch ended with two rules kept on judgement against a
-null measurement, because both are about choices a greedy chooser does not
-make. A second person at the board measures those rules today. That is why
-this outranks writing a better AI: the AI is a faster instrument for the
-questions it can already see, and this is a different instrument for the ones
-it cannot.
+A second person is an option in the other seat, and choosing it restarts,
+because it changes the shape of a year rather than the strength of an
+opponent. The year goes left seat, hand over, right seat, and only then does
+the world move.
 
-It makes two parked fairness questions urgent. A-17 is reopened in the
-archive: turn order was settled as leave-it-alone precisely because only one
-seat is human, and a 30.9-point swing lands on a machine that does not care.
-With two people somebody sits in that seat every game. All three candidate
-fixes were rejected and none becomes acceptable just because the need
-changed. And OP-07's +4.0 point left-seat map bias stops being a curiosity.
+The engine's one structural assumption about who is human is gone. endYear()
+no longer hardcodes aiTurn(1), and the year reset clears both seats rather
+than seat 0 alone. Neither can move a measured number - ai.js reads neither
+acted nor cast - and node sim/matrix.js 40 40 cities reproduces §10 exactly
+at 57/8/43/13, which is how that claim is checked rather than asserted.
+ui.js addresses one SEAT variable instead of 52 literals, and the map click
+handler reads it at click time rather than closing over it, so the cached
+land layer survives a hand-over.
 
-Scope recorded. The engine has one structural assumption about who is human,
-at tick.js:229, plus a year reset that only clears seat 0's flags. The
-interface has 52 hardcoded seat literals and wants doing as one change to a
-SEAT variable rather than 70 edits. The chronicle is the real problem and is
-not plumbing: every say() branches on who === 0 and writes to you about
-theirs, so two players means two logs or a neutral voice, and a neutral voice
-loses the thing concept.md specifies.
+Hotseat is cheaper here than a hotseat usually is, and the reason is worth
+recording: there is no hidden information in this game, so no curtain is
+needed between turns. What is needed instead is knowing whose year it is
+from across a table, so the active seat is carried by colour across the full
+width of the board rather than by a label in a side panel.
 
-Also records the hand-over button, with the condition stated as nothing
-further is possible rather than everything is used - the naive version hangs
-whenever a player has no legal intervention. A toggle, off by default.
+The hand-over stays a toggle, off by default, with the condition stated as
+nothing further is possible rather than everything is used.
+
+The compensating tile is in, off, and not validated. It went in on a clean
+argument - a blessed tile is worth 3, OP-07's left-seat bias is +4.0, so one
+tile very nearly cancels it - and sim/handicap.js does not agree. Haunt moves
+nearly 8, because a blessed tile also enlarges the connected region a stone's
+power is measured over and gives a tile to bless outward from. Bands moves
+the wrong way. At 160 games a cell that looked like +10.8 and alarming; at
+400 it is +3.0 ± 3.8 and is noise. Nothing is resolved at these sample sizes
+- OP-07's own figure took 1,160 games - and the likely mechanism is OP-01
+again, since a pre-blessed start tile lowers blessGain under the token and a
+one-ply chooser then takes a different first act. The numbers are in OP-07
+rather than the toggle being quietly kept.
+
+If that doctrine-dependence turns out to be real it has exactly the disease
+A-17's bias has: a bias whose sign depends on how you play cannot be
+corrected by a static handout to one seat. The answer for both is the same
+one, and it is a fourth candidate the register had never considered - let the
+second player choose their seat. Cities wants to act first and blessing
+doctrines want to act second, so seat choice converts the asymmetry into a
+decision rather than a handicap. That is A-10's move, and it costs no engine
+change.
+
+The chronicle is not done, and deliberately. One log, folded shut and
+labelled told from the left hand, which is honest and costs nothing. Two
+properly addressed logs is a mechanical change to about forty say() call
+sites and wants its own pass.
+
+Board size and mis-tapping are recorded in OP-21 and deferred. smoke.js now
+plays a two-seat game through the build's own buttons, 11,758 checks, and
+asserts the thing that matters: that handing over does not move the world.

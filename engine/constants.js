@@ -46,6 +46,13 @@ FG.resetTune = function () {
 // walls are slow going (cost 3) rather than impassable
 FG.SOFT = false;
 
+// OP-07/OP-21. Tiles blessed for the right-hand seat at year one, against the
+// measured +4.0 ± 1.4 point advantage the left-hand seat gets from map
+// generation. Zero by default — every number measured so far was taken without
+// it, and it is only wanted when a person is sitting in the right-hand seat.
+// Applied in createGame; see the note there for what it cannot fix.
+FG.HANDICAP = 0;
+
 // --- R2: the August 2026 batch ------------------------------------------
 // OP-19 and OP-20, plus the smaller rules settled alongside them. Every one is
 // off by default, and with all of them off this engine plays exactly the game
