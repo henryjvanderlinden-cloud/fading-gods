@@ -1,54 +1,24 @@
-OP-21: two people at one board, built
+The seat control goes in the header, and the page says what the game is
 
-A second person is an option in the other seat, and choosing it restarts,
-because it changes the shape of a year rather than the strength of an
-opponent. The year goes left seat, hand over, right seat, and only then does
-the world move.
+Found by opening the build. The two-player switch was in the sidebar below
+"on the road", the intervention list, the chart and "your stones", so on a
+narrow window it sat below the whole board and the first person to look for
+it could not find it. A control that changes what a year *is* should not be
+below the fold, so the other seat and its two toggles move to the top right,
+beside the title.
 
-The engine's one structural assumption about who is human is gone. endYear()
-no longer hardcodes aiTurn(1), and the year reset clears both seats rather
-than seat 0 alone. Neither can move a measured number - ai.js reads neither
-acted nor cast - and node sim/matrix.js 40 40 cities reproduces §10 exactly
-at 57/8/43/13, which is how that claim is checked rather than asserted.
-ui.js addresses one SEAT variable instead of 52 literals, and the map click
-handler reads it at click time rather than closing over it, so the cached
-land layer survives a hand-over.
+The title was still "the levy marches", which was the name of the build that
+introduced marching armies and has been the name of the whole game ever since
+by accident. It is Fading Gods, subtitled prototype.
 
-Hotseat is cheaper here than a hotseat usually is, and the reason is worth
-recording: there is no hidden information in this game, so no curtain is
-needed between turns. What is needed instead is knowing whose year it is
-from across a table, so the active seat is carried by colour across the full
-width of the board rather than by a label in a side panel.
+The blurb underneath was about levies for the same reason - it described the
+one feature that build had added rather than the game. Replaced with the
+epigraph, a paragraph on what the game is, and a paragraph on how a year is
+spent: three moves, one act, one intervention. Somebody opening this for the
+first time now learns the ratchet - blessed ground, reckoned ground, and that
+your own farmland walls you out - before they are asked to make a decision
+about it.
 
-The hand-over stays a toggle, off by default, with the condition stated as
-nothing further is possible rather than everything is used.
-
-The compensating tile is in, off, and not validated. It went in on a clean
-argument - a blessed tile is worth 3, OP-07's left-seat bias is +4.0, so one
-tile very nearly cancels it - and sim/handicap.js does not agree. Haunt moves
-nearly 8, because a blessed tile also enlarges the connected region a stone's
-power is measured over and gives a tile to bless outward from. Bands moves
-the wrong way. At 160 games a cell that looked like +10.8 and alarming; at
-400 it is +3.0 ± 3.8 and is noise. Nothing is resolved at these sample sizes
-- OP-07's own figure took 1,160 games - and the likely mechanism is OP-01
-again, since a pre-blessed start tile lowers blessGain under the token and a
-one-ply chooser then takes a different first act. The numbers are in OP-07
-rather than the toggle being quietly kept.
-
-If that doctrine-dependence turns out to be real it has exactly the disease
-A-17's bias has: a bias whose sign depends on how you play cannot be
-corrected by a static handout to one seat. The answer for both is the same
-one, and it is a fourth candidate the register had never considered - let the
-second player choose their seat. Cities wants to act first and blessing
-doctrines want to act second, so seat choice converts the asymmetry into a
-decision rather than a handicap. That is A-10's move, and it costs no engine
-change.
-
-The chronicle is not done, and deliberately. One log, folded shut and
-labelled told from the left hand, which is honest and costs nothing. Two
-properly addressed logs is a mechanical change to about forty say() call
-sites and wants its own pass.
-
-Board size and mis-tapping are recorded in OP-21 and deferred. smoke.js now
-plays a two-seat game through the build's own buttons, 11,758 checks, and
-asserts the thing that matters: that handing over does not move the world.
+No rules changed. smoke.js still passes 11,758 checks, including the two-seat
+game played through the build's own buttons, and picking a doctrine back out
+of the dropdown returns to a single-player game correctly.

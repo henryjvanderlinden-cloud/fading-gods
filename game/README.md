@@ -27,8 +27,13 @@ somebody's fields.
 
 ## Two people at one board
 
-Pick **a second person, at this board** in *the other seat*. That restarts, because
-it changes the shape of a year rather than the strength of an opponent.
+Pick **a second person, at this board** in *the other seat*, at the top right of the
+page. That restarts, because it changes the shape of a year rather than the strength
+of an opponent.
+
+It is in the header rather than the sidebar for a reason worth keeping: it was in the
+sidebar first, below *your stones*, and the first person to open the build could not
+find it. A control that changes what a year *is* should not be below the fold.
 
 A year is then: the left hand acts, hands over, the right hand acts, and only then
 does the world move. The button says which. Whose year it is runs in that seat's own
@@ -41,7 +46,7 @@ wonder count is derivable from the board, so both players can watch each other
 decide. For OP-21's purpose that is a feature rather than a concession: the whole
 reason the mode exists is to hear somebody reason out loud about whether to teach.
 
-Two toggles sit under the dropdown.
+Two toggles sit under the dropdown, and both apply to a single-player game too.
 
 **Hand over as soon as nothing further is possible** — off by default. The condition
 is deliberately *nothing further is possible* and not *everything is used*: waiting

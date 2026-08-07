@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fading Gods — the levy marches</title>
+<title>Fading Gods</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@300;400&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
@@ -26,7 +26,21 @@ header{padding:30px 0 12px;border-bottom:1px solid var(--line)}
 h1{font-size:26px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:lowercase}
 .sub{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.22em;
  text-transform:uppercase;color:var(--faint);margin-top:5px}
-.q{max-width:68ch;color:var(--dim);margin:16px 0 20px;font-size:15px}
+/* The title on the left, who is in the other seat on the right. It lives up here
+   rather than in the sidebar because choosing a second person changes the shape
+   of a year, and a control that changes the game should not be below the fold
+   under "your stones". OP-21. */
+.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
+.seat{flex:0 1 auto;min-width:290px;max-width:350px}
+.seat .lab{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:9.5px;letter-spacing:.2em;
+ text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.seat .cb{display:flex;gap:7px;align-items:baseline;font-family:'IBM Plex Sans Condensed',sans-serif;
+ font-size:11px;letter-spacing:.04em;color:var(--dim);margin-top:7px;cursor:pointer}
+.seat .cb input{accent-color:var(--gold);margin:0;flex:0 0 auto}
+.ep{max-width:68ch;margin:20px 0 0;font-size:17px;color:var(--ink)}
+.q{max-width:68ch;color:var(--dim);margin:10px 0 20px;font-size:15px}
+.q b{font-weight:400;color:var(--ink)}
+.q .hh{color:var(--bless)}.q .rr{color:var(--reck)}
 .cols{display:grid;grid-template-columns:1fr 330px;gap:32px;align-items:start}
 @media(max-width:1180px){.cols{grid-template-columns:1fr}}
 h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:10.5px;
@@ -132,12 +146,40 @@ details.blk[open] summary::before{content:"⌄ "}
 </style>
 </head>
 <body><div class="wrap">
-<header><h1>the levy marches</h1><div class="sub">prototype · forty years · armies on the road</div></header>
-<p class="q">A levy no longer strikes from nowhere. It forms, and then it walks — one tile a year,
-and you can see exactly where it is going. You can wall it out by drowning the ground or raising
-mountains across its road, or you can send a <b style="color:var(--bless);font-weight:400">bad omen</b>
-and empty the town before it arrives, so that they take the walls and none of the people. But the
-people have to go somewhere, and where they go, they grow.</p>
+<header>
+ <div class="hd">
+  <div><h1>Fading Gods</h1><div class="sub">prototype</div></div>
+  <div class="seat">
+   <div class="lab">the other seat</div>
+   <select id="doc">
+    <option value="cities">Cities — founds, never splits, lets them grow</option>
+    <option value="bands">Bands — splits at sixty, blesses constantly</option>
+    <option value="mixed">Mixed — a bit of both</option>
+    <option value="passive">Passive — does nothing at all</option>
+    <option value="human">A second person, at this board</option>
+   </select>
+   <!-- OP-21. Two people at one screen. There is no hidden information in this
+        game, so a hotseat needs no curtain between turns — which is normally
+        the expensive part of one. -->
+   <label class="cb"><input type="checkbox" id="autopass"><span>hand over as soon as nothing
+    further is possible</span></label>
+   <label class="cb"><input type="checkbox" id="even"><span>even the map — one blessed tile to
+    the right hand</span></label>
+  </div>
+ </div>
+</header>
+<p class="ep">You can only be remembered by the thing that deafens you.</p>
+<p class="q">You are an old power in a small valley, and you are fading. Nothing takes your power
+away: the people build enough instruments that they stop needing to ask, and then stop being able
+to hear. You put them here yourself, knowing what grows from them. Where you have walked the ground
+is <b class="hh">blessed</b>; where a settlement has counted and ploughed it the ground is
+<b class="rr">reckoned</b>, and you cannot set foot on it again — your own farmland walls you out
+exactly as theirs does. Every settlement that grows loud enough costs you the greatest
+<b>wonder</b> you have left, and opens a <b>work of the settled</b> in its place.</p>
+<p class="q">Each year you have <b>three moves</b>, <b>one act</b> — bless the ground you stand on,
+raise a stone, found a settlement, split one — and <b>one intervention</b>, which is a wonder while
+you still have wonders and a work once you do not. Forty years, and whoever holds the most ground
+at the end of them wins. You will end holding everything you can build and nothing you can call.</p>
 
 <div class="cols">
 <div>
@@ -179,23 +221,6 @@ people have to go somewhere, and where they go, they grow.</p>
    <div class="key" id="ckey"></div>
   </div>
   <div class="blk"><h2>your stones</h2><ul class="sl" id="st"></ul></div>
-  <div class="blk"><h2>the other seat</h2>
-   <select id="doc">
-    <option value="cities">Cities — founds, never splits, lets them grow</option>
-    <option value="bands">Bands — splits at sixty, blesses constantly</option>
-    <option value="mixed">Mixed — a bit of both</option>
-    <option value="passive">Passive — does nothing at all</option>
-    <option value="human">A second person, at this board</option>
-   </select>
-   <!-- OP-21. Two people at one screen. There is no hidden information in this
-        game, so a hotseat needs no curtain between turns — which is normally
-        the expensive part of one. -->
-   <div class="tune" style="margin-top:10px">
-    <label class="cb"><input type="checkbox" id="even"><span>even the map — one blessed
-     tile to the right hand</span></label>
-    <label class="cb"><input type="checkbox" id="autopass"><span>hand over as soon as
-     nothing further is possible</span></label>
-   </div></div>
   <div class="blk"><h2>settlements</h2><ul class="sl" id="sl"></ul></div>
   <details class="blk" id="logwrap" open><summary id="logsum">what happened</summary>
    <div class="log" id="log"></div></details>
