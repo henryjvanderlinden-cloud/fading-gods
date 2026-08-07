@@ -21,6 +21,31 @@ longer anything else to blame.
 **Settled by:** writing a two- or three-ply search, or a scripted "expert" line per
 doctrine, and re-running the matrix. Expect the numbers to move.
 
+### Two measurements from the August 2026 batch make this concrete
+
+It has been stated as a caveat since it was raised. It is now a demonstrated,
+quantified obstacle, twice over.
+
+**A twelve-line change to the chooser was worth 35 percentage points.** More than
+any rule in the batch. A teaching bonus weighted at 6 instead of 3, counting every
+untaught settlement instead of the ones ready for the plough, held the token
+loitering among its own villages and cut Cities from 8.8 foundings a game to 2.0.
+The first full measurement of OP-19 was drawn from that run and every conclusion in
+it was wrong. **The AI is not a caveat on the numbers; on that run it was the
+largest term in them.**
+
+**And it cannot see two of the batch's rules at all.** `taughtLoss` and `audible77`
+both measure at exactly zero. Both are rules about choices a greedy one-ply chooser
+does not make — when to spend a wonder, whether to keep a settlement small enough
+to hear you. They are kept anyway, on judgement, which is recorded in OP-19 and is
+the first time this project has kept anything against its own measurement.
+
+**That is the real cost of OP-01, and it is not "the numbers might move."** It is
+that a whole category of rule — the kind that trades something now for something
+later, which is most of what this game is about — is currently unmeasurable.
+Settling this does not just re-rank the doctrines. It decides whether several rules
+in the build have a reason to exist.
+
 ## OP-03 · high · Does being walled in feel like an ending or like confiscation?
 
 At forty turns with hard walls, late-game reachable area falls to single digits and
@@ -55,6 +80,24 @@ costume.
 **Settled by:** playing and noticing. If it doesn't land, candidate fixes are
 fewer works, or works that are situationally weaker than wonders rather than
 strictly later.
+
+**Measured, August 2026, and the number is unkind.** OP-19 moved the wonder trigger
+from population to teaching — a change to *when you lose every wonder in the game* —
+and it altered no win rate at all. Not by a little: `taughtLoss` on and off produce
+identical tables.
+
+The straightforward reading is that in the AI's hands **wonders are worth
+approximately nothing**, so it makes no difference when they are taken away. That
+is either a devastating answer to this question or an artefact of OP-01, which
+spends them greedily on whatever is in reach and never holds one in reserve — and
+holding one in reserve is the entire premise of the trade this question is about.
+
+Note which way the evidence runs, though: the trade cannot be *felt* by a chooser
+that has no feelings, and the one played game so far had a player deliberately
+teaching three villages knowing what it cost. **The question is unchanged and the
+measurement cannot answer it.** But it can now be said with numbers that nothing
+mechanical is carrying the ladder, so if the trade does not land emotionally, there
+is nothing else holding it up.
 
 ## OP-05 · medium · Mid-game sag
 
@@ -353,6 +396,58 @@ to *Dunbar is social*. And the final board was OP-15's **Polytheism** almost
 exactly, two territories divided by a mountain spine and water — but at 108 to 75
 it would not have fired, which suggests the near-tie condition on that ending is
 wrong.
+
+### Which rule is doing what — leave-one-out
+
+30 games per cell, seeds split, each row the whole batch minus one rule.
+
+| | Cities | Haunt | Bands |
+|---|---|---|---|
+| shipped | 53% | 17% | 10% |
+| the whole batch | 40% | 77% | 67% |
+| without `logistic` | 53% | 63% | **23%** |
+| without `teaching` | 47% | 57% | 47% |
+| without `taughtLoss` | 40% | 77% | 67% |
+| without `audible77` | 40% | 77% | 67% |
+| without `fade` | 37% | 67% | 53% |
+| without `exitLane` | **53%** | 77% | 67% |
+
+**`logistic` is the batch.** Bands falls 67 → 23 without it. Cutting blessing from
+3 to 2 was worth only 12 points by comparison, so **A-09 is not reopened** — that
+was proposed on the reading of one played game and withdrawn on measurement. The
+per-tile premium is not what makes the magical line work; capping settlement
+production is.
+
+### Three decisions taken on this table
+
+**The overshoot stands for now.** Haunt at 77% and Bands at 67% are higher than
+*possible, and hard* wants, and `r`, the taught caps, and A-14's reckoning budget
+are the three ways down. Left alone deliberately — the batch is not finished, and
+tuning an unfinished rule set means tuning it twice.
+
+**`exitLane`'s rate is kept, and is now a decision rather than an accident.** It
+arrived attached to the entombment fix and was never argued; measured, it costs
+Cities 13 points, because ploughing one tile a year in the first ring instead of
+three is a straight nerf to settlements. **Settlements should be nerfed, and one
+tile a year is enough.** The two halves of the flag are separable and both stay:
+the never-seal-a-place-in invariant is the bug fix, the rate is the balance change.
+
+**`taughtLoss` and `audible77` are kept against a null result, on purpose.** Both
+measure at exactly zero — not a small effect, no effect. Both are rules about
+*choices*: when to spend a wonder, whether to keep a settlement small enough to
+hear you. A one-ply greedy chooser makes neither, so **the harness is structurally
+incapable of seeing what they are for.** They are for players.
+
+This is the first thing in the project kept against its own measurement, and it
+should be uncomfortable, so it is written down rather than left implicit. Two
+consequences follow:
+
+- **Neither is dead code and neither should be cleaned up.** If someone later finds
+  a flag with no measured effect and removes it, this paragraph is why not.
+- **Re-measure both the moment OP-01 improves.** A chooser that can plan two moves
+  is the first thing that could give either of them a number. If they still measure
+  zero against an opponent that can see a wonder coming, that is a different result
+  and this decision should be revisited.
 
 ### Also settled in this batch, and unbuilt
 
