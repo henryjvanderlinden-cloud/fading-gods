@@ -247,11 +247,16 @@ function figureM(x, y, col) {
 // ------------------------------------------------------------------ a tile
 function tileArt(t, k) {
  const [x, y] = px(t.c, t.r), r = rng(t.seed);
- const blessed = t.st === "bless" && !impassable(t);
+ // OP-19. A settlement stands in its own fields — but only once it has been
+ // taught to make them. Untaught, it is still blessed country with people in it,
+ // and the fill has to say so, because the fill is the most legible thing on the
+ // board and this is the decision the game is about.
+ const tilled = t.set && (!FG.R2.teaching || t.set.taught);
+ const blessed = (t.st === "bless" || (t.set && !tilled)) && !impassable(t);
  let fill = P.land[t.t];
  if (blessed) fill = P.bless[t.t] || fill;
  if (t.st === "reck") fill = P.reck;
- if (t.set) fill = P.reck;                 // a settlement stands in its own fields
+ if (tilled) fill = P.reck;
  let s = `<path class="hx" d="${hexPath(x, y)}" fill="${fill}" stroke="${P.seam}"
    stroke-width="${u(0.7).toFixed(1)}" data-k="${k}"/>`;
 
@@ -276,7 +281,7 @@ function tileArt(t, k) {
  }
  // Farmland: strips of different crop, some green, some fallow, angled by
  // faction. Strips stay inside 0.64·SZ so they rotate without leaving the hex.
- if (t.st === "reck" || t.set) {
+ if (t.st === "reck" || tilled) {
   const own = t.set ? t.set.own : t.own, ang = own === 0 ? -32 : 30;
   const gap = u(5.4), top = y - u(8.6), hgt = u(3.1);
   s += `<g transform="rotate(${ang} ${x.toFixed(1)} ${y.toFixed(1)})">`;
@@ -294,8 +299,9 @@ function tileArt(t, k) {
   s += `</g>`;
   if (!t.set) s += boundaryStone(x, y, own, t.seed);
  }
- if (blessed && !t.set) {
-  const sp = SPARK[t.own === 0 ? 0 : 1];
+ // An untaught settlement still sparkles: they are few, and they can still hear.
+ if (blessed && (!t.set || !tilled)) {
+  const sp = SPARK[(t.set ? t.set.own : t.own) === 0 ? 0 : 1];
   s += twinkle(x - u(9) + r() * u(4), y - u(7) + r() * u(3), u(4.4), sp[0], r())
      + twinkle(x + u(7) - r() * u(4), y - u(1) + r() * u(4), u(3.4), sp[1], r())
      + twinkle(x - u(3) + r() * u(6), y + u(8) - r() * u(3), u(3.9), sp[2], r())
@@ -376,7 +382,7 @@ function render() {
  // read, so this stays a pure function of state and owns no rules.
  let over = "", scrim = "";
  const key = G.T.map(t => t.t + t.st + (t.own === null ? "-" : t.own)
-   + (t.set ? "s" + t.set.own + Math.round(t.set.pop) : "")).join("")
+   + (t.set ? "s" + t.set.own + Math.round(t.set.pop) + (t.set.taught ? "T" : "") : "")).join("")
    + "|" + G.stones.map(a => a.join(",")).join("/");
  const landStale = key !== LAND.key;
  if (landStale) {
@@ -482,8 +488,22 @@ function render() {
  // interventions
  const lostN = lostCount(0), bg = bigCount(0), hg = hugeCount(0), wk = working(0).length, cs = civicStrength(0);
  $("tally").textContent =
-  `${bg} past 150 · ${hg} past 800 · ${wk} working stone${wk === 1 ? "" : "s"} · strength ${cs}`
+  (FG.R2.taughtLoss ? `${FG.taughtCount(0)} taught to till · ` : `${bg} past 150 · `)
+  + `${hg} past 800 · ${wk} working stone${wk === 1 ? "" : "s"} · strength ${cs}`
+  + (FG.R2.fade ? ` · ${Math.round(FG.manifest(0) * 100)}% of you left` : "")
   + (G.p[0].cast ? " · intervened" : "");
+
+ // OP-19. The teachings — neither wonders nor works, and only present at all
+ // when the rule is on. Drawn first, because they are the decision the batch is
+ // about and they are done in person rather than called from anywhere.
+ $("teach").innerHTML = !FG.R2.teaching ? "" : FG.TEACH.map(s => {
+  const n = targets(s.id, 0).length;
+  return `<li><span class="nm">${s.n}</span><span class="ds">${s.d}</span>
+   <button style="margin-top:5px" class="${ARM === s.id ? "arm" : ""}"
+    ${(G.p[0].cast || G.over || !n) ? "disabled" : ""} data-iv="${s.id}">
+    ${ARM === s.id ? "choose a settlement" : (n ? "teach · " + n : "none of yours in reach")}</button></li>`;
+ }).join("");
+
  const open = civicOpen(0);
  $("divine").innerHTML = DIVINE.map((s, i) => {
   const gone = i < lostN, n = gone ? 0 : targets(s.id, 0).length;
@@ -586,6 +606,46 @@ cbl.className = "cb";
 cbl.innerHTML = `<input type="checkbox" id="sf"><span>walls are slow going, not impassable</span>`;
 tw.appendChild(cbl);
 cbl.querySelector("input").onchange = e => { FG.SOFT = e.target.checked; render(); };
+
+// --- which rules ---------------------------------------------------------
+// FG.R2, the August 2026 batch. All off is the game design/rules.md describes,
+// and the two sets can be compared on the same map because changing a flag
+// restarts from the same seed. Flags that are declared but not yet implemented
+// are shown and marked, rather than hidden — a switch that does nothing is less
+// confusing than a rule nobody can find.
+const R2BUILT = ["logistic", "teaching", "taughtLoss", "audible77", "fade", "exitLane"];
+const R2LABEL = {
+ logistic:"growth is logistic; terrain sets the ceiling", teaching:"tilling and killing are taught, in person",
+ taughtLoss:"a wonder goes on teaching, not at 150", audible77:"under seventy-seven, they bless the ground",
+ split2:"split reaches two tiles, to your blessing", fade:"you may walk the fields, at 10% of you a year",
+ unmake:"taking their blessing returns it to wild", encircle:"a ring of blessing takes a place",
+ landGates:"works open on tilled land, not on numbers", pathFrac:"distance is measured by road",
+ barren3:"withered ground stays barren three years", exitLane:"the fields never quite close over"
+};
+const r2w = $("r2"), R2SEED = {v: 1};
+Object.keys(FG.R2).forEach(k => {
+ const built = R2BUILT.includes(k), l = document.createElement("label");
+ l.className = built ? "" : "off";
+ l.innerHTML = `<input type="checkbox" data-r2="${k}"${built ? "" : " disabled"}>`
+  + `<span style="color:${built ? "var(--dim)" : "var(--faint)"}">${R2LABEL[k]}${built ? "" : " · not built"}</span>`;
+ r2w.appendChild(l);
+});
+function r2sync() {
+ r2w.querySelectorAll("[data-r2]").forEach(i => { i.checked = FG.R2[i.dataset.r2]; });
+ const on = R2BUILT.filter(k => FG.R2[k]).length;
+ $("r2state").textContent = on === 0 ? "the shipped game — design/rules.md as written"
+  : on === R2BUILT.length ? "the August batch, whole — OP-19 and OP-20"
+  : on + " of " + R2BUILT.length + " built rules on";
+}
+// Same seed, so the only difference between two runs is the rules.
+function r2restart() { r2sync(); ARM = null; LAND = {key:null, html:""};
+ FG.createGame({them: $("doc").value, seed: R2SEED.v}); $("done").innerHTML = ""; render(); }
+r2w.querySelectorAll("[data-r2]").forEach(i => {
+ i.onchange = () => { FG.R2[i.dataset.r2] = i.checked; r2restart(); };
+});
+$("r2off").onclick = () => { FG.R2all(false); r2restart(); };
+$("r2on").onclick  = () => { FG.R2all(false); R2BUILT.forEach(k => FG.R2[k] = true); r2restart(); };
+r2sync();
 
 ["bless", "stone", "found", "split"].forEach(a => {
  $(a).onclick = () => {

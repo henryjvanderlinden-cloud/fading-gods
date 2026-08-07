@@ -7,6 +7,39 @@ directory up, and are shared with `sim/`. `ui.js` is the renderer and the input
 handling, and owns no rules: if a rule appears in it, the simulator cannot see it
 and the balance numbers stop meaning anything.
 
+## Which rules you are playing
+
+The build ships with `FG.R2` — the August 2026 batch, OP-19 and OP-20 — entirely
+**off**, so opening `index.html` plays the game `design/rules.md` describes. The
+**which rules** panel in the right-hand column switches between the two, and
+changing anything in it restarts year one **on the same map**, so the two rule sets
+can be compared on the same ground rather than on two different draws.
+
+Six of the twelve rules are built: logistic growth, the two teachings, the wonder
+trigger, the audible Seventy-Seven, walking the fields at a price, and the exit
+lane. The other six are listed, disabled, and marked *not built* — a switch that
+does nothing is less confusing than a rule nobody can find.
+
+Two things only appear with the batch on: **the teachings**, at the top of the
+intervention column, which are done in person rather than called from anywhere; and
+**manifestation**, in the tally line, which is what is left of you after walking in
+somebody's fields.
+
+An untaught settlement is drawn as blessed country with people in it — blessed
+fill, sparkle, no furrows. It only becomes farmland-ochre the year you teach it.
+That is the decision the batch is about, and the fill is the most legible thing on
+the board.
+
+### Why `previous/` cannot hold a snapshot of this one
+
+The four prototypes in `previous/` are self-contained: their rules are inside the
+HTML, which is what makes them frozen. This build loads `../engine/*.js`, so a copy
+of it would go on following the live engine and would stop being a record of
+anything — the A-16 failure mode, arrived at from a different direction.
+
+The R2 panel is what replaces that pattern. One build, both games, switchable, and
+the old rules stay reachable by construction rather than by copying.
+
 ## What it looks like, and why
 
 The art direction is `concept/art-direction/`, and the reasoning is in the README
