@@ -1,0 +1,36 @@
+{
+  "group_id": "c188d71a-5c3b-44b3-8fb6-4adcce2d69f5",
+  "states": [
+    {
+      "character": {
+        "id": "6d9cd4d7-3817-43fb-8411-427239563f2f",
+        "name": "Idle",
+        "prompt": "person with a helmet with antlers holding a staff and a large golden ring, with a large flowing green cape, in medieval attire. His theme is forest. It is serious looking, not cartoony, and draws inspiration from frank gazzetta and the DOS game Fantasy Empires.",
+        "size": {
+          "width": 88,
+          "height": 88
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-08-07T12:25:39.283438+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-08-07T12:31:59.208691"
+}

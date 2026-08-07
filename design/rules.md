@@ -5,6 +5,17 @@ tuned value, not a principle; nearly all of them are exposed as sliders in the
 build so they can be argued with. Where a rule is a *principle* rather than a
 number, it is marked **[load-bearing]**.
 
+> **A second rule set exists and is not described here.** `FG.R2` in
+> `engine/constants.js` holds the August 2026 batch — OP-19 and OP-20 — twelve
+> rules, all off by default. With them off the engine plays exactly what is
+> written below, which is the point of them being off. Six are built and
+> measured; the numbers are in OP-19 and they are *better than §10*, so this
+> document will be rewritten around them if they survive tuning. Until then it
+> describes the shipped game, and OP-19 describes the candidate.
+>
+> A-16 is the reason this note exists. A document that quietly stops matching
+> the game does not announce it.
+
 ---
 
 ## 1. The board

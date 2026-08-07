@@ -312,6 +312,20 @@ not answer this on its own either.
 it does nothing — the doctrines that would use it were already winning every game
 against a crippled opponent. Re-measure once Cities works.
 
+### Also settled in this batch, and unbuilt
+
+Small rules that arrived with OP-19 and have no question of their own. Recorded
+here so they are not lost between a settled argument and an unwritten design doc.
+Flags are declared in `FG.R2` and do nothing yet.
+
+| Flag | Rule | Why |
+|---|---|---|
+| `barren3` | Withered ground stays barren three years before a settlement may plough it again | The immediate effect is currently unnoticeable — reckoning resumes the very next `worldTick`. The permanent cost already in the code stays: re-reckoning re-spends the settlement's 30-tile lifetime budget, which is real and invisible. Tilts magical, which is wanted. |
+| `split2` | Split targets any tile you have blessed within path distance 2, without the 85% founding requirement; the splinter is untaught | Path distance rather than ring distance, consistent with A-18, so water and mountains constrain your own fission exactly as they constrain founding. Split cannot leapfrog terrain. |
+| `landGates` | See OP-05 | |
+| `pathFrac` | See A-18 | |
+| `unmake`, `encircle` | See OP-16, OP-20 | |
+
 ### What has to be decided before this can be measured again
 
 Teaching-in-person is the design intent and it is not in question. *Where* the

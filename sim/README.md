@@ -97,3 +97,43 @@ FG.CONTEST = true;           // rejected A-17 candidate — contested ground goe
 FG.BLESS_WILD_ONLY = true;   // rejected A-17 candidate — bless never takes their ground
 FG.SOFT = true;              // walls cost 3 rather than blocking
 ```
+
+## FG.R2 — the August 2026 batch
+
+Twelve rules from OP-19 and OP-20, each individually toggleable, **all off by
+default**. With all of them off this engine plays exactly the game
+`design/rules.md` describes, which is what makes it the A/B baseline — and it is
+worth keeping true, so check `sim/smoke.js` still reports 11,732 passing before
+trusting a comparison.
+
+```js
+FG.R2all(true);              // the whole batch
+FG.R2all(false);             // the game as shipped
+FG.R2.logistic = true;       // or one rule at a time
+```
+
+| Flag | Rule |
+|---|---|
+| `logistic` | logistic growth; the ceiling carries terrain and teaching, not the rate |
+| `teaching` | tilling and killing, taught per settlement, in person |
+| `taughtLoss` | the wonder goes on teaching rather than at population 150 |
+| `audible77` | settlements under seventy-seven bless the ground round them |
+| `split2` | split targets your blessing at path distance 2 |
+| `fade` | reckoned ground walkable; 10% of manifestation to end a year in it |
+| `unmake` | taking their blessing returns it to wild |
+| `encircle` | a ring of blessing takes a settlement; the taboo |
+| `landGates` | works unlock on tilled land, not on population |
+| `pathFrac` | `blessFrac` counts path distance |
+| `barren3` | withered ground stays barren three years |
+| `exitLane` | the fields close slowly, and never seal a place in |
+
+Numbers live in `FG.R2TUNE` — growth rate, the three carrying capacities, the
+toll, and the rest. Not in `FG.TUNE`, because that is the slider panel and these
+are not sliders yet.
+
+**Turn them on one at a time when measuring.** The first run of this batch
+produced a 35-point swing that looked like a rule and was a bug in the chooser;
+a single master switch could not have told the two apart. See OP-19.
+
+Stage 1 — `logistic`, `teaching`, `taughtLoss`, `audible77`, plus `exitLane` and
+`fade` — is built. The rest are declared and not yet implemented.
