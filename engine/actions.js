@@ -7,6 +7,16 @@ const {NB, ring, T, say, impassable, DIVINE, MOUNT, DROWN, BLIGHT,
        canFound, canSplit, canStone, settlements, walkStep,
        mountainLine, nearestSource} = FG;
 
+// A settlement, with the two things it may be taught. `taught` and `kill` are
+// present whatever FG.R2.teaching says, so state stays one shape and the flag
+// only decides whether anything reads them. OP-19.
+FG.newSet = function (pop, who, from) {
+ return {pop, own:who, spent:0,
+         taught: !!(from && from.taught),    // a colony inherits; a splinter does not
+         kill:   !!(from && from.kill),
+         tabu:   false};                     // OP-20
+};
+
 // --- acts ---------------------------------------------------------------
 function doAct(kind, who) {
  const k = FG.G.p[who].pos, t = T(k), me = who === 0;
@@ -23,14 +33,16 @@ function doAct(kind, who) {
   say(me ? "A stone comes up out of the ground. Nobody set it there." : "A stone rises on their side.", me ? "omen" : "riv");
  } else if (kind === "found") {
   if (!canFound(k, who)) return false;
-  t.set = {pop:30, own:who, spent:0}; t.st = "wild"; t.own = null;
+  t.set = FG.newSet(30, who); t.st = "wild"; t.own = null;
   say(me ? "Thirty of them stay. They will not stay thirty." : "They put down a settlement.", me ? "good" : "riv");
  } else if (kind === "split") {
   if (!canSplit(k, who)) return false;
   const free = NB[k].filter(x => canFound(x, who));
   const nk = FG.pick(free);
   const half = Math.floor(t.set.pop / 2); t.set.pop -= half;
-  T(nk).set = {pop:half, own:who, spent:0}; T(nk).st = "wild"; T(nk).own = null;
+  // A splinter is born untaught, always. A split is the opposite gesture from a
+  // colony: it is the Seventy-Seven, people choosing to go back. OP-19.
+  T(nk).set = FG.newSet(half, who); T(nk).st = "wild"; T(nk).own = null;
   say(me ? "They keep the Seventy-Seven. Half go over the rise." : "They split one of theirs.", me ? "good" : "riv");
  } else return true;   // do nothing
  return true;
@@ -39,6 +51,23 @@ function doAct(kind, who) {
 // --- interventions ------------------------------------------------------
 function doIntervene(id, k, who) {
  const me = who === 0, t = T(k);
+
+ // OP-19. Teaching. Nothing is deducted and nothing is spent — the price of
+ // tilling is a wonder, and it is charged by lostCount() reading the board.
+ if (id === "till" || id === "kill") {
+  if (!FG.R2.teaching) return false;
+  if (!FG.teachTargets(id, who).includes(k)) return false;
+  if (id === "till") {
+   t.set.taught = true;
+   say(me ? "You show them the plough, and they take to it. The ground will answer them now."
+          : "They have been taught to plough.", me ? "bad" : "riv");
+  } else {
+   t.set.kill = true;
+   say(me ? "You teach them the other thing. They learn it faster."
+          : "Theirs have been taught to kill.", me ? "bad" : "war");
+  }
+  return true;
+ }
 
  if (id === "mountains") {
   mountainLine(k).forEach(x => { const q = T(x);
@@ -94,7 +123,8 @@ function doIntervene(id, k, who) {
   }
   if (id === "colony") {
    src.t.set.pop *= 0.65;
-   T(k).set = {pop:40, own:who, spent:0}; T(k).st = "wild"; T(k).own = null;
+   // A colony is a work of the settled, and is born tilling. OP-19.
+   T(k).set = FG.newSet(40, who, src.t.set); T(k).st = "wild"; T(k).own = null;
    say(me ? "Forty of them go out with carts and a charter." : "They send out a colony.", me ? "civ" : "riv");
   }
   if (id === "levy") {

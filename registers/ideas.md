@@ -28,7 +28,13 @@ what happens, because you need the epic more than the city.
 
 **Fission as the central choice** — when a settlement splits, do you go with the
 splinter into quiet country and be a god again, or stay with the parent and become
-its administration? Recurring every few decades, never the same twice.
+its administration? Recurring every few decades, never the same twice. *(Now
+concrete as **OP-19**, and for a reason nobody predicted: moving the wonder trigger
+from population to teaching deleted Split's old job — keeping settlements under 150
+— and the Seventy-Seven gave it a better one. A settlement under 77 blesses the
+ground around it, logistic growth carries it past 77 unless you act, and so the
+recurring decision arrives on its own without being scheduled. The half of this
+entry still unbuilt is the part about **which side you go with**.)*
 
 **Temple as life support** — thick walls to stop the noise, ritual cleanliness as
 noise reduction, an inner room. Every strange purity code in the ancient world read
@@ -77,13 +83,21 @@ testing honest.
 settlements, which would give the map more structure than blob islands.
 
 **Sacred groves that cannot be reckoned** — a small number of tiles that resist
-farmland permanently, worth fighting over.
+farmland permanently, worth fighting over. *(Cheaper than it looks now that OP-20
+exists: a forbidden settlement is a tile that cannot be taught, which is most of
+this idea arrived at from the other end. Whether ground should be able to carry the
+same property is a separate and smaller question.)*
 
 **Stones that can be thrown down** — the rival spending a work to destroy one of
 yours, rather than merely starving it.
 
 **A wonder that restores a lost wonder**, once, at enormous cost. The bargain of
-the late game.
+the late game. *(Answered by **OP-20**, and better than it was asked. It is not a
+wonder and it costs no wonder: you take a taught settlement by encirclement and
+forbid the plough, and the wonder that teaching cost comes back. The price is a
+siege rather than a number, the limit is that a taboo is permanent so a place can
+only be forbidden once, and the people of the forbidden city leave on the road. The
+version in this entry was a purchase. The version in OP-20 is an undoing.)*
 
 **Seasons or bad years** — a lean year that halves growth everywhere. Would create
 natural pauses in the exponential.

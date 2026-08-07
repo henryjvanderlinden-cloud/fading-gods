@@ -37,6 +37,15 @@ works reachable rather than earlier, and **OP-14**, which makes the walls passab
 at a permanent price. Both are better answers than opening the works faster,
 because neither disturbs the costs settled in A-13.
 
+**Two answers arrived together in the August 2026 batch, and one of them is not a
+fix to this question but a reversal of it.** OP-14 is adopted — reckoned ground
+becomes enterable at 10% of your manifestation a year — so the walls are priced
+rather than absolute. And OP-20 gives the late game something **additive**: taking
+a loud city by encirclement and forbidding the plough returns a wonder you had
+already lost. If the last ten turns are a decade spent getting one thing back, this
+question answers itself. If they are a decade spent watching a counter, it does
+not. See OP-19 and OP-20.
+
 ## OP-04 · medium · Is the wonder → work trade actually felt?
 
 The intended moment is: *I would rather have had Drown back than the levy I used
@@ -55,6 +64,20 @@ be flat.
 
 **Settled by:** noting which turns you act on instantly. A turn with no hesitation
 is a turn with no decision in it. Map where they cluster.
+
+**Diagnosed, August 2026, and it was worse than a sag.** The works are
+**double-gated** — `targets()` checks a per-settlement population of 150 / 200 /
+300, and `civicOpen()` *also* checks a board-wide ladder
+`strength = settlements≥150 + settlements≥800` at 5 / 7 / 9. Two gates that both
+count population, neither of which the player can read off the board.
+
+**OP-19 removes both**, and pegs the unlocks to land and teaching instead:
+clearance when a settlement's radius-1 ring is tilled, colony at that ring plus two
+further tiles, levy the year killing is taught. Population becomes a growth story
+rather than a gate, and every unlock becomes something you can see.
+
+**This puts A-13 back on the table.** The works' population costs — 10% / 35% /
+45% — were priced against the ladder that is being removed. Re-measure them.
 
 ## OP-06 · high · Does an ascetic strategy ever win?
 
@@ -108,6 +131,233 @@ still at 8% with an opponent that can plan two moves, the honest options are to
 accept that the viable magical line is *few settlements and many stones* and
 rename the doctrine, or to make blessing worth more, which A-09 shows is the lever
 that actually moves this.
+
+## OP-19 · high · The settlement model: does teaching make the magical line real?
+
+**Raised August 2026. This is OP-06's proposed answer, and it is large enough that
+it must be measured before it is believed.** Nothing below has been simulated.
+
+Today a settlement drifts across population thresholds and the player watches. The
+proposal is that **going agricultural becomes a conscious, per-settlement
+decision**, and that everything currently pegged to population moves onto it.
+
+### The five pieces
+
+**1. Growth becomes logistic.** `pop × (1 + r × (1 − pop/K))`, retiring the
+exponential and the 2600 clamp. `r` rises to roughly 0.30–0.35 to compensate for
+logistic slowing the early years; the shape is a fast start and a long plateau.
+
+**2. `K` is where terrain now lives, and it splits in two.** Untaught, the cap is
+**150 flat on every terrain** — Dunbar is a cognitive and social limit and crop
+yield has nothing to do with it. Taught, it is **plain 1000 · forest ~800 · hill
+~600**, which is crop yield, and which makes the teaching decision read the map:
+you teach the plains and leave the hills wild. Because these are ceilings rather
+than compounding rates, the numbers can be far apart without the runaway that
+fertility-on-the-growth-rate currently produces.
+
+**3. Two teachings, each an intervention, each requiring presence.** *Teach tilling
+the land* raises `K` and is the only thing that lets a settlement reckon ground.
+*Teach killing* gates the levy and nothing else. A colony inherits its parent's
+teachings — it is a work of the settled and is born tilling. A splinter does not.
+
+**4. The wonder trigger moves from population to teaching.** Today
+`lost = max(0, settlements≥150 − workingStones)`. Now: **you lose your greatest
+remaining wonder the year you teach a settlement to till.** Two reasons this is the
+keystone rather than a tidy-up. Mechanically, untaught settlements now sit at 150,
+and against a population trigger they would flicker across it every year and the
+ladder would jitter. Thematically, it is the thesis stated as a click: you are not
+deafened because there are a lot of them, you are deafened because you taught them
+to count the fields.
+
+**5. The Seventy-Seven gets teeth.** §4 calls 77–149 *"the regret zone: past magic,
+not yet useful"* and it currently means nothing — band and village differ by a
+label. Under this, **a settlement under 77 passively blesses adjacent ground each
+year**, like a living stone.
+
+### Why 5 is not optional
+
+Without it the model has a hole. An untaught settlement scores 3, exactly what the
+blessed tile it replaced scored; founding sets `st = "wild"`, which **severs your
+blessed region**, and `region()` is what stone power reads, so every settlement
+halves the stones near it; it does not reckon; and it can be encircled and taken
+(OP-20). A purely magical player should therefore found *zero* settlements — which
+makes Bands strictly worse than Haunt and makes the teaching decision moot, because
+there would never be anything to teach.
+
+With it, the untaught band is the magical side's compounding engine, it does not
+touch the stone cap, and `concept/lore.md` becomes mechanical: they hear you
+because they are few and the country is quiet.
+
+### And it gives Split a job again
+
+Split's old purpose — keeping settlements under the 150 wonder threshold — is
+deleted by piece 4. Its new purpose is **keeping them under 77 so they keep
+blessing**, and logistic growth toward `K` = 150 means a settlement drifts past 77
+unless you act. Split now behaves like a colony: it may target any tile you have
+blessed within **path distance 2**, without the 85% founding requirement, and the
+splinter is untaught. This is *fission as the central choice*, which `ideas.md` has
+listed as designed-but-never-built since the beginning.
+
+### What must be watched
+
+- **Split may kill Found.** With no 85% requirement it is better than Found almost
+  everywhere it is legal, leaving Found as the move that starts a region and
+  nothing else. Possibly the right shape. Should be chosen, not discovered.
+- **Does an under-77 settlement bless one tile a year, or its whole ring?** A stone
+  blesses one. Undecided, and the difference is large.
+- **Every number is unmeasured** — `r`, the three caps, split's radius, and the
+  three land-based unlock conditions in OP-05.
+
+**Settled by:** building it behind `FG.R2` and running the matrix both ways on
+identical seeds, watching Bands and Haunt specifically. The goal is stated in the
+fiction and should be stated here too: **a magical victory should be possible, and
+hard.** If Bands is still in single digits with all of this in, the model is wrong
+and not merely untuned.
+
+### First measurement — built, and it overshoots badly
+
+Stage 1 only: logistic growth, teaching, the wonder trigger, the audible
+Seventy-Seven. `FG.R2` in `engine/constants.js`; 40 games per matchup, seeds split
+between both orders, all against the Cities doctrine.
+
+| Flags | Cities | Mixed | Haunt | Bands |
+|---|---|---|---|---|
+| baseline, all off | 50% | 43% | 20% | 8% |
+| `logistic` only | 48% | 43% | **57%** | **40%** |
+| `+teaching +taughtLoss` | **15%** | 60% | **100%** | **93%** |
+| `+audible77` — full stage 1 | 15% | 60% | 100% | 93% |
+
+Three things, and the second is the important one.
+
+**Logistic growth alone very nearly does the job.** Bands 8 → 40 and Haunt 20 → 57
+with Cities untouched at 48. That is the whole of OP-06 moved by one formula, and
+it is a much better result than expected — it says the magical doctrines were
+losing to *exponential settlement growth*, not to anything about blessing.
+
+**Teaching in its current form breaks the Cities doctrine, and the cause is
+entombment.** Measured directly: Cities teaches **1.6 times per game** and spends
+**50% of all player-years with a reach of zero tiles.**
+
+The mechanism is a loop nobody saw coming, though the triage came close:
+
+1. You found a settlement, which puts your token on it.
+2. You teach it — the natural moment, since you are standing there.
+3. It ploughs its own radius-1 ring that same year.
+4. Reckoned ground is impassable, so you are sealed inside a one-tile island,
+   permanently.
+
+So the doctrine that teaches most is punished hardest, and the 15% is not a balance
+result at all — it is a bug in the interaction between two rules that were each
+reasonable alone. **The magical win rates above are therefore not trustworthy
+either**, because they were measured against an opponent that spent half the game
+unable to move.
+
+**`FG.SOFT` is not enough of a fix to hide behind.** With walls priced at 3 instead
+of blocking — the nearest existing stand-in for OP-14 — Cities recovers only to
+15%, still teaching about twice a game. One tile a year through your own fields is
+not mobility. So OP-14 as currently written, at 10% of manifestation a year, may
+not answer this on its own either.
+
+**`audible77` changed nothing measurable**, to two decimal places. Not evidence that
+it does nothing — the doctrines that would use it were already winning every game
+against a crippled opponent. Re-measure once Cities works.
+
+### What has to be decided before this can be measured again
+
+Teaching-in-person is the design intent and it is not in question. *Where* the
+teaching happens is:
+
+- **At founding.** You decide, as you put the settlement down, whether these people
+  will till. No journey, no entombment, and the decision stays conscious and
+  per-settlement. Loses the ability to convert an old band later, which is part of
+  what made the idea attractive.
+- **At founding, or later in person.** Most teaching happens at the founding; the
+  journey is only needed to convert a settlement that already exists. Keeps both,
+  costs a second code path.
+- **Your own fields are passable to you; theirs are not.** Fixes it at the source,
+  and directly contradicts `design/rules.md` §2, which marks *your own farmland
+  walls you out exactly as theirs does* as load-bearing. That rule was written when
+  the arc was purely about being shut out. It now also shuts you out of the one
+  decision the game is about.
+- **OP-14, with a movement allowance large enough to matter**, which the 10% figure
+  may not be.
+
+## OP-20 · high · Encirclement, and the god's right to forbid
+
+**Raised August 2026, alongside OP-19 and dependent on it.**
+
+A settlement completely ringed by one power's blessing changes hands after about
+two turns. A second path to conquest, deliberately cheap, and the first one the
+magical side has ever had.
+
+### The asymmetry is the point
+
+| Route | What transfers |
+|---|---|
+| **Levy** — people take it | Ownership only. It keeps what it knows. |
+| **Encirclement** — you take it | Ownership, **and a decision.** |
+
+On encirclement the player is asked, once, whether tilling and killing remain
+permitted in this place or become **taboo**. It is a consequence rather than an
+act, and should not cost the year's intervention. Nothing else in the game asks a
+question this way.
+
+**People move ownership; gods move knowledge.** The same asymmetry as OP-16 —
+creation at a distance, unmaking only in person — extended from ground to what the
+ground knows. It is also the only un-teaching in the game, other than a splinter
+being born untaught, and it gives the player a verb it has never had: *forbid*.
+
+### What forbidding is worth
+
+**It returns the wonder that teaching cost.** Without that, nobody would ever
+choose taboo — you would be trading a city for a hamlet and getting only the
+hamlet. With it, encircle-and-forbid is the arc played backwards: you take a loud
+place, you make it quiet, and you can hear again. It is `ideas.md`'s *a wonder that
+restores a lost wonder, once, at enormous cost*, except the cost is a siege rather
+than a number.
+
+**The taboo is permanent.** Once forbidden, a place stays forbidden and neither
+power can teach it again. Not a contested state that flips; a thing a god decided
+about a place. That permanence is the only thing limiting the mechanic.
+
+`divineLeft` slices from the front of a fixed order, so a returned wonder is the
+**most recently lost** — Quicken first, Raise mountains last, having been the first
+thing to go. The right order, and free.
+
+### The forbidden city empties
+
+`K` falls from the terrain figure to 150 and the population declines toward it. The
+raw logistic multiplier goes badly negative — 800 against `K` = 150 at `r` = 0.32
+gives about **−0.39**, which is not a population — so the decline needs a floor
+around 25–30% a year, and **the people who leave become refugee columns**, using
+the machinery §7 already has for *Bad omen*. A forbidden city empties over six or
+seven years, visibly, as people on the road.
+
+The second-order consequence is already documented in §7 as the best emergent
+interaction in the build: **the arrivals push another settlement past a
+threshold.** Forbidding one place makes another one loud. You cannot forbid your
+way to silence.
+
+### What must be watched
+
+- **Is encircle-and-forbid too good?** A wonder count that never falls, a late game
+  spent entirely on sieges. The taboo is permanent per *place*, not per player, and
+  there is no limit on the number of places. Measure before adding a cap — the cost
+  of the siege may limit it alone.
+- **Coastal settlements are much cheaper to encircle.** Three land neighbours means
+  three blessed tiles, not six, so Drown-then-encircle is a conquest for a wonder
+  and two acts. Accepted deliberately; recorded so it is not a surprise.
+- **Your own bands are the encircleable ones.** An untaught settlement never
+  reckons, so it never breaks its own ring, and under OP-19 you will have many. The
+  saving grace is that a rival must physically walk around one, through your
+  blessing, which is impassable to them. Probably fine. Worth measuring.
+- **Does forbidding un-reckon the ground?** Probably not — that is what *Wither* is
+  for, and free reversal would make the taboo strictly better than a wonder. But it
+  is not obvious, and the fill colour in OP-17 has to say which way it went.
+
+**Settled by:** building it behind `FG.R2` after OP-19 measures clean, then the
+matrix. Watch the wonder count over a game as its own series — if it is flat after
+year 25 for any doctrine, this is too strong.
 
 ## OP-07 · medium · Map generation is unexamined
 
@@ -205,7 +455,33 @@ permanent command network for the price of a few early acts, and if that is
 correct for every doctrine then it is not a decision, it is a chore with a
 narrative attached.
 
-## OP-14 · high · Can you walk on reckoned ground if it ages you?
+**Two things in the August 2026 batch move this, in opposite directions.** OP-19
+gives settlements under seventy-seven a passive blessing of their own, so a stone
+is **no longer the only compounding thing the magical side owns** — which weakens
+the argument for stones needing a second job. But OP-14's adoption means works no
+longer need a dead stone to be *reachable*, since you can now walk to anything at a
+price. Both halves of the "second answer to OP-03" claim above are therefore
+weaker than when it was written. What survives untouched is the good part: severing
+a blessed region converting you from a god into an administration.
+
+## OP-14 · high · Can you walk on reckoned ground if it ages you? — **adopted, August 2026, and now load-bearing for OP-19**
+
+**Adopted in principle.** What is left open is the sub-question below — cliff or
+slope, and what happens at zero — not whether the rule goes in.
+
+It stopped being optional when teaching became a per-settlement decision made in
+person (OP-19). Teaching requires presence; a mature settlement is ringed by its
+own reckoned ground; so without this rule a settlement can only ever be taught in
+its first few years, before it ploughs itself shut. That may be a defensible
+window, but it is a large and unintended consequence of an unrelated rule, and
+pricing the walls removes it.
+
+It also completes a movement model rather than adding a third exception: **three
+tiles a year through your own blessing, one through wild ground, and reckoned
+ground enterable at 10% of your manifestation a year.** Fast at home, slow abroad,
+costly inside theirs.
+
+---
 
 Reckoned ground becomes passable. Ending a year on it costs 10% of your
 manifestation, permanently, so ten tile-years of trespass across a forty-year game
@@ -355,6 +631,20 @@ and both are partly art questions. Note that a still is now *worse* than the
 running game, since sparkle carries real information — this build must not be
 judged from screenshots.
 
+**One thing the port carried over from before the direction was chosen, and it is
+now wrong.** `game/ui.js:254` reads `if (t.set) fill = P.reck;` — *"a settlement
+stands in its own fields"* — so every settlement is farmland-ochre from the year it
+is founded, including one that has never tilled anything. Under OP-19 that is no
+longer true, and the fill is contradicting the single most important decision in
+the game.
+
+**A settlement tile takes the blessed colour until it is taught, and the reckoned
+colour afterwards.** Three sites, not one: line 254 sets the fill, line 279 draws
+plough furrows on any settlement tile, and line 297 excludes settlements from the
+blessed sparkle. All three follow the teaching flag, or an untaught settlement
+reads as a farm regardless. Consistent with *Fill is the land* — an untaught
+settlement is not a farm.
+
 **What the port did not fix, and knowingly:** blessed hill against farmland is
 still 1.35 luminance and blessed plain against wild plain 1.65. In the build the
 distinction is carried by content rather than colour — sparkle and standing
@@ -435,3 +725,20 @@ That needs separating from the incidental case:
 **Settled by:** implementing the Bless/Quicken split, which is small, and then
 deciding the Clearance question separately — it is the larger one and it is the
 one the numbers point at.
+
+### Refined and scheduled, August 2026
+
+The split stands, with the mechanism made concrete. **Taking the other power's
+blessing returns it to wild, not to you.** Two visits to take a tile: you unmake
+before you make. No fractional state, and it says the principle out loud.
+
+This may make the reach change unnecessary. The complaint that started it was that
+Quicken reaches three tiles from a working stone with no approach and no warning —
+but if unmaking requires presence, then Quicken at range can only take **wild**
+ground, which is exactly *creation at a distance, destruction only in person*.
+Cutting the reach as well is, net, a nerf to the magical player: Quicken is the
+last wonder lost, so whoever teaches fewest settlements keeps it longest.
+**Measure before cutting.**
+
+The flip-flopping watch above still applies, and the harness item stands: count
+tiles that change hands more than three times.

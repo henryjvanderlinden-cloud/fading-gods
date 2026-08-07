@@ -180,3 +180,32 @@ is weak on its own account, which is what OP-06 needed to know.
 **Worth remembering if it comes back:** the residual +4.0 ± 1.4 point advantage
 to the left-hand seat is *not* turn order and does not go away with any of this.
 It is the map, and it moved to OP-07.
+
+## A-18 · Should mountains be special-cased as shields? — **settled: no. Measure distance differently.**
+
+The proposal was that tiles behind a mountain range should not count toward the
+85% blessed country a founding requires, so that a ridge could act as a shield and
+allow settlements on both sides of it.
+
+**Settled by changing what "within two tiles" means, not by naming mountains.**
+`blessFrac` counts tiles at **path distance 2** rather than ring distance 2.
+
+The reasoning, which is why this is archived rather than left open:
+
+- `ring()` is a pure adjacency flood that ignores terrain entirely, so the change
+  is a few lines and touches nothing else.
+- **Mountain shields fall out for free.** Ground behind a ridge is more than two
+  steps away by road, so it stops counting without anything in the code knowing
+  what a mountain is.
+- **So does the interaction with water**, which nobody asked for and which is
+  better than the thing that was asked for: cutting the map with *Drown the
+  ground* now shrinks the founding requirement on the far side. That makes Drown
+  sharper as an offensive act rather than only as a defensive one.
+
+Note it gates two rules, not one — founding at 85% and *Raise mountains* at 70% —
+so raising a mountain beside your own mountain wall becomes harder. Judged a
+recursion rather than an annoyance, and left in.
+
+**Unmeasured.** Settled on argument, and the argument is about what a distance
+means rather than about a balance number. If the founding rate moves noticeably
+when it goes in, reopen it.

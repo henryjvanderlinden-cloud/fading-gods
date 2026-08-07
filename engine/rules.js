@@ -76,9 +76,34 @@ const bigCount  = who => settlements(who).filter(o => o.t.set.pop >= 150).length
 const hugeCount = who => settlements(who).filter(o => o.t.set.pop >= 800).length;
 const civicStrength = who => bigCount(who) + hugeCount(who);
 
+// OP-19. Settlements of yours that have been taught to till.
+const taughtCount = who => settlements(who).filter(o => o.t.set.taught).length;
+
+// OP-19. How many people this settlement's ground will carry.
+//
+// Untaught it is Dunbar, flat on every terrain — a cognitive and social limit,
+// and crop yield has nothing to do with it. Taught it is yield, and the land
+// fraction comes in here rather than on the growth rate, so a settlement hemmed
+// in by water tops out lower instead of merely climbing more slowly.
+function carryCap(t) {
+ if (!t.set) return 0;
+ if (!t.set.taught) return FG.R2TUNE.kWild;
+ const base = FG.R2TUNE.kTaught[t.t] || FG.R2TUNE.kTaught.plain;
+ const land = NB[K(t.c, t.r)].filter(x => !impassable(T(x))).length / 6;
+ return Math.max(FG.R2TUNE.kWild, base * (0.55 + 0.45 * land));
+}
+
 // You lose the greatest remaining wonder for every settlement past 150, less
 // one for each working stone.
-const lostCount = who => Math.max(0, bigCount(who) - working(who).length);
+//
+// OP-19 moves the trigger from population to teaching. Note this stays
+// *derived* rather than becoming a stored counter, which was the plan and was
+// wrong: because it counts taught settlements you currently own, forbidding a
+// place (OP-20) drops the count and hands the wonder back with no bookkeeping,
+// and taking a taught city by levy raises it — you did not teach them, but they
+// are yours now, and they are loud.
+const lostCount = who =>
+ Math.max(0, (FG.R2.taughtLoss ? taughtCount(who) : bigCount(who)) - working(who).length);
 function divineLeft(who) { return DIVINE.slice(Math.min(lostCount(who), DIVINE.length)); }
 
 function civicOpen(who) {
@@ -162,8 +187,24 @@ function mountainLine(k) {
 }
 
 // --- targeting ----------------------------------------------------------
+// OP-19. Teaching is done in person: you must be standing on the settlement or
+// beside it. No stone relays it — this is the one thing that cannot be said at a
+// distance. A settlement tile is walkable, so standing on one is possible; its
+// reckoned ring is not, which is why OP-14 had to be adopted alongside this.
+function teachTargetsAt(from, id, who) {
+ if (!FG.R2.teaching) return [];
+ return ring(from, 1).filter(k => {
+  const t = T(k);
+  if (!t.set || t.set.own !== who) return false;
+  if (t.set.tabu) return false;                  // OP-20 — forbidden for good
+  return id === "till" ? !t.set.taught : !t.set.kill;
+ });
+}
+const teachTargets = (id, who) => teachTargetsAt(FG.G.p[who].pos, id, who);
+
 function targets(id, who) {
  const out = [];
+ if (FG.TEACH.some(s => s.id === id)) return teachTargets(id, who);
  if (DIVINE.some(s => s.id === id)) {
   divineReach(who).forEach(k => {
    const t = T(k);
@@ -222,9 +263,10 @@ function score() {
 function band(p) { return p < 77 ? ["band", 1] : p < 150 ? ["village", 2] : p < 800 ? ["town", 3] : ["city", 4]; }
 
 Object.assign(FG, {cost, reach, walkStep, region, stoneRange, working, settlements,
- bigCount, hugeCount, civicStrength, lostCount, divineLeft, civicOpen, divineReach,
- blessFrac, foundBlock, canFound, blessGain, canSplit, stoneBlock, canStone,
- mountainLine, targets, nearestSource, score, band});
+ bigCount, hugeCount, civicStrength, taughtCount, carryCap, lostCount, divineLeft,
+ civicOpen, divineReach, blessFrac, foundBlock, canFound, blessGain, canSplit,
+ stoneBlock, canStone, mountainLine, targets, teachTargets, teachTargetsAt,
+ nearestSource, score, band});
 
 if (typeof module !== "undefined" && module.exports) module.exports = FG;
 })(typeof globalThis !== "undefined" ? globalThis : this);

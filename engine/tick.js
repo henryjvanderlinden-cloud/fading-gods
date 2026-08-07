@@ -99,17 +99,47 @@ function worldTick(snap) {
  FG.G.T.forEach((t, k) => {
   if (!t.set) return;
   const land = NB[k].filter(x => !impassable(T(x))).length / 6;
-  const f = t.f * (0.55 + 0.45 * land), b = t.set.pop;
-  t.set.pop = Math.min(2600, t.set.pop * (1 + FG.TUNE.growth.v / 100 * f));
-  if (t.set.own === 0) {
-   if (b < 77 && t.set.pop >= 77) say("A settlement has passed seventy-seven. Nothing comes through there now.", "bad");
-   if (b < 150 && t.set.pop >= 150) say("Past a hundred and fifty. They begin working the ground outward.", "bad");
+  const b = t.set.pop;
+
+  if (FG.R2.logistic) {
+   // OP-19. Logistic, with the ceiling carrying everything the growth rate used
+   // to: terrain, teaching, and how much land there is. The rate itself is now
+   // uniform. Above its ceiling — which is what forbidding a place does, OP-20 —
+   // the multiplier goes negative, so the decline is floored and the difference
+   // leaves as people rather than as arithmetic.
+   const K = FG.carryCap(t);
+   const m = 1 + FG.R2TUNE.r / 100 * (1 - t.set.pop / K);
+   t.set.pop = t.set.pop * Math.max(1 - FG.R2TUNE.decline, m);
+  } else {
+   const f = t.f * (0.55 + 0.45 * land);
+   t.set.pop = Math.min(2600, t.set.pop * (1 + FG.TUNE.growth.v / 100 * f));
   }
+
+  if (t.set.own === 0) {
+   if (b < 77 && t.set.pop >= 77)
+    say(FG.R2.audible77 ? "A settlement has passed seventy-seven. They cannot hear you there now."
+                        : "A settlement has passed seventy-seven. Nothing comes through there now.", "bad");
+   if (!FG.R2.taughtLoss && b < 150 && t.set.pop >= 150)
+    say("Past a hundred and fifty. They begin working the ground outward.", "bad");
+  }
+ });
+
+ // OP-19. A settlement under seventy-seven blesses the ground round it, as a
+ // stone does, and for the same reason: they are few, the country is quiet, and
+ // there is nothing between them and you but air. Untaught only — a people who
+ // have been shown the plough are counting the fields, not listening.
+ if (FG.R2.audible77) FG.G.T.forEach((t, k) => {
+  if (!t.set || t.set.taught || t.set.pop >= 77) return;
+  const cand = ring(k, 1).filter(x => { const q = T(x);
+   return !impassable(q) && !q.set && q.st === "wild"; });
+  if (cand.length) { T(cand[0]).st = "bless"; T(cand[0]).own = t.set.own; }
  });
 
  // reckoning, against a lifetime budget per settlement [load-bearing, A-14]
  FG.G.T.forEach((t, k) => {
-  if (!t.set || t.set.pop < 150) return;
+  if (!t.set) return;
+  // OP-19. Only a people who have been taught to till turn ground into fields.
+  if (FG.R2.teaching ? !t.set.taught : t.set.pop < 150) return;
   if (t.set.spent >= FG.TUNE.budget.v) {
    if (!t.set.done) { t.set.done = true;
     if (t.set.own === 0) say("They have taken in as much ground as they ever will.", ""); }
@@ -141,6 +171,10 @@ function worldTick(snap) {
  const lostAfter = lostCount(0);
  for (let i = snap.lostBefore; i < Math.min(lostAfter, DIVINE.length); i++)
   say("You reach for it and it is not there. " + DIVINE[i].n + " is gone.", "bad");
+ // OP-19/OP-20. The count can now fall as well as rise — a place forbidden, or a
+ // taught city lost to someone else. The most recently lost comes back first.
+ for (let i = Math.min(snap.lostBefore, DIVINE.length) - 1; i >= lostAfter; i--)
+  say("Somewhere it has gone quiet enough again. " + DIVINE[i].n + " is yours once more.", "good");
 
  const civAfter = civicOpen(0);
  if (civAfter.length > snap.civBefore)
