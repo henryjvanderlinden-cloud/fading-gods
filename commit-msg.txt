@@ -1,0 +1,27 @@
+OP-21: two players at one board, above OP-01
+
+Not a feature. The batch ended with two rules kept on judgement against a
+null measurement, because both are about choices a greedy chooser does not
+make. A second person at the board measures those rules today. That is why
+this outranks writing a better AI: the AI is a faster instrument for the
+questions it can already see, and this is a different instrument for the ones
+it cannot.
+
+It makes two parked fairness questions urgent. A-17 is reopened in the
+archive: turn order was settled as leave-it-alone precisely because only one
+seat is human, and a 30.9-point swing lands on a machine that does not care.
+With two people somebody sits in that seat every game. All three candidate
+fixes were rejected and none becomes acceptable just because the need
+changed. And OP-07's +4.0 point left-seat map bias stops being a curiosity.
+
+Scope recorded. The engine has one structural assumption about who is human,
+at tick.js:229, plus a year reset that only clears seat 0's flags. The
+interface has 52 hardcoded seat literals and wants doing as one change to a
+SEAT variable rather than 70 edits. The chronicle is the real problem and is
+not plumbing: every say() branches on who === 0 and writes to you about
+theirs, so two players means two logs or a neutral voice, and a neutral voice
+loses the thing concept.md specifies.
+
+Also records the hand-over button, with the condition stated as nothing
+further is possible rather than everything is used - the naive version hangs
+whenever a player has no legal intervention. A toggle, off by default.

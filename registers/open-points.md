@@ -7,6 +7,86 @@ Format: `OP-nn` · severity · the question · why it matters · how it would be
 
 ---
 
+## OP-21 · highest · Two players at one board
+
+**Raised August 2026, and placed above OP-01 deliberately.** Not a feature. It is
+the instrument for the class of question the harness has just been shown to be
+blind to.
+
+The batch ended with two rules — `taughtLoss` and `audible77` — kept on judgement
+against a null measurement, because both are about choices a greedy chooser does
+not make, and OP-01 says nothing better is coming soon. **A second person at the
+board measures those rules today.** Whether a player keeps a settlement under
+seventy-seven so it can still hear them, and whether losing a wonder to teach feels
+like a price or a formality, are both directly observable the moment someone is
+choosing rather than maximising. That is why this outranks writing a better AI:
+the AI is a faster instrument for the questions it can already see, and this is a
+different instrument for the ones it cannot.
+
+It also makes the two most-parked fairness questions urgent, which is the part that
+will cost the most.
+
+### What it breaks, and both are already in the register
+
+**A-17 reopens, and its answer does not survive.** Turn order was settled as *leave
+it alone, measure around it* — explicitly on the grounds that the build has a fixed
+order and only one seat is human, so the asymmetry lands on an AI that does not
+care. Mirror matches measured a seat swing of up to **30.9 points** for Haunt and
+14.9 for Cities. With two people, one of them sits in that seat every game and it
+is simply an unfair match. All three candidate fixes were rejected — two on the
+numbers, one on the mechanism, because the world resolves at year end and
+alternating produces a double move at every changeover. **PvP needs a fourth
+answer, and there isn't one yet.**
+
+**OP-07 stops being a curiosity.** The left-hand seat finishes **+4.0 ± 1.4 points**
+ahead over 1,160 mirror games, from map generation alone. Small beside turn order
+and entirely tolerable when the right-hand seat is a machine. Not tolerable between
+two people. The likely cause is already identified — the exclusion falloff in
+`gen()` is not symmetric on a grid whose odd rows are offset half a hex.
+
+### What it costs in code
+
+Less than it looks in the engine and more than it looks in the interface.
+
+- **`engine/tick.js:229`** — `endYear()` hardcodes `FG.aiTurn(1)`. The engine's only
+  structural assumption about who is human.
+- **`engine/tick.js:219–220`** — the year reset clears `acted` and `cast` for seat 0
+  only, because the AI never reads them. Both seats need the full reset.
+- **`game/ui.js`** — 52 call sites pass a literal `0` and 18 read `G.p[0]`. Mechanical,
+  but it is most of the file, and it wants doing as *one* change to a `SEAT`
+  variable rather than as 70 edits.
+- **The chronicle is the real problem, and it is not plumbing.** Every `say()` in
+  `actions.js` and `tick.js` branches on `me = who === 0` and writes to *you* about
+  *theirs*. Two players means either two logs or a neutral voice, and a neutral
+  voice loses the thing `concept/concept.md` specifies as the chronicle — short
+  declarative sentences, past tense, addressed to a god. **Two logs is probably
+  right and nobody has thought about what a hotseat does when both are on screen.**
+
+### The turn should hand itself over
+
+Wanted alongside, and useful in the single-player build too: **when nothing further
+is possible, pass to the other player.**
+
+The naive condition is wrong and will hang. Waiting for movement, act *and*
+intervention all to be spent means waiting forever whenever a player has no legal
+intervention, or does not want to walk their last tile. The condition is **nothing
+further is possible**, not everything is used:
+
+- the act is taken, and
+- the intervention is spent *or* no intervention has a legal target, and
+- movement is exhausted *or* nowhere reachable is worth the walk
+
+The last clause is a judgement the interface cannot make, so movement probably
+should not gate it at all — a player who has acted and intervened has finished
+their year in every sense that matters.
+
+**A toggle, off by default.** Some players will want to look at the board after
+their last move, and taking that away to save a click is a bad trade.
+
+**Settled by:** building it. Then three games between two people, watching
+specifically whether either of them ever declines to teach — which is the one
+observation nothing else in this project can currently make.
+
 ## OP-01 · high · The rival AI is one-ply greedy
 
 Every balance number in `design/rules.md` was produced against an opponent that
@@ -20,6 +100,9 @@ longer anything else to blame.
 
 **Settled by:** writing a two- or three-ply search, or a scripted "expert" line per
 doctrine, and re-running the matrix. Expect the numbers to move.
+
+**Now second to OP-21**, which is a different instrument for the questions this one
+cannot see rather than a faster one for the questions it can.
 
 ### Two measurements from the August 2026 batch make this concrete
 

@@ -181,6 +181,22 @@ is weak on its own account, which is what OP-06 needed to know.
 to the left-hand seat is *not* turn order and does not go away with any of this.
 It is the map, and it moved to OP-07.
 
+### Reopened by OP-21, August 2026
+
+**The answer above depends on a premise that player-versus-player removes.** It was
+settled as *leave the game alone and change the measurement*, and that was correct
+precisely because only one seat is human — the asymmetry lands on an AI, which does
+not care, and splitting the seeds decontaminates the numbers at no cost.
+
+With two people at one board, somebody sits in the disadvantaged seat every game.
+A 30.9-point swing for Haunt and 14.9 for Cities is then not a confound to measure
+around; it is an unfair match, and no amount of reporting fixes it.
+
+All three candidates here were rejected and none of them becomes acceptable just
+because the need changed — the mechanism objection to alternating is the same
+objection whoever is sitting there. **A fourth answer is wanted and does not exist
+yet.** See OP-21.
+
 ## A-18 · Should mountains be special-cased as shields? — **settled: no. Measure distance differently.**
 
 The proposal was that tiles behind a mountain range should not count toward the
