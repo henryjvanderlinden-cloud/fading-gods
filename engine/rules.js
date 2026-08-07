@@ -34,6 +34,12 @@ const manifestMp = who =>
 // which is what the first stage-1 measurement found happening in half of all
 // player-years.
 function wouldSeal(x) {
+ // Ploughing ground that is already ploughed takes nobody's way out — it only
+ // changes whose furrows they are. Without this first line a settlement ringed
+ // by the rival's fields can never plough anything again, because every
+ // candidate looks like the last exit while none of them is an exit at all.
+ // Found in a played game: three taught villages that never made a field.
+ if (T(x).st === "reck") return false;
  return NB[x].some(sk => {
   const s = T(sk);
   if (!s.set) return false;

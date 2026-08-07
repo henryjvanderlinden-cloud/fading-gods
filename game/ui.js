@@ -369,7 +369,13 @@ function render() {
 
  $("bar").innerHTML = `
  <div class="c"><div class="l">year</div><div class="v">${G.turn}<span style="font-size:13px;color:var(--faint)"> / ${TUNE.turns.v}</span></div></div>
- <div class="c"><div class="l">moves</div><div class="v ${G.p[0].mp ? "" : "r"}">${G.p[0].mp}</div></div>
+ <div class="c"><div class="l">moves</div><div class="v ${G.p[0].mp ? "" : "r"}">${G.p[0].mp}</div></div>`
+ // OP-14. What is left of you. Only shown when there is something that can take
+ // it — with the toll off, this is always 100% and is noise in the bar.
+ + (FG.R2.fade ? `<div class="c"><div class="l">of you</div><div class="v ${
+     FG.manifest(0) <= 0.35 ? "r" : FG.manifest(0) < 1 ? "u" : ""
+   }">${Math.round(FG.manifest(0) * 100)}<span style="font-size:13px;color:var(--faint)">%</span></div></div>` : "")
+ + `
  <div class="c"><div class="l">can walk to</div><div class="v ${walk <= 5 ? "r" : "m"}">${walk}</div></div>
  <div class="c"><div class="l">blessed</div><div class="v h">${S[0].h}</div></div>
  <div class="c"><div class="l">farmland</div><div class="v u">${S[0].c}</div></div>

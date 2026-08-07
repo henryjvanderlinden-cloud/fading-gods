@@ -312,6 +312,48 @@ not answer this on its own either.
 it does nothing — the doctrines that would use it were already winning every game
 against a crippled opponent. Re-measure once Cities works.
 
+### Played, and it holds — with two things the matrix could not have found
+
+**First full game, year 40, a pure refuser: 108 to 75, with no farmland at all.**
+Nine settlements, six of them sitting at Dunbar, twenty-seven blessed tiles, three
+villages taught to till late. **This is the first time OP-06 has been answered
+affirmatively by a person rather than by the harness**, and it is worth more than
+the win rates because a doctrine the AI plays is not a doctrine anyone chose.
+
+**Why it was won matters more than that it was won, and it is not what the batch
+was designed to do.** Twenty-seven blessed tiles at 3 against about twenty-five
+farmland tiles at 2 — comparable ground, and the per-tile value decided it.
+Settlements used to win by *generating* tiles faster than blessing could keep up;
+logistic growth and the reckoning budget have now capped that production, and with
+the compounding gone, **A-09's blessed=3 against reckoned=2 is simply a 50% premium
+on every tile held**. Blessing was set to 3 when Cities compounded freely and
+needed offsetting. That, rather than `r`, is the first knob to turn — and it means
+A-09 joins A-13 as a settled question this batch has reopened.
+
+**A bug, found by playing and invisible to every measurement taken so far.** Three
+villages were taught to till and never made a single field, because their ground
+had been drowned or already ploughed by the rival. `wouldSeal` refused every
+candidate: a settlement ringed by the other power's farmland saw each neighbour as
+its last way out, when none of them was a way out at all. Fixed — ploughing ground
+that is already ploughed takes nobody's exit, it only changes whose furrows they
+are. Note the shape of it: **the harness could not have caught this**, because the
+greedy AI never teaches a settlement it cannot feed.
+
+**The stone brake is dead for a refuser, and this was not noticed when it was
+built.** `lostCount = max(0, taughtCount − workingStones)`. Teach nothing and the
+working stones subtract from zero — they hold back nothing, because nothing was
+taken. Under the old population trigger that could not happen. It bites hardest in
+the doctrine that raises the most stones, and it is the third thing in this batch
+to weaken OP-13.
+
+**Two smaller readings of the same board.** Six settlements at exactly 150 read as
+a rule rather than as places — jittering the untaught cap per settlement by ±15%
+off `t.seed`, which already exists per tile, would cost nothing and is still true
+to *Dunbar is social*. And the final board was OP-15's **Polytheism** almost
+exactly, two territories divided by a mountain spine and water — but at 108 to 75
+it would not have fired, which suggests the near-tie condition on that ending is
+wrong.
+
 ### Also settled in this batch, and unbuilt
 
 Small rules that arrived with OP-19 and have no question of their own. Recorded
