@@ -201,3 +201,36 @@ say — this is the design, and it should be re-argued rather than re-derived.
 
 **Where it went:** OP-05, and `engine/rules.js` `civicOpen()`.
 
+
+## Split targeting a neighbouring tile
+
+**What:** the original Split — half the settlement goes to an adjacent tile that
+passes the full founding test.
+
+**Why out:** it could not happen. `foundBlock` refuses any tile with a settlement
+in its own neighbourhood, and every neighbour of a settlement has one: the
+settlement doing the splitting. **Legal in 0 of 1,047 settlement-years**, and
+never once in three played games — Rick reported the button never being available
+and this is why. See **A-20**, and 1.6 for the replacement.
+
+**Do not revive as:** "the same rule, but the parent does not count as a
+neighbouring settlement." That is a special case in the one predicate the whole
+expansion system reads, written to rescue a rule nothing is known about — it was
+never exercised, so it has no merits to restore. And it would put two settlements
+side by side, which nothing else in the game allows.
+
+## Crediting a returned wonder for forbidding a place (OP-20)
+
+**What:** encircle-and-forbid hands the capturer back their most recently lost
+wonder, as OP-20 proposed while the taboo was still a choice the player made.
+
+**Why out:** the taboo stopped being a choice, so there was nothing left to make
+attractive — and the wonder moves anyway. `lostCount` is derived from the board,
+so un-teaching a place drops the count of whoever *owned* it, and the wonder goes
+back to the side that lost the loud city. Identical to what taking a taught city
+by levy already does, no stored counter, no bookkeeping.
+
+**Do not revive as:** "a small credit, just to make sieges worth it." That makes
+the count no longer derived, which is the property that lets a place change hands
+in either direction without anybody tracking anything. See the note in `rules.js`
+above `lostCount`, which predicted this and was written before OP-20 was built.

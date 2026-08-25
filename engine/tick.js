@@ -79,6 +79,93 @@ function moveColumns() {
  });
 }
 
+// 1.9 / OP-20. People who leave a place go somewhere; they do not evaporate.
+// Reuses the refugee machinery §7 already has for Bad omen, and reuses it
+// deliberately — the second-order consequence documented there is the best
+// emergent interaction in the build, and it is the whole point here. The
+// arrivals push another settlement past a threshold, so **forbidding one place
+// makes another one loud. You cannot forbid your way to silence.**
+//
+// **They walk back to their own people, not to yours.** They are leaving because
+// the plough is forbidden here, so they go where ploughing still happens — which
+// is the country of the power that lost them, recorded as `exile` at the moment
+// the ring closed. That is the cost of forbidding a loud place, and it is a real
+// one: you break their engine here and make their next town bigger. Silence is
+// not achieved; loudness is moved. If their country is gone or cannot be reached
+// they fall back on the place's new owner, and failing that they scatter.
+function nearestOf(k, who) {
+ const t = T(k);
+ let dest = null, bd = 99;
+ FG.settlements(who).forEach(o => {
+  if (o.k === k) return;
+  if (walkStep(k, o.k) === undefined) return;
+  const d = Math.abs(T(o.k).c - t.c) + Math.abs(T(o.k).r - t.r);
+  if (d < bd) { bd = d; dest = o.k; }
+ });
+ return dest;
+}
+
+function exodus(k, n) {
+ if (n <= 0) return;
+ const t = T(k), mine = t.set.own;
+ const home = t.set.exile === undefined ? mine : t.set.exile;
+ let to = nearestOf(k, home), own = home;
+ if (to === null) { to = nearestOf(k, mine); own = mine; }
+ if (to === null) {
+  if (mine === 0) say("They go out of the forbidden place, and there is nowhere left to go. They scatter.", "bad");
+  return;
+ }
+ FG.G.refugees.push({at:k, to, n, own});
+ if (own === 0) say(n + " come out of the place they were forbidden, and take the road to the nearest of yours.", "");
+ else if (mine === 0) say(n + " leave rather than give up the plough, and go back to their own.", "bad");
+ else say("People are leaving the place you were forbidden.", "riv");
+}
+
+// 1.9 / OP-20. A place closed in on every side by one power's blessing goes over
+// to it, and what it knows is forbidden for good.
+//
+// Two years rather than one, so it is a siege and not a trick: the ring has to
+// survive a year in which the other power gets to act, and under 1.8 relieving
+// it means walking there. The clock is cleared the moment the ring breaks or
+// changes hands, so one tile taken back resets the whole thing.
+//
+// Nothing is credited to anybody here. `lostCount` is derived from the board and
+// counts *taught settlements you currently own*, so un-teaching this place drops
+// the former owner's count and the wonder goes back to them in the same tick,
+// with no bookkeeping — which is exactly what already happens when a taught city
+// is taken by levy. The capturer gains a settlement, a permanent silence, and
+// whatever the fields stop producing. See constants.js 1.9.
+function encircleTick() {
+ if (!FG.R2.encircle) return;
+ FG.G.T.forEach((t, k) => {
+  if (!t.set) return;
+  const by = FG.encircledBy(k);
+  if (by === null) { t.set.ring = null; return; }
+  if (!t.set.ring || t.set.ring.by !== by) t.set.ring = {by, n: 0};
+  t.set.ring.n++;
+
+  if (t.set.ring.n < FG.R2TUNE.encircle) {
+   if (t.set.own === 0) say("One of yours is closed in on every side. Whatever is out there is not moving.", "bad");
+   else if (by === 0) say("One of theirs is closed in on every side, and the ring holds.", "good");
+   return;
+  }
+
+  const from = t.set.own, was = t.set.taught || t.set.kill;
+  t.set.own = by; t.set.ring = null; t.set.spent = 0; t.set.done = false;
+  t.set.exile = from;   // where the ones who will not stay are walking to
+  // The taboo. Both teachings, for good — `teachTargetsAt` refuses a forbidden
+  // place for ever after, and `carryCap` reads `taught`, so the ceiling drops to
+  // Dunbar in this same tick and the emptying starts immediately.
+  t.set.taught = false; t.set.kill = false; t.set.tabu = true;
+
+  if (by === 0)
+   say(was ? "The ring closes. The place is yours, and what they were taught there is forbidden — nobody will plough here again, or march from it."
+           : "The ring closes, and the place is yours. It will stay quiet.", "omen");
+  else if (from === 0)
+   say("They have closed the ring. The place has gone over, and what you taught them there is forbidden for good.", "war");
+ });
+}
+
 // Taken after your act and before the rival's, so the year's messages can
 // report what changed rather than what is.
 function snapshot() {
@@ -94,6 +181,9 @@ function worldTick(snap) {
  resolveContested();
  moveColumns();
  stoneTick();
+ // Before growth, so a place that changes hands this year declines at its new
+ // ceiling this year rather than getting one more season of the old one.
+ encircleTick();
 
  // growth
  FG.G.T.forEach((t, k) => {
@@ -109,7 +199,13 @@ function worldTick(snap) {
    // leaves as people rather than as arithmetic.
    const K = FG.carryCap(t);
    const m = 1 + FG.R2TUNE.r / 100 * (1 - t.set.pop / K);
-   t.set.pop = t.set.pop * Math.max(1 - FG.R2TUNE.decline, m);
+   const next = t.set.pop * Math.max(1 - FG.R2TUNE.decline, m);
+   // 1.9. And here is where it leaves as people. Only for a forbidden place —
+   // that is the one thing in the game that puts a settlement far above its own
+   // ceiling, and a town shrinking by a percent because a column arrived is not
+   // an exodus and should not be drawn as one.
+   if (FG.R2.encircle && t.set.tabu && next < b) exodus(k, Math.floor(b - next));
+   t.set.pop = next;
   } else {
    const f = t.f * (0.55 + 0.45 * land);
    t.set.pop = Math.min(2600, t.set.pop * (1 + FG.TUNE.growth.v / 100 * f));
@@ -140,6 +236,14 @@ function worldTick(snap) {
   if (!t.set) return;
   // OP-19. Only a people who have been taught to till turn ground into fields.
   if (FG.R2.teaching ? !t.set.taught : t.set.pop < 150) return;
+  // 1.9. And not while the ring is closed. Found by building the rule and then
+  // watching it never fire: farmland erases blessing, a taught settlement
+  // ploughs its own first ring, and blessing cannot be laid on farmland — so
+  // one season's ploughing broke every siege permanently and a taught place was
+  // simply immune. A place closed in on every side does not go out to the
+  // fields, which is what a siege *is*, and it hands the defender the right
+  // counter: break the ring and the ploughing resumes the same year.
+  if (FG.R2.encircle && t.set.ring) return;
   if (t.set.spent >= FG.TUNE.budget.v) {
    if (!t.set.done) { t.set.done = true;
     if (t.set.own === 0) say("They have taken in as much ground as they ever will.", ""); }
@@ -238,7 +342,8 @@ function endYear() {
  return worldTick(snap);
 }
 
-Object.assign(FG, {stoneTick, moveColumns, snapshot, worldTick, endYear, resolveContested});
+Object.assign(FG, {stoneTick, moveColumns, snapshot, worldTick, endYear, resolveContested,
+ encircleTick, exodus});
 
 if (typeof module !== "undefined" && module.exports) module.exports = FG;
 })(typeof globalThis !== "undefined" ? globalThis : this);

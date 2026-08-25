@@ -18,6 +18,12 @@ const {COLS, ROWS, DIVINE, CIVIC, T, ring, reach, score, targets, region,
 const SZ = 50, W = Math.sqrt(3) * SZ, VS = 1.5 * SZ, U = SZ / 24;
 const BW = W * (COLS + 0.5) + 8 * U, BH = VS * (ROWS - 1) + 2 * SZ + 8 * U;
 let ARM = null;   // the intervention currently armed, awaiting a target
+// 1.6. And the act that now has a target of its own. Split used to pick a tile
+// at random out of the one place it could go; since it can reach any of your
+// blessing two tiles out, where the splinter lands is a decision — it is a
+// founding, and founding is the one thing in the game every expansion begins
+// with. So it arms like an intervention rather than firing like a button.
+let ARMACT = null;
 // OP-23. The hint line is now shared: render() computes what it says by default,
 // and hovering or pressing a chip borrows it to describe that intervention. The
 // descriptions used to sit under every name in a column; there is no room for
@@ -377,7 +383,7 @@ function boundaries(G) {
 }
 
 function newGame() {
- ARM = null;
+ ARM = null; ARMACT = null;
  SEAT = 0;
  LAND = {key: null, html: ""};      // a new board is always a new land layer
  const doc = $("doc").value, human = doc === "human";
@@ -392,7 +398,7 @@ function newGame() {
 // does not move until the second has finished too.
 function endTurn() {
  if (FG.G.over) return;
- ARM = null;
+ ARM = null; ARMACT = null;
  if (pvp() && SEAT === 0) { SEAT = 1; render(); return; }
  if (FG.endYear()) finish();
  SEAT = 0;
@@ -424,7 +430,8 @@ function maybeHandOver() {
 function render() {
  const G = FG.G, TUNE = FG.TUNE, ME = SEAT, THEM = other(SEAT);
  const R = reach(ME), S = score(), walk = Object.keys(R).length - 1;
- const tg = ARM ? new Set(targets(ARM, ME)) : null;
+ const tg = ARM ? new Set(targets(ARM, ME))
+   : ARMACT === "split" ? new Set(FG.splitTargets(G.p[ME].pos, ME)) : null;
  const isCivic = ARM && CIVIC.some(c => c.id === ARM);
  // 1.16 / 1.17. Which of the outlined tiles are out past your hearing and will
  // take a piece of you. Drawn rather than written: a solid outline is a thing
@@ -432,7 +439,7 @@ function render() {
  // tile is chosen, because the toll is permanent and the year is spent on the
  // tap — the whole point of the mechanic is that it is a decision, and a cost
  // you only learn about in the chronicle afterwards is not a decision.
- const toll = ARM ? new Set([...(tg || [])].filter(k => FG.tolled(ARM, k, ME))) : null;
+ const toll = ARM ? new Set([...(tg || [])].filter(k => FG.tolled(ARM, k, ME))) : new Set();
  const threat = G.armies.some(a => a.own === THEM);
 
  // Whose year it is, in that seat's own colour, across the whole width of the
@@ -470,7 +477,8 @@ function render() {
  // read, so this stays a pure function of state and owns no rules.
  let over = "", scrim = "";
  const key = G.T.map(t => t.t + t.st + (t.own === null ? "-" : t.own)
-   + (t.set ? "s" + t.set.own + Math.round(t.set.pop) + (t.set.taught ? "T" : "") : "")).join("")
+   + (t.set ? "s" + t.set.own + Math.round(t.set.pop) + (t.set.taught ? "T" : "")
+              + (t.set.tabu ? "X" : "") + (t.set.ring ? "R" + t.set.ring.by : "") : "")).join("")
    + "|" + G.stones.map(a => a.join(",")).join("/");
  const landStale = key !== LAND.key;
  if (landStale) {
@@ -488,9 +496,19 @@ function render() {
  });
 
  // settlements — the complex says what stage it is
- G.T.forEach(t => {
+ G.T.forEach((t, k) => {
   if (!t.set) return;
   const [x, y] = px(t.c, t.r), b = band(t.set.pop)[1];
+  // 1.9. The siege, drawn before the buildings so the buildings sit inside it.
+  // A closing ring is the one thing on this board that happens *to* a place
+  // over more than one year, and a player who cannot see it coming cannot
+  // relieve it — which is the only counter the rule has.
+  if (t.set.ring) over += `<path d="${hexPath(x, y, SZ - u(2))}" fill="none"
+    stroke="${COL[t.set.ring.by]}" stroke-width="${u(2.6)}" opacity=".85"
+    stroke-dasharray="${u(6).toFixed(1)} ${u(4).toFixed(1)}" pointer-events="none"/>`;
+  // A forbidden place: a closed ring, and no fields, ever again.
+  if (t.set.tabu) over += `<path d="${hexPath(x, y, SZ - u(6))}" fill="none"
+    stroke="${P.ink}" stroke-width="${u(1.4)}" opacity=".5" pointer-events="none"/>`;
   over += `<g pointer-events="none">${temple(x, y - u(2), b, COL[t.set.own], t.seed)}
    <text x="${x}" y="${y + SZ - u(3.5)}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
    font-size="${u(10).toFixed(1)}" font-weight="600" fill="${P.ink}" stroke="#000"
@@ -553,6 +571,13 @@ function render() {
    if (ARM) {
     if (!targets(ARM, SEAT).includes(k)) return;
     if (doIntervene(ARM, k, SEAT)) { FG.G.p[SEAT].cast = true; ARM = null; }
+    render(); maybeHandOver(); return;
+   }
+   // 1.6. The act's target, chosen the same way an intervention's is, so a
+   // tablet learns one gesture rather than two.
+   if (ARMACT) {
+    if (!FG.splitTargets(FG.G.p[SEAT].pos, SEAT).includes(k)) return;
+    if (doAct(ARMACT, SEAT, k)) { FG.G.p[SEAT].acted = true; ARMACT = null; }
     render(); maybeHandOver(); return;
    }
    const RR = reach(SEAT);
@@ -678,7 +703,8 @@ function render() {
  $("sl").innerHTML = G.T.filter(t => t.set).sort((a, b) => b.set.pop - a.set.pop)
   .slice(0, 10).map(t => {
    const [n, b] = band(t.set.pop);
-   return `<li><span class="b${b}">${t.set.own === ME ? "" : "their "}${n}${t.set.done ? " · spent" : ""}</span><span>${Math.round(t.set.pop)}</span></li>`;
+   const mark = t.set.tabu ? " · forbidden" : t.set.ring ? " · closed in" : t.set.done ? " · spent" : "";
+   return `<li><span class="b${b}">${t.set.own === ME ? "" : "their "}${n}${mark}</span><span>${Math.round(t.set.pop)}</span></li>`;
   }).join("") || '<li style="color:var(--faint);border:none">none yet</li>';
 
  // The chronicle is written from the left-hand seat and says "you" about it.
@@ -699,13 +725,14 @@ function render() {
  $("stone").disabled = a || !!ARM || !canStone(k, ME);
  $("found").disabled = a || !!ARM || !canFound(k, ME);
  $("split").disabled = a || !!ARM || !canSplit(k, ME);
- $("pass").disabled = a || !!ARM;
+ $("split").classList.toggle("armed", ARMACT === "split");
+ $("pass").disabled = a || !!ARM || !!ARMACT;
  $("end").disabled = G.over;
  $("end").textContent = !pvp() ? "End year"
   : SEAT === 0 ? "Hand to the right" : "End the year";
 
  const hint = $("hint");
- hint.className = "hintline" + (ARM ? " arm" : "");
+ hint.className = "hintline" + (ARM || ARMACT ? " arm" : "");
  const sb = stoneBlock(k, ME), fb = foundBlock(k, ME);
  // The armed chip says what it is as well as what to do with it, so a player on
  // a tablet who has never hovered anything still reads the description once,
@@ -718,7 +745,9 @@ function render() {
    ? "  ·  A dashed tile is beyond your hearing: " + Math.round(FG.R2TUNE.dreamToll * 100)
      + "% of you, for good."
    : "";
- HINT = G.over ? "" : ARM ? (armed ? armed.d + "  ·  " : "")
+ HINT = G.over ? "" : ARMACT === "split"
+    ? "Half of them go over the rise. Choose the blessed tile they stop at, or press Split again to put it down."
+  : ARM ? (armed ? armed.d + "  ·  " : "")
     + "Choose an outlined tile, or press the chip again to put it down." + dash
   : a ? (pvp() && SEAT === 0 ? "Acted this year. You may still intervene, then hand over."
                              : "Acted this year. You may still intervene, then end the year.")
@@ -791,13 +820,18 @@ cbl.querySelector("input").onchange = e => { FG.SOFT = e.target.checked; render(
 // restarts from the same seed. Flags that are declared but not yet implemented
 // are shown and marked, rather than hidden — a switch that does nothing is less
 // confusing than a rule nobody can find.
-const R2BUILT = ["logistic", "teaching", "taughtLoss", "audible77", "fade", "exitLane",
-                 "dreamTeach", "dreamWorks"];
+// A-16. This used to be a second copy of the list in constants.js, and it had
+// drifted: `taughtGates` — the largest tuning lever in the project — was missing
+// from it, so the panel showed that rule as *not built* and the "whole batch"
+// button switched it off. The engine owns the list now and the interface asks.
+const R2BUILT = FG.R2BUILT;
 const R2LABEL = {
  logistic:"growth is logistic; terrain sets the ceiling", teaching:"tilling and killing are taught",
  taughtLoss:"a wonder goes on teaching, not at 150", audible77:"under seventy-seven, they bless the ground",
  split2:"split reaches two tiles, to your blessing", fade:"you may walk the fields, at 10% of you a year",
- unmake:"taking their blessing returns it to wild", encircle:"a ring of blessing takes a place",
+ unmake:"taking their blessing returns it to wild, not to you",
+ encircle:"a ring of blessing takes a place, and forbids it",
+ taughtGates:"the works open on teachings, not on numbers",
  landGates:"works open on tilled land, not on numbers", pathFrac:"distance is measured by road",
  barren3:"withered ground stays barren three years", exitLane:"the fields never quite close over",
  dreamTeach:"you may teach where you are heard, at 10% of you", 
@@ -819,7 +853,7 @@ function r2sync() {
   : on + " of " + R2BUILT.length + " built rules on";
 }
 // Same seed, so the only difference between two runs is the rules.
-function r2restart() { r2sync(); ARM = null; SEAT = 0; LAND = {key:null, html:""};
+function r2restart() { r2sync(); ARM = null; ARMACT = null; SEAT = 0; LAND = {key:null, html:""};
  const doc = $("doc").value, human = doc === "human";
  FG.HANDICAP = $("even").checked ? 1 : 0;
  FG.createGame({them: human ? null : doc, pvp: human, seed: R2SEED.v});
@@ -831,12 +865,18 @@ $("r2off").onclick = () => { FG.R2all(false); r2restart(); };
 $("r2on").onclick  = () => { FG.R2all(false); R2BUILT.forEach(k => FG.R2[k] = true); r2restart(); };
 r2sync();
 
-["bless", "stone", "found", "split"].forEach(a => {
+["bless", "stone", "found"].forEach(a => {
  $(a).onclick = () => {
-  if (FG.G.p[SEAT].acted || FG.G.over || ARM) return;
+  if (FG.G.p[SEAT].acted || FG.G.over || ARM || ARMACT) return;
   if (doAct(a, SEAT)) { FG.G.p[SEAT].acted = true; render(); maybeHandOver(); }
  };
 });
+// 1.6. Split arms and waits for the tile, and pressing it again puts it down.
+$("split").onclick = () => {
+ if (FG.G.p[SEAT].acted || FG.G.over || ARM) return;
+ ARMACT = ARMACT === "split" ? null : "split";
+ render();
+};
 $("pass").onclick = () => { FG.G.p[SEAT].acted = true; render(); maybeHandOver(); };
 $("end").onclick = endTurn;
 $("restart").onclick = newGame;

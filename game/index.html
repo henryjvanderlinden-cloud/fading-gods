@@ -175,6 +175,10 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .chip sup{font-size:9px;margin-left:5px;color:var(--faint);vertical-align:super}
 .chip.tch{color:var(--moss)}.chip.div{color:var(--bless)}.chip.civ{color:var(--reck)}
 .chip:hover:not(.off){border-color:currentColor;color:currentColor}
+/* 1.6. An armed act, which only Split is. Same treatment as an armed chip,
+   because it is the same gesture: the thing is picked up and the board is
+   waiting for the tile. */
+.acts button.armed{background:var(--ink);color:var(--ground);border-color:var(--ink)}
 .chip.on{background:var(--ink);color:var(--ground);border-color:var(--ink)}
 .chip.on sup{color:var(--ground)}
 /* Off by class and not by the disabled attribute: a disabled button fires no

@@ -298,3 +298,166 @@ defensible, and let the rest count the fields. See OP-06 and OP-12.
 
 **Settled by:** a played game, and the player whose game it was.
 
+
+## A-20 · Was Split ever legal? — **settled: no. Not once, since it was written.**
+
+Not a balance question and it was never asked as one. It was found by reading
+`canSplit` against `foundBlock` while building 1.6, and then measured, because
+the register's rule since August 2026 is that a claim about the code is checked
+against the code.
+
+`canSplit` asked for a **neighbour** of the settlement that passed the whole
+founding test. `foundBlock` refuses any tile with a settlement in its own
+neighbourhood. Every neighbour of a settlement has one — the settlement doing the
+splitting. The two conditions are mutually exclusive by construction.
+
+**Measured: true in 0 of 1,047 settlement-years**, playing the doctrine that
+weights it highest, before anything was changed.
+
+What it cost, which is more than the act:
+
+- **`bands` weights split at 14, above everything but `stone`.** Its whole share
+  of the chooser's attention went to an option that could never be selected, so
+  the doctrine the dropdown describes as *splits at sixty* has never split, and
+  every number ever measured for it is a number for a doctrine playing with one
+  fewer act than it thinks it has.
+- **The build's Split button has never once been enabled.** Rick reported not
+  being able to use it; this is why. Three played games, and the thing was
+  simply not reachable.
+- **It is the fifth thing in this project found by reading the code against the
+  prose rather than by measuring.** `landGates`, two formulas under the growth
+  model, the `wouldSeal` entombment, and now this. The register was describing a
+  rule that did not exist, and the harness could not tell anyone, because a
+  legality test that is always false produces no anomaly — only an absence.
+
+**Settled by:** reading it, then counting it. The repair is 1.6; see OP-19.
+
+**Do not conclude that the old targeting rule was wrong on its merits.** It was
+never exercised, so nothing is known about it. What replaced it was chosen for
+other reasons and is on its own evidence.
+
+## A-21 · Where may a splinter go? — **settled: your blessing, two tiles out**
+
+The 1.6 rule, and the second half of what that flag does. See A-20 for the first.
+
+**A splinter goes to ground you have blessed, at path distance 2, with the 85%
+founding requirement waived.** Everything else `foundBlock` asks is still asked.
+
+Three things fall out rather than being decided:
+
+- **Distance 2 is not a chosen radius, it is the only one available.** *Not next
+  to a settlement* rules out distance 1 by itself, and it is the same rule that
+  keeps any two settlements apart anywhere else on the board.
+- **Path distance, not ring distance** — A-18. Water and mountains constrain your
+  own fission exactly as they constrain founding, and a split cannot leapfrog
+  terrain. A settlement ringed by water has nowhere to send anyone, which is
+  right.
+- **The blessing requirement is kept and the percentage is dropped.** The people
+  are already there; what they need is somewhere quiet to stop, not a country.
+  Keeping the requirement keeps §3's *all expansion begins with blessing* true of
+  splitting as well as of founding — see OP-18, where that gate stops looking
+  arbitrary.
+
+And one price nobody had to write: **the tile's blessing is spent by the
+founding.** A settlement stands on wild ground, so splitting costs you a tile of
+your own quiet country, permanently. Nothing in the register had priced that,
+because nothing had ever done it.
+
+**Measured**, 80 games a cell against Cities, the build's own turn order, this
+rule alone against the batch as it stood: Cities 50 → 45, Mixed 34 → **43**,
+Haunt 55 → 48, Bands 34 → **39**. It gives an act back to the doctrines that
+weight it and takes the corresponding points off the two that do not. That is
+what a repair looks like, and it is the correct sign.
+
+**Still low in play, and that is OP-01 and not this.** Bands splits 0.44 times a
+game against 29% of settlement-years in which it is legal. The greedy chooser
+compares a flat weight of 14 against `bless × gain`, which reaches 24, and takes
+the blessing nearly every time. The opportunity is there and the chooser does not
+want it.
+
+## A-22 · Does unmaking require presence? — **settled: yes, and it is built**
+
+OP-16's Bless/Quicken split, refined in August 2026 to a test on *presence*
+rather than on which of the two spells it is, and now 1.8.
+
+**Taking country the other power has blessed returns it to wild.** You unmake
+before you make: two visits for one tile. Wild country is taken as it always
+was. The rule reads `blessEffect(tile, who, inPerson)` and every site that
+blesses anything asks it, so the two halves cannot drift apart.
+
+**Bless is always in person** — it happens under your feet. **Quicken asks
+whether its target was within arm's reach**, the same test `tolled` uses for the
+dream toll, so the game's two prices are read off one line. Sent down the stone
+network, Quicken takes wild ground and passes over theirs.
+
+That is *creation at a distance, unmaking only in person*, on the ground rather
+than in a register, and it is what makes a stone deep inside its own blessed
+region hard to silence: the attacker must walk in, one ring a year, visibly.
+OP-16's original complaint — that Quicken skipped the entire siege — is answered
+without cutting its reach, which the entry had already warned would be a net nerf
+to the magical player.
+
+**Measured alone**, same convention: Cities 50 → 40, Mixed 34 → 30, Haunt 55 →
+**66**, Bands 34 → **24**.
+
+**That spread is the interesting result, and it is not about blessing. It is
+about turn order.** A-17's swing exists because Bless overwrites, so the second
+mover overwrites after the first has committed. Removing the overwrite removes
+most of the mechanism. Mirror matches, 60 games, mean margin p0 − p1 with the
+starting-position bias subtracted out:
+
+| doctrine | turn order was worth | with 1.8 | with all three |
+|---|---|---|---|
+| cities | −1.1 | −8.3 | **−19.4** |
+| haunt | −11.6 | **−6.5** | −6.5 |
+| bands | −14.5 | **−1.8** | +1.2 |
+
+**So 1.8 is A-17's second candidate arriving by another road.** `BLESS_WILD_ONLY`
+was rejected as a turn-order fix; this is not that rule — it takes their ground
+and gives it to nobody rather than refusing to take it — but it removes the same
+overwrite, and it nearly eliminates the bias for Bands and halves it for Haunt.
+
+**And it makes Cities worse, and 1.9 makes Cities worse again.** A ring is
+resolved at the end of the year, so the second mover has the last word on whether
+it is whole. The total bias across the three doctrines is about what it was; it
+has been redistributed, not removed. **A-17 is not reopened — it is re-pointed.**
+Its own conclusion was *measure around it*, and the fourth candidate in OP-21,
+letting the second player choose their seat, is worth more now than when it was
+written: the bias is larger, still doctrine-dependent, and still opposite-signed.
+
+## A-23 · Does a besieged settlement go out to the fields? — **settled: no**
+
+Not a question anybody asked. It was found by building 1.9, watching it never
+fire, and reading why.
+
+Farmland erases blessing — the one-way ratchet, §5, the thesis in one line. A
+taught settlement ploughs its own first ring. A ring is made of blessing. So the
+first season of ploughing broke every siege, and blessing cannot be laid on
+farmland, so **the besieger could never repair it. A taught settlement was
+structurally immune to encirclement**, which is precisely the settlement OP-20
+was written to be able to take. Measured before the fix: a 900-strong city under
+a closed ring grew 929 → 950 → 965 → … for nine years.
+
+**A place closed in on every side does not go out to the fields.** That is what a
+siege is, and it costs one line. The same city now goes 929 → 669 → 481 → 347 →
+250 → 197 → 177 → 167 → 161.
+
+Two things it hands back, both wanted:
+
+- **The defender gets a counter.** Break the ring — one tile of your own blessing
+  beside the place, or Wither, or a Clearance aimed at a besieging tile from
+  another of your settlements — and the ploughing resumes the same year and the
+  clock resets to zero.
+- **Relief by clearance is a settled-doctrine answer to a magical attack**, which
+  the board did not have. It is not written anywhere; it falls out.
+
+**A mature city is still hard to encircle and should be.** Existing farmland
+beside a place stops the ring ever forming, so taking a loud city means Withering
+its fields first, then closing the ring, then forbidding. Three stages, several
+wonders, several years. That is the late-game project OP-20 asked for, and the
+one-ply chooser will never attempt it — so **the matrix systematically
+undercounts this rule**, and the number that matters will come from a played
+game.
+
+**Settled by:** building it, measuring nothing happening, and reading the tick
+order.

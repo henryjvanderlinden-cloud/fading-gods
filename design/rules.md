@@ -546,3 +546,94 @@ uses its own fixed 5 / 7 / 9 rather than borrowing the sliders. `FG.R2all(false)
 therefore still plays exactly what §6 describes. A baseline that moves with a
 slider is not a baseline — A-16, in miniature.
 
+
+---
+
+## 13. Splitting
+
+**Current.** Built August 2026 as `FG.R2.split2`, and it is the first time this
+act has done anything at all — see A-20.
+
+Standing on a settlement of yours of **sixty people or more**, you may split it.
+Half go over the rise and found a new place. The splinter is **born untaught**,
+always: a split is the opposite gesture from a colony, which is born tilling.
+
+**Where they may go.** Any tile **you have blessed**, at **path distance 2** from
+the parent, that passes every founding test except the 85% one:
+
+- not rock, water, a settlement, or a stone;
+- **not beside any settlement** — which is what makes the answer exactly two, since
+  distance 1 fails this by construction;
+- no rival blessing within two tiles.
+
+Path distance rather than ring distance (A-18): rock and water block, so a place
+ringed by water has nowhere to send anyone, and a split can never leapfrog terrain.
+
+**The price nobody wrote.** A settlement stands on wild ground, so founding the
+splinter **spends that tile's blessing**. Splitting costs you a tile of your own
+quiet country, permanently.
+
+In the build, Split arms and waits for the tile, the way an intervention does.
+It used to fire on the button and pick at random out of the one place it could
+go — which was, in practice, nowhere.
+
+## 14. Taking their ground
+
+**Current.** Built August 2026 as `FG.R2.unmake`. See A-22.
+
+**Wild country comes over to you. Country the other power has blessed goes back to
+wild.** You unmake before you make: two visits for one tile.
+
+Which of the two happens is decided by **presence**, not by which power you used:
+
+| | in person | at range |
+|---|---|---|
+| **Bless** — under your feet | takes wild, unmakes theirs | — |
+| **Quicken** — within arm's reach | takes wild, unmakes theirs | takes wild only |
+
+*Creation at a distance, unmaking only in person.* A stone deep inside its own
+blessed region is therefore genuinely hard to silence: the attacker has to walk
+in, one ring a year, in the open.
+
+Note the consequence for turn order. A-17's swing exists because Bless overwrote;
+with the overwrite gone, the swing nearly disappears for Bands and halves for
+Haunt — and grows for Cities. It has been redistributed, not removed.
+
+## 15. Encirclement, and what is forbidden
+
+**Current.** Built August 2026 as `FG.R2.encircle`. See OP-20 and A-23.
+
+A settlement whose every neighbour **that is not rock or water** is blessed ground
+of one single power that does not own it is **ringed**. Hold the ring for **two
+years** and the place changes hands.
+
+Rock and water count as part of the ring and need no blessing, so a coastal place
+with three land neighbours is closed in by three tiles. Drown-then-encircle is a
+conquest for a wonder and two acts, and that is deliberate.
+
+**A ringed settlement does not go out to the fields.** It stops reckoning for as
+long as the ring holds. Without this a taught place ploughed its besiegers into
+farmland in one season, and blessing cannot be laid on farmland, so no siege of a
+taught settlement could ever have succeeded.
+
+**On capture the place is forbidden.** Both teachings, for good: it cannot be
+taught to till or to kill again, by anybody. There is no choice offered — a
+captured ringed-in place is always forbidden.
+
+**What follows needs no further rule:**
+
+- Its ceiling falls to Dunbar the moment it is untaught, so it **empties**, at up
+  to 28% a year, from whatever it had grown to.
+- The ones who leave become **refugee columns**, and they walk back to the country
+  of the power that **lost** them — they are leaving over the plough, so they go
+  where ploughing is still allowed. Forbidding a loud place makes the rival's next
+  town bigger. **You cannot forbid your way to silence.**
+- Nothing is credited for forbidding. `lostCount` counts taught settlements *you
+  currently own*, so the wonder goes back to whoever lost the loud place — the
+  same thing that already happens when a taught city is taken by levy.
+
+**The counters.** Break the ring — one tile of your own blessing beside the place,
+a Wither, or a Clearance ordered from another of your settlements onto a besieging
+tile — and the fields resume the same year and the clock resets to zero. A mature
+city cannot be ringed at all until its existing farmland has been Withered away,
+which makes taking one a three-stage project across several years.

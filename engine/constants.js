@@ -90,10 +90,50 @@ FG.R2 = {
  teaching:   true,   // 1.3   tilling and killing, taught per settlement
  taughtLoss: true,   // 1.4   the wonder goes on teaching, not at pop 150
  audible77:  true,   // 1.5   settlements under 77 bless the ground round them
- split2:     false,  // 1.6   UNBUILT — split targets blessing at path distance 2
+ // 1.6. Built August 2026, and it is a bug fix wearing a rule's clothes.
+ //
+ // The old split asked for a *neighbour* of the settlement that passed the
+ // whole founding test — and `foundBlock` refuses any tile with a settlement in
+ // its own neighbourhood, which every neighbour of a settlement has: the
+ // settlement doing the splitting. **Split was therefore never legal, in any
+ // position, since it was written.** Measured before it was touched: true in 0
+ // of 1,047 settlement-years, in a build where `bands` weights it at 14 and the
+ // dropdown describes that doctrine as *splits at sixty*.
+ //
+ // So the flag does two things at once and they should not be confused. It
+ // makes split *possible*, which is a repair rather than a balance change; and
+ // it decides where a splinter may go, which is a balance change. See OP-19 and
+ // registers/rejected.md for the rule it replaces.
+ split2:     true,   // 1.6   split targets your blessing at path distance 2
  fade:       true,   // 1.7   reckoned ground enterable at 10% a year (OP-14)
- unmake:     false,  // 1.8   UNBUILT — taking their blessing returns it to wild
- encircle:   false,  // 1.9   UNBUILT — a ring of blessing takes a settlement
+
+ // 1.8 / OP-16. **Creation at a distance, unmaking only in person** — the line
+ // this project has been drawing since teaching moved onto the stone network,
+ // now drawn on the ground itself. Blessing wild country is what it always was.
+ // Taking country the other power has blessed returns it to *wild*: you unmake
+ // before you make, two visits for one tile, and the principle is said out loud
+ // on the board instead of asserted in a register.
+ //
+ // The test is presence, not which of the two spells it is. Bless happens where
+ // you stand and can always unmake. Quicken aimed at arm's reach can unmake
+ // too; aimed down the stone network it takes wild ground and nothing else.
+ // That is what makes a stone deep inside its own blessed region hard to
+ // silence — the attacker has to walk in, one ring a year, visibly.
+ unmake:     true,   // 1.8   taking their blessing returns it to wild
+
+ // 1.9 / OP-20. A settlement closed in on every side by one power's blessing
+ // goes over to it after two years, and what it knows is forbidden for good.
+ // People move ownership; gods move knowledge — 1.8's asymmetry carried from
+ // the ground to what the ground knows. It is the only un-teaching in the game,
+ // and the only verb the player has that is neither making nor breaking.
+ //
+ // Nothing is handed back for it directly, and it does not need to be.
+ // `lostCount` is derived from the board, so silencing a taught place drops the
+ // count of whoever owned it — exactly as taking one by levy already does. The
+ // wonder returns to the side that lost the loud place. That is the rule the
+ // game already had and it is the right one: the fading is caused by your own
+ // people ceasing to hear you, so it lifts when they stop being yours.
+ encircle:   true,   // 1.9   a ring of blessing takes a place, and forbids it
  // 1.10 was `landGates` — the works unlocking on ground you had tilled. Cut in
  // August 2026 without ever being built, in favour of 1.18 below, which measures
  // the same and costs two lines instead of a new per-settlement unlock model.
@@ -144,10 +184,17 @@ FG.R2all = function (on) {
 // `FG.R2all(true)` sets the unbuilt flags too, which is harmless today and will
 // stop being harmless the moment one of them is written. Prefer this.
 FG.R2built = function (on) {
- ["logistic","teaching","taughtLoss","audible77","fade","exitLane",
-  "dreamTeach","dreamWorks","taughtGates"].forEach(k => { FG.R2[k] = !!on; });
+ FG.R2BUILT.forEach(k => { FG.R2[k] = !!on; });
  return FG.R2;
 };
+
+// The list itself, exported, because the interface needs exactly this and used
+// to keep its own copy — which had drifted: `taughtGates` was missing from it,
+// so the build showed the largest tuning lever in the project as *not built*,
+// and the "whole batch" button switched it off. One list, read by both. A-16.
+FG.R2BUILT = ["logistic", "teaching", "taughtLoss", "audible77", "fade", "exitLane",
+              "dreamTeach", "dreamWorks", "taughtGates",
+              "split2", "unmake", "encircle"];
 
 // The caps in FG.R2. Separate from FG.TUNE because TUNE is the slider panel and
 // these are not sliders yet — if they earn their way into the build they move.
@@ -184,6 +231,25 @@ FG.takeable = function (q, who) {
  if (FG.impassable(q) || q.set) return false;
  if (q.st === "wild") return true;
  return !FG.BLESS_WILD_ONLY && q.st === "bless" && q.own !== who;
+};
+
+// 1.8. What blessing this tile actually *does*, which under `unmake` is two
+// different things and used to be one. Returns "take", "unmake", or null.
+//
+// `inPerson` is the caller's answer to *are you standing next to this*, and it
+// is the whole rule. Bless passes true always — it happens under your feet.
+// Quicken passes whether its target tile was within arm's reach, the same test
+// `tolled` uses, so the two prices in the game are read off the same line.
+//
+// Note that an unmade tile still counts as a gain to the chooser and to the
+// hint line, and should: it takes three points off the other power and opens
+// the ground to a second visit. It is worth doing. It is only worth *less*.
+FG.blessEffect = function (q, who, inPerson) {
+ if (FG.impassable(q) || q.set) return null;
+ if (q.st === "wild") return "take";
+ if (q.st !== "bless" || q.own === who || q.own === null) return null;
+ if (!FG.R2.unmake) return FG.BLESS_WILD_ONLY ? null : "take";
+ return inPerson ? "unmake" : null;
 };
 
 // --- randomness ---------------------------------------------------------

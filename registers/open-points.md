@@ -180,6 +180,23 @@ later, which is most of what this game is about — is currently unmeasurable.
 Settling this does not just re-rank the doctrines. It decides whether several rules
 in the build have a reason to exist.
 
+### A third measurement, August 2026, and this one is not about judgement
+
+**Every number ever measured for `bands` was measured against a doctrine playing
+with one fewer act than it has.** Split has never been legal — A-20 — and `bands`
+weights it at 14, second only to `stone`. The chooser has been spending that
+weight on an option that could not be selected since the build was written.
+
+Two things follow and they point in opposite directions:
+
+- The historical numbers for that doctrine are worth less than they looked, and
+  so is anything tuned against them.
+- **The chooser still barely wants it now that it works.** Split is legal in 29%
+  of `bands` settlement-years and taken 0.44 times a game, because a flat weight
+  of 14 loses to `bless × gain` reaching 24 nearly every time. Making an option
+  legal did not make a one-ply greedy chooser use it, which is this entry in one
+  sentence.
+
 ### Deliberately deferred, August 2026
 
 Not because it stopped mattering — the two measurements above stand and are the
@@ -215,6 +232,13 @@ a loud city by encirclement and forbidding the plough returns a wonder you had
 already lost. If the last ten turns are a decade spent getting one thing back, this
 question answers itself. If they are a decade spent watching a counter, it does
 not. See OP-19 and OP-20.
+
+**Both of those are now built, and this entry is the one that has to be played to
+be answered.** OP-14's toll is in and a person has been to 10% of himself and
+called it a decision. Encirclement is in, and it is additive, and taking a mature
+city with it is a multi-year project rather than a click. **Nothing else is
+needed here except somebody playing the last ten turns and saying which it felt
+like.** Candidate fixes should not be added before that happens.
 
 ## OP-04 · medium · Is the wonder → work trade actually felt?
 
@@ -752,11 +776,11 @@ Flags are declared in `FG.R2` and do nothing yet.
 
 | Flag | Rule | Why |
 |---|---|---|
+| `split2` | **Built, August 2026 — and it was a repair.** See A-20 and A-21. |
 | `barren3` | Withered ground stays barren three years before a settlement may plough it again | The immediate effect is currently unnoticeable — reckoning resumes the very next `worldTick`. The permanent cost already in the code stays: re-reckoning re-spends the settlement's 30-tile lifetime budget, which is real and invisible. Tilts magical, which is wanted. |
-| `split2` | Split targets any tile you have blessed within path distance 2, without the 85% founding requirement; the splinter is untaught | Path distance rather than ring distance, consistent with A-18, so water and mountains constrain your own fission exactly as they constrain founding. Split cannot leapfrog terrain. |
 | `landGates` | See OP-05 | |
 | `pathFrac` | See A-18 | |
-| `unmake`, `encircle` | See OP-16, OP-20 | |
+| `unmake`, `encircle` | **Both built, August 2026.** See OP-16 and A-22, OP-20 and A-23. | |
 
 ### Answered, August 2026 — and by a fifth candidate none of the four below is
 
@@ -889,6 +913,73 @@ way to silence.
 **Settled by:** building it behind `FG.R2` after OP-19 measures clean, then the
 matrix. Watch the wonder count over a game as its own series — if it is flat after
 year 25 for any doctrine, this is too strong.
+
+### Built, August 2026 — with the choice taken out of it and one rule added
+
+`FG.R2.encircle`, 1.9, on by default. Two years ringed and the place changes
+hands.
+
+**The taboo is not offered, it is what happens.** Rick's call, and it removes the
+entry's hardest problem rather than answering it. A captured ringed-in place is
+forbidden **both teachings, for good** — it cannot be taught to till or to kill
+by anybody, ever. There is no question asked at the moment of capture and no
+version of the mechanic in which you take the place and leave it loud.
+
+**Nothing is credited for forbidding, and the entry above is wrong about needing
+it.** That paragraph — *it returns the wonder that teaching cost, without which
+nobody would ever choose taboo* — was written when taboo was a choice. It is not
+one now, so there is nothing to make attractive. And the wonder moves anyway,
+because `lostCount` is derived from the board: un-teaching the place drops the
+count of **whoever owned it**, so the wonder goes back to the side that lost the
+loud city. That is exactly what already happens when a taught city is taken by
+levy, it needs no bookkeeping, and it is the right reading — the fading is caused
+by your own people ceasing to hear you, so it lifts when they stop being yours.
+
+**Which makes the trade sharper than the entry imagined.** Encircling a loud
+place of theirs stops their farmland engine, gains you three points of
+settlement, and **hands them back a wonder.** You make your rival weaker
+agriculturally and more dangerous magically, in one act. Nobody designed that; it
+is what the derived count already said.
+
+**A rule had to be added, and it is A-23.** A besieged settlement does not
+plough. Without it a taught place broke every siege in one season and was
+structurally immune to the mechanic written to take it. It also hands the
+defender the counter this entry had no answer for: break the ring and the fields
+resume the same year.
+
+**The emptying is built and the people are real.** `carryCap` drops to Dunbar the
+moment the place is untaught, so the decline needs no special case at all — the
+floor at 28% a year was already there. The ones who leave become refugee columns
+on §7's machinery, and **they walk back to the country of the power that lost
+them**, because they are leaving over the plough and they go where ploughing is
+still allowed. So forbidding a loud place makes the rival's *next* town bigger.
+Silence is not achieved; loudness is moved.
+
+### What is still open
+
+- **The wonder count as its own series is still not built.** This entry has asked
+  for it twice and A-19 asks for it a third time. It is now the single most
+  wanted piece of instrumentation in the project.
+- **Is it too good?** Measured alone, 80 games a cell against Cities: Cities 50 →
+  56, Mixed 34 → 40, Haunt 55 → 70, Bands 34 → 44. Everything goes up, blessing
+  doctrines most. With 1.6 and 1.8 alongside it the batch lands at 34 / 36 / 54 /
+  29. **Left untuned** — see the standing rule about tuning an unfinished rule
+  set twice.
+- **The matrix undercounts this rule and always will.** A one-ply chooser never
+  builds a ring on purpose; every capture measured is an accident of blessing,
+  0.2–0.5 a game. A player aiming at it does much better, and taking a *mature*
+  city requires Withering its fields first — a three-stage siege no chooser will
+  ever attempt. OP-01.
+- **It costs the second mover's advantage.** A ring resolves at the end of the
+  year, so whoever acts second has the last word on whether it is whole. See
+  A-22's table: Cities' turn-order bias goes from −1.1 to −19.4 across the three
+  new rules. That is OP-21's problem more than this one's.
+- **The taboo has no cap and needs none yet**, on the same reasoning as before:
+  the cost of the siege limits it. Unmeasured, because nothing sieges on purpose.
+- **Does forbidding un-reckon the ground?** Built as *no* — the fields stay, they
+  are simply never extended. Wither is still the only thing that undoes farmland.
+  OP-17's fill colour now has to say *forbidden*, and today it is a thin inner
+  ring and the settlement list saying so.
 
 ## OP-07 · medium · Map generation is unexamined
 
@@ -1632,6 +1723,27 @@ last wonder lost, so whoever teaches fewest settlements keeps it longest.
 
 The flip-flopping watch above still applies, and the harness item stands: count
 tiles that change hands more than three times.
+
+### Built, August 2026 — the split is in, and it is a rule about presence
+
+`FG.R2.unmake`, 1.8, on by default. **Taking the other power's blessing returns
+it to wild.** The test is presence rather than which spell it is: Bless always
+unmakes, Quicken unmakes only within arm's reach and takes wild ground at range.
+See **A-22** for the reasoning, the numbers, and the thing it turned out to be
+about, which is turn order and not blessing.
+
+**What this closes:** the reach complaint that opened the argument. Quicken can
+no longer skip the siege, and its reach did not have to be cut to achieve it —
+which the entry itself had warned would be a net nerf to the magical player.
+
+**What it does not close, and it is the larger half.** Blessing accounts for 1%
+of silenced stones and farmland for 92%, and *Clearance can still be aimed at a
+stone*. That is the question this entry named as the real one and then did not
+answer, and 1.8 does not touch it. It is still open, still undocumented in the
+build, and still unmeasured. **The flip-flopping watch is also unfired:** nobody
+has counted tiles changing hands more than three times, and under 1.8 a
+contested tile now takes two acts to flip rather than one, which should make
+flip-flopping less attractive and has not been checked.
 
 ### A third disposition for a paved stone, August 2026
 

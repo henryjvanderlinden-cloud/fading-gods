@@ -14,19 +14,49 @@ FG.newSet = function (pop, who, from) {
  return {pop, own:who, spent:0,
          taught: !!(from && from.taught),    // a colony inherits; a splinter does not
          kill:   !!(from && from.kill),
-         tabu:   false};                     // OP-20
+         tabu:   false,                      // OP-20 — forbidden both teachings
+         ring:   null};                      // 1.9  — {by, n}, the siege clock
 };
 
+// 1.8. Blessing a set of tiles, with the two outcomes counted apart so the
+// chronicle can say which happened. Taking their ground gives it to nobody: it
+// goes back to wild, and a second visit is what makes it yours.
+//
+// The claim is recorded for a take and not for an unmaking, which matters only
+// under FG.CONTEST (a rejected A-17 candidate, off by default): a tile you
+// merely emptied is not a tile you asserted.
+function blessTiles(k, who, inPerson) {
+ let took = 0, unmade = 0;
+ ring(k, 1).forEach(x => {
+  const q = T(x), e = FG.blessEffect(q, who, inPerson);
+  if (!e) return;
+  if (e === "unmake") { q.st = "wild"; q.own = null; unmade++; return; }
+  FG.claim(x, who); q.st = "bless"; q.own = who; took++;
+ });
+ return {took, unmade};
+}
+
+// One act, so one sentence, with a clause each way.
+function blessSay(r, me, quick) {
+ const b = [];
+ if (r.took)   b.push(me ? "the ground goes over to you in " + r.took + " tile" + (r.took > 1 ? "s" : "")
+                         : "theirs takes " + r.took + " tile" + (r.took > 1 ? "s" : ""));
+ if (r.unmade) b.push(me ? "what was theirs in " + r.unmade + " goes back to thorn"
+                         : r.unmade + " of yours goes back to thorn");
+ if (!b.length) return;
+ const s = b.join(", and ");
+ say((quick ? "Quickly, " + s : s.charAt(0).toUpperCase() + s.slice(1)) + ".",
+     me ? (quick ? "omen" : "") : "riv");
+}
+
 // --- acts ---------------------------------------------------------------
-function doAct(kind, who) {
+// `opt` is an optional target for the acts that have one. Only `split` reads
+// it, and only since 1.6 gave a splinter more than one place to go.
+function doAct(kind, who, opt) {
  const k = FG.G.p[who].pos, t = T(k), me = who === 0;
  if (kind === "bless") {
-  const n = FG.blessGain(k, who);
-  if (!n) return false;
-  ring(k, 1).forEach(x => { const q = T(x);
-   if (!FG.takeable(q, who)) return;
-   FG.claim(x, who); q.st = "bless"; q.own = who; });
-  say((me ? "The ground goes over to you in " : "Theirs takes ") + n + " tile" + (n > 1 ? "s" : "") + ".", me ? "" : "riv");
+  if (!FG.blessGain(k, who)) return false;
+  blessSay(blessTiles(k, who, true), me, false);
  } else if (kind === "stone") {
   if (!canStone(k, who)) return false;
   FG.G.stones[who].push(k);
@@ -36,12 +66,21 @@ function doAct(kind, who) {
   t.set = FG.newSet(30, who); t.st = "wild"; t.own = null;
   say(me ? "Thirty of them stay. They will not stay thirty." : "They put down a settlement.", me ? "good" : "riv");
  } else if (kind === "split") {
-  if (!canSplit(k, who)) return false;
-  const free = NB[k].filter(x => canFound(x, who));
-  const nk = FG.pick(free);
+  // 1.6. The candidates come from the engine rather than being rebuilt here,
+  // which is how the old version came to be unreachable: the legality test and
+  // the list of places it was legal to go were written twice and only one of
+  // them was ever checked.
+  const free = FG.splitTargets(k, who);
+  if (!free.length) return false;
+  const nk = (opt !== undefined && free.includes(opt)) ? opt : FG.pick(free);
   const half = Math.floor(t.set.pop / 2); t.set.pop -= half;
   // A splinter is born untaught, always. A split is the opposite gesture from a
   // colony: it is the Seventy-Seven, people choosing to go back. OP-19.
+  //
+  // And it is born on blessed ground that it does not consume — the tile keeps
+  // its blessing right up until the settlement stands on it, at which point
+  // `st` goes to wild like any founding. That is the cost of a split nobody
+  // priced: it spends a tile of your own quiet country to make a place.
   T(nk).set = FG.newSet(half, who); T(nk).st = "wild"; T(nk).own = null;
   say(me ? "They keep the Seventy-Seven. Half go over the rise." : "They split one of theirs.", me ? "good" : "riv");
  } else return true;   // do nothing
@@ -135,11 +174,11 @@ function doIntervene(id, k, who) {
   say(me ? "The furrows go back to thorn in " + n + " tile" + (n > 1 ? "s" : "") + "." : "Their fields go to waste.", me ? "omen" : "riv");
 
  } else if (id === "quicken") {
-  let n = 0;
-  ring(k, 1).forEach(x => { const q = T(x);
-   if (!FG.takeable(q, who)) return;
-   FG.claim(x, who); q.st = "bless"; q.own = who; n++; });
-  say(me ? "The ground comes over quickly, in " + n + " tile" + (n > 1 ? "s" : "") + "." : "Theirs quickens.", me ? "omen" : "riv");
+  // 1.8. The one place in the game where the same intervention does two
+  // different things depending on where you are standing. In arm's reach it
+  // can unmake; sent down the stone network it takes wild ground and passes
+  // over theirs, because a thing you say cannot undo a thing they believe.
+  blessSay(blessTiles(k, who, !FG.atRange(k, who)), me, true);
 
  } else {
   // works — the price is paid by the settlement that orders them

@@ -90,6 +90,172 @@ console.log(`  ${pass} passed, ${fail} failed`);
 console.log(`  measured: ${capturedStoneYears} stone-years spent standing in a rival's blessing`
  + ` over ${SEEDS} games — blessing over a stone silences it, and nothing says so (OP-16)`);
 
+// ------------------------------------------------- 1.6 / 1.8 / 1.9, August 2026
+// Three rules that all turn on a predicate the rest of the engine reads, so they
+// are checked on constructed boards as well as in play. The constructed half is
+// what caught the two things play did not: that split had never once been legal,
+// and that a taught settlement broke every siege by ploughing.
+console.log("\nthe three rules of the second batch");
+{
+ const before = fail;
+ const {K, NB, T, ring} = FG;
+
+ // A blank plain board with nothing on it, so a rule can be shown one situation
+ // at a time. Every flag in the batch is on, because that is the game.
+ function blank() {
+  FG.resetTune(); FG.R2all(false); FG.R2built(true);
+  FG.createGame({you: null, them: "passive", seed: 1});
+  FG.G.T.forEach(t => { t.t = "plain"; t.f = 1; t.st = "wild"; t.own = null; t.set = null; });
+  FG.G.stones = [[], []]; FG.G.armies = []; FG.G.refugees = []; FG.G.log = [];
+  FG.G.p[0].pos = K(4, 4); FG.G.p[1].pos = K(12, 4);
+ }
+ const settle = (c, r, who, pop, taught) => {
+  const t = T(K(c, r));
+  t.set = FG.newSet(pop, who); t.set.taught = !!taught; t.st = "wild"; t.own = null; return t;
+ };
+ const blessRound = (c, r, rad, who) =>
+  ring(K(c, r), rad).forEach(x => { T(x).st = "bless"; T(x).own = who; });
+
+ // --- 1.6 split ---------------------------------------------------------
+ blank(); blessRound(4, 4, 2, 0); settle(4, 4, 0, 80);
+ const parent = K(4, 4), tg = FG.splitTargets(parent, 0), d = FG.pathWithin(parent, 2);
+ ok("split has somewhere to go", tg.length > 0);
+ ok("no splinter lands beside its parent", tg.every(x => !NB[parent].includes(x)));
+ ok("every splinter lands at path distance two", tg.every(x => d[x] === 2));
+ ok("every splinter lands on ground you blessed",
+    tg.every(x => T(x).st === "bless" && T(x).own === 0));
+ ok("sixty is the floor", (T(parent).set.pop = 59, !FG.canSplit(parent, 0))
+    && (T(parent).set.pop = 60, FG.canSplit(parent, 0)));
+
+ blank(); blessRound(4, 4, 2, 0); settle(4, 4, 0, 80);
+ T(K(4, 2)).st = "wild"; T(K(4, 2)).own = null;
+ ok("wild ground two out is not a target", !FG.splitTargets(parent, 0).includes(K(4, 2)));
+
+ blank(); blessRound(4, 4, 2, 0); settle(4, 4, 0, 80);
+ const openTargets = FG.splitTargets(parent, 0).length;
+ NB[parent].forEach(x => { T(x).t = "water"; T(x).f = 0; T(x).st = "wild"; T(x).own = null; });
+ ok("a split cannot leapfrog water", FG.splitTargets(parent, 0).length === 0,
+    `open board offered ${openTargets}`);
+
+ blank(); blessRound(4, 4, 2, 0); settle(4, 4, 0, 80);
+ FG.G.p[0].pos = parent;
+ const aim = FG.splitTargets(parent, 0)[0];
+ ok("split goes where it is aimed", FG.doAct("split", 0, aim) === true && T(aim).set !== null);
+ ok("eighty splits into forty and forty", T(aim).set.pop === 40 && T(parent).set.pop === 40);
+ ok("a splinter is born untaught and unforbidden",
+    T(aim).set.taught === false && T(aim).set.tabu === false && T(aim).set.ring === null);
+ ok("founding spends the tile's blessing", T(aim).st === "wild" && T(aim).own === null);
+
+ // The rule this replaced, kept as a check rather than a paragraph: it could
+ // never fire, in any position, and this is the position most favourable to it.
+ blank(); FG.R2.split2 = false; blessRound(4, 4, 2, 0); settle(4, 4, 0, 80);
+ ok("the old split was impossible even on an open blessed board",
+    FG.splitTargets(parent, 0).length === 0);
+ FG.R2built(true);
+
+ // --- 1.8 unmake --------------------------------------------------------
+ blank();
+ T(K(3, 4)).st = "bless"; T(K(3, 4)).own = 1;
+ FG.G.p[0].pos = K(4, 4);
+ ok("their blessing, in person, is unmade", FG.blessEffect(T(K(3, 4)), 0, true) === "unmake");
+ ok("their blessing, at range, is nothing", FG.blessEffect(T(K(3, 4)), 0, false) === null);
+ ok("wild ground, at range, is still taken", FG.blessEffect(T(K(5, 4)), 0, false) === "take");
+ FG.doAct("bless", 0);
+ ok("Bless returns their ground to wild, not to you",
+    T(K(3, 4)).st === "wild" && T(K(3, 4)).own === null);
+ ok("the same Bless takes the wild ground beside it",
+    T(K(5, 4)).st === "bless" && T(K(5, 4)).own === 0);
+ FG.doAct("bless", 0);
+ ok("two visits make it yours", T(K(3, 4)).st === "bless" && T(K(3, 4)).own === 0);
+
+ blank();
+ FG.G.stones[0] = [K(4, 4)]; blessRound(4, 4, 2, 0);
+ [[7, 4], [7, 3], [7, 5]].forEach(([c, r]) => { T(K(c, r)).st = "bless"; T(K(c, r)).own = 1; });
+ FG.G.p[0].pos = K(4, 4);
+ ok("a tile ringed by their blessing is no Quicken target at range",
+    FG.atRange(K(7, 4), 0) && !FG.targets("quicken", 0).includes(K(7, 4)));
+ FG.G.p[0].pos = K(6, 4);
+ ok("walk to it and Quicken can reach it", FG.targets("quicken", 0).includes(K(7, 4)));
+ FG.doIntervene("quicken", K(7, 4), 0);
+ ok("Quicken in person unmakes", T(K(7, 4)).st === "wild" && T(K(7, 3)).st === "wild");
+
+ // --- 1.9 encircle ------------------------------------------------------
+ blank(); settle(4, 4, 1, 900, true);
+ NB[K(4, 4)].forEach(x => { T(x).st = "bless"; T(x).own = 0; });
+ ok("a place ringed on every side is ringed", FG.encircledBy(K(4, 4)) === 0);
+ T(NB[K(4, 4)][0]).own = 1;
+ ok("one tile of their own breaks the ring", FG.encircledBy(K(4, 4)) === null);
+ T(NB[K(4, 4)][0]).own = 0;
+ FG.encircleTick();
+ ok("year one notes the ring and changes nothing",
+    T(K(4, 4)).set.own === 1 && T(K(4, 4)).set.ring.n === 1);
+ FG.encircleTick();
+ ok("year two takes the place", T(K(4, 4)).set.own === 0);
+ ok("and forbids it both teachings",
+    T(K(4, 4)).set.tabu === true && T(K(4, 4)).set.taught === false && T(K(4, 4)).set.kill === false);
+ ok("a forbidden place can never be taught again", !FG.teachTargets("till", 0).includes(K(4, 4)));
+ ok("its ceiling falls to Dunbar", FG.carryCap(T(K(4, 4))) === FG.R2TUNE.kWild);
+
+ blank(); settle(4, 4, 1, 300, true);
+ NB[K(4, 4)].forEach(x => { T(x).st = "bless"; T(x).own = 0; });
+ FG.encircleTick();
+ T(NB[K(4, 4)][0]).st = "wild"; T(NB[K(4, 4)][0]).own = null;
+ FG.encircleTick();
+ ok("breaking the ring resets the clock",
+    T(K(4, 4)).set.ring === null && T(K(4, 4)).set.own === 1);
+
+ // The thing that was wrong and was found by building it: farmland erases
+ // blessing, so a taught settlement used to plough its besiegers away in one
+ // season and was simply immune. A ringed place does not go out to the fields.
+ blank(); settle(4, 4, 1, 900, true); settle(9, 4, 1, 100, false);
+ NB[K(4, 4)].forEach(x => { T(x).st = "bless"; T(x).own = 0; });
+ const pops = [];
+ for (let y = 0; y < 9; y++) { FG.worldTick(FG.snapshot()); pops.push(Math.round(T(K(4, 4)).set.pop)); }
+ ok("a besieged place cannot plough its way out of the ring", T(K(4, 4)).set.own === 0,
+    `still theirs after nine years: ${pops.join(" ")}`);
+ ok("a forbidden city empties toward Dunbar", pops[pops.length - 1] < 200, pops.join(" -> "));
+ ok("and the people who leave walk back to their own",
+    Math.round(T(K(9, 4)).set.pop) > 100, `their other place: ${Math.round(T(K(9, 4)).set.pop)}`);
+ console.log(`  a forbidden city, year by year: ${pops.join(" · ")}`);
+
+ // The wonder. Nothing is credited by the rule; the count is derived, so
+ // silencing a taught place hands the wonder back to whoever owned it.
+ blank(); settle(9, 4, 0, 900, true); settle(11, 4, 0, 300, true);
+ const lostA = FG.lostCount(0);
+ settle(4, 4, 0, 900, true);
+ const lostB = FG.lostCount(0);
+ NB[K(4, 4)].forEach(x => { T(x).st = "bless"; T(x).own = 1; });
+ FG.encircleTick(); FG.encircleTick();
+ ok("a third teaching costs a third wonder", lostB === lostA + 1);
+ ok("and losing that place to a ring gives the wonder back", FG.lostCount(0) === lostA);
+
+ FG.R2all(false); FG.R2built(true); FG.resetTune();
+ console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
+}
+
+// ------------------------------------------------- the A/B baseline, exact
+// The one thing that must never move. FG.R2all(false) plays the pre-batch game,
+// and a rule added to the batch must not be able to reach it.
+console.log("\nthe baseline is still exact");
+{
+ const before = fail;
+ const play = (you, them, seed) => {
+  FG.resetTune(); FG.createGame({you, them, seed});
+  for (let y = 0; y < 40; y++) { FG.aiTurn(0); if (FG.endYear()) break; }
+  const s = FG.score(); return s[0].tot + ":" + s[1].tot;
+ };
+ // Frozen the day 1.6, 1.8 and 1.9 went in, against the engine as it stood
+ // before them. If one of these moves, a new rule is reading state it should
+ // not, whatever its flag says.
+ const OLD = ["55:94", "52:105", "66:116", "71:80", "41:103", "48:124", "34:107", "99:110"];
+ FG.R2all(false);
+ for (let s = 0; s < OLD.length; s++)
+  ok("the old game is unchanged, seed " + s, play("bands", "cities", s) === OLD[s],
+     `got ${play("bands", "cities", s)}, want ${OLD[s]}`);
+ FG.R2all(false); FG.R2built(true); FG.resetTune();
+ console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
+}
+
 // ------------------------------------------------------------------- UI
 console.log("\nthe build, in a real DOM");
 const before = fail;

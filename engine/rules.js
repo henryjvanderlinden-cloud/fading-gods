@@ -62,6 +62,25 @@ function reach(who) {
  return d;
 }
 
+// 1.6 / A-18. Path distance for people on foot: every tile within `rad` steps
+// of `from`, where rock and water block and nothing else does. Deliberately not
+// `cost()` — that is the *player's* movement, and a splinter going over the
+// rise is not the player. Keyed by tile, valued by distance, `from` at zero.
+function pathWithin(from, rad) {
+ const d = {}; d[from] = 0;
+ const q = [[from, 0]];
+ while (q.length) {
+  const [k, c] = q.shift();
+  if (c >= rad) continue;
+  for (const nk of NB[k]) {
+   if (impassable(T(nk))) continue;
+   if (d[nk] !== undefined) continue;
+   d[nk] = c + 1; q.push([nk, c + 1]);
+  }
+ }
+ return d;
+}
+
 // Mortals walk anywhere that is not rock or water — the player's movement
 // rules do not apply to armies or refugee columns. Returns the next tile on
 // the path, null if already there, undefined if no road exists at all.
@@ -259,19 +278,81 @@ const canFound = (k, who, free) => !foundBlock(k, who, free);
 // rejected A-17 candidate, kept behind its toggle: under it, ground the other
 // power took this year is worth nothing to take, because taking it sends the
 // tile to neither of you.
-function blessGain(k, who) {
+// 1.8. `inPerson` defaults to true, because every caller but Quicken is: Bless
+// happens under your feet, and the chooser asks this about a tile it is
+// considering standing on.
+function blessGain(k, who, inPerson) {
  const claims = FG.G.claims || {};
  const other = 1 << (1 - who);
+ const near = inPerson === undefined ? true : inPerson;
  return ring(k, 1).filter(x => {
-  if (!FG.takeable(T(x), who)) return false;
+  if (!FG.blessEffect(T(x), who, near)) return false;
   if (FG.CONTEST && (claims[x] & other)) return false;
   return true;
  }).length;
 }
 
-function canSplit(k, who) {
+// 1.6. Where a splinter from k may go.
+//
+// **The rule this replaces could never fire.** It asked for a *neighbour* of
+// the settlement that passed the whole founding test, and `foundBlock` refuses
+// any tile with a settlement in its own neighbourhood — which every neighbour
+// of a settlement has, namely the settlement doing the splitting. Legal in 0 of
+// 1,047 settlement-years when it was finally measured. See constants.js 1.6.
+//
+// The new rule: a splinter goes to ground *you have blessed*, at path distance
+// `splitRad`, with the 85% founding requirement waived. The people are already
+// there and what they need is somewhere to stop, not a country — but they will
+// not stop anywhere you have not made quiet, which is what keeps blessing the
+// thing every expansion begins with (§3, OP-18).
+//
+// Everything else `foundBlock` asks is still asked, and one of those questions
+// does the shaping: *not next to a settlement* rules out distance 1 entirely,
+// so `splitRad` = 2 means the splinter lands at exactly two, which is also the
+// only distance at which two settlements do not touch. Path distance rather
+// than ring distance, per A-18 — water and mountains constrain your own fission
+// exactly as they constrain founding, and a split cannot leapfrog terrain.
+function splitTargets(k, who) {
  const t = T(k);
- return t.set && t.set.own === who && t.set.pop >= 60 && NB[k].some(x => canFound(x, who));
+ if (!t.set || t.set.own !== who || t.set.pop < 60) return [];
+ if (!FG.R2.split2) return NB[k].filter(x => canFound(x, who));
+ const d = pathWithin(k, FG.R2TUNE.splitRad);
+ return Object.keys(d).map(Number).filter(x => {
+  if (x === k) return false;
+  const q = T(x);
+  if (!(q.st === "bless" && q.own === who)) return false;
+  return canFound(x, who, true);
+ });
+}
+const canSplit = (k, who) => splitTargets(k, who).length > 0;
+
+// 1.9 / OP-20. Who, if anyone, has closed this place in.
+//
+// A settlement is ringed when every neighbour it has that is not rock or water
+// is blessed ground belonging to one single power that does not own it. Rock
+// and water count as part of the ring and do not have to be blessed, which is
+// deliberate and is recorded in OP-20 as accepted: a coastal place with three
+// land neighbours is closed in by three tiles, so Drown-then-encircle is a
+// conquest for a wonder and two acts.
+//
+// Blessing of the settlement's *own* power breaks the ring, so relieving a
+// siege is a thing you can do — and under 1.8 it has to be done in person,
+// which is what makes the siege a siege. `audible77` will not do it for you:
+// a small untaught place blesses only *wild* neighbours, and a place that is
+// ringed has none left.
+function encircledBy(k) {
+ const t = T(k);
+ if (!t.set) return null;
+ let who = null;
+ for (const x of NB[k]) {
+  const q = T(x);
+  if (impassable(q)) continue;
+  if (q.st !== "bless" || q.own === null) return null;
+  if (q.own === t.set.own) return null;
+  if (who === null) who = q.own;
+  else if (who !== q.own) return null;
+ }
+ return who;
 }
 
 function stoneBlock(k, who) {
@@ -341,7 +422,14 @@ function targets(id, who) {
    else if (id === "blight") { if (t.set && t.set.own !== who && t.set.pop > 40) out.push(k); }
    else if (id === "omen") { if (t.set && t.set.own === who && t.set.pop > 40 && settlements(who).length > 1) out.push(k); }
    else if (id === "wither") { if (ring(k, 1).some(x => { const q = T(x); return !q.set && q.st === "reck" && q.own !== who; })) out.push(k); }
-   else if (id === "quicken") { if (ring(k, 1).some(x => FG.takeable(T(x), who))) out.push(k); }
+   // 1.8. Quicken is legal where it would do something, and what it would do
+   // depends on where you are standing. Out past arm's reach it takes wild
+   // ground only, so a tile ringed entirely by the other power's blessing
+   // stops being a target at all until you walk to it.
+   else if (id === "quicken") {
+    const near = !atRange(k, who);
+    if (ring(k, 1).some(x => FG.blessEffect(T(x), who, near))) out.push(k);
+   }
   });
   return [...new Set(out)];
  }
@@ -385,11 +473,12 @@ function score() {
 
 function band(p) { return p < 77 ? ["band", 1] : p < 150 ? ["village", 2] : p < 800 ? ["town", 3] : ["city", 4]; }
 
-Object.assign(FG, {cost, reach, walkStep, region, stoneRange, working, settlements,
+Object.assign(FG, {cost, reach, walkStep, pathWithin, region, stoneRange, working, settlements,
  bigCount, hugeCount, civicStrength, taughtCount, carryCap, lostCount, divineLeft,
  civicOpen, divineReach, stoneReach, atRange, tolled, blessFrac, foundBlock, canFound,
- blessGain, canSplit, stoneBlock, canStone, mountainLine, targets, teachTargets,
- teachTargetsAt, nearestSource, score, band, manifest, manifestMp, wouldSeal});
+ blessGain, canSplit, splitTargets, encircledBy, stoneBlock, canStone, mountainLine,
+ targets, teachTargets, teachTargetsAt, nearestSource, score, band, manifest,
+ manifestMp, wouldSeal});
 
 if (typeof module !== "undefined" && module.exports) module.exports = FG;
 })(typeof globalThis !== "undefined" ? globalThis : this);
