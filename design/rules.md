@@ -470,3 +470,79 @@ toll without noticing when it does not. See OP-01.
 What the harness *can* see is the drain, and the drain is real and lands only on
 the doctrines that teach. Whether the drain is a decision or a punishment is a
 question for a person at the board — OP-21.
+
+---
+
+## 12. What opens a work
+
+**Changed August 2026 as `taughtGates`, on by default.** The works open on
+**settlements you have taught to till**: one for clearance, two for the colony,
+three for the levy. The three numbers are sliders in the build and read in
+teachings.
+
+### What it replaced, and why it had to go
+
+The old ladder was `strength = settlements past 150, plus one more for each past
+800`, against 5 / 7 / 9. It was priced when a settlement could reach the old 2600
+clamp. `logistic` moved both distributions underneath it and nothing announced
+that: an untaught settlement is asymptotic to 150 and never counts at all, and a
+taught one now tops out between 600 and 1000, so the 800 rung is nearly
+unreachable.
+
+Measured, 40 games a doctrine, with the batch on and the old ladder in place:
+
+| Playing | Games where any work ever opened | First one at |
+|---|---|---|
+| Cities | 28% | year 33 |
+| Mixed | 13% | year 33 |
+| Haunt | never | — |
+| Bands | never | — |
+
+**The mean Cities game ended at strength 3.1 against a first gate of 5** — below
+the bottom rung of a three-rung ladder — and the levy fired once in forty games.
+§6's *you begin with none and gain them* had stopped being true.
+
+### Why teachings and not something else
+
+**[load-bearing]** `lostCount` already counts taught settlements. So this puts the
+whole arc on one number running in both directions: **every teaching costs you a
+wonder and buys you a work.** The row of chips empties from the left and fills
+from the right on the same counter, and that counter is already printed on the
+stat bar, so the gate is legible without anything being added to say it.
+
+The alternative on the table — `landGates`, reading the unlock off tilled ground
+— measured no better and cost a per-settlement unlock model. `registers/rejected.md`.
+
+### What it did to the balance, 80 games a cell
+
+| | Cities | Mixed | Haunt | Bands |
+|---|---|---|---|---|
+| the old game | 55% | 38% | 11% | 10% |
+| the batch, old 5/7/9 ladder | 53% | 46% | 79% | 63% |
+| **the batch, taught 1/2/3** | 50% | 34% | 55% | 34% |
+
+Works open in 85% of Cities games and 91% of Mixed, first one about year 23, and
+all three open in roughly two thirds of Cities games.
+
+**Haunt 79 → 55 and Bands 63 → 34**, from restoring the settled side's late game
+rather than from touching blessing. This is the largest single tuning lever found
+so far and none of OP-19's stated knobs — `r`, the taught caps, the reckoning
+budget — has been moved yet.
+
+### What is deliberately unchanged
+
+- **The per-settlement minimums.** `targets()` still requires 150 / 200 / 300
+  people in the settlement that orders the work. One gate was moved at a time.
+- **The costs in people**, 10% / 35% / 45%. A-13 priced them against a ladder that
+  has now been replaced, and against works that in practice never opened.
+- **A refusing doctrine still never opens a work**, at any threshold. Intended:
+  the works are what the settled do. It does mean three of the nine chips are
+  permanently dead for Haunt and Bands.
+
+### The baseline is frozen, not scaled
+
+`TUNE.t1/t2/t3` now read in teachings, so the pre-batch path in `civicOpen()`
+uses its own fixed 5 / 7 / 9 rather than borrowing the sliders. `FG.R2all(false)`
+therefore still plays exactly what §6 describes. A baseline that moves with a
+slider is not a baseline — A-16, in miniature.
+

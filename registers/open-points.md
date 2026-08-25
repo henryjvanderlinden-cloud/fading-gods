@@ -267,31 +267,99 @@ rather than a gate, and every unlock becomes something you can see.
 **This puts A-13 back on the table.** The works' population costs — 10% / 35% /
 45% — were priced against the ladder that is being removed. Re-measure them.
 
-### `landGates` was never built, and with the batch now on by default that matters
+### Measured and fixed, August 2026 — and it was not a sag, it was an absence
 
-Read from the code, August 2026. This entry says *OP-19 removes both gates*. It
-does not, and it never did: `landGates` is a declaration in `FG.R2` that nothing
-in `engine/` reads. `civicOpen()` still gates on
-`civicStrength = settlements≥150 + settlements≥800` at 5 / 7 / 9, and `targets()`
-still checks per-settlement population at 150 / 200 / 300.
+**Read from the code, then measured.** This entry has claimed since it was
+written that OP-19 removes both population gates. It never did: `landGates` was a
+declaration in `FG.R2` that nothing in `engine/` read. Both gates were still
+there — `civicOpen()` on `strength = settlements≥150 + settlements≥800` at
+5 / 7 / 9, and `targets()` on per-settlement population at 150 / 200 / 300.
 
-Harmless while the batch was off. Not harmless now, because **`logistic` moved
-both distributions underneath those numbers and nobody re-pointed them:**
+Harmless while the batch was off. Not harmless once it was default-on, because
+**`logistic` moved both distributions out from under those numbers:**
 
 - An untaught settlement is asymptotic to `kWild` = 150 and **never reaches it**,
-  so it never counts toward `bigCount`. A pure refuser therefore has
-  `civicStrength` 0 for forty years and can never open a work at all. That is
-  arguably the right outcome and it is certainly not a *decision* anybody took.
-- A taught settlement now tops out at 600–1000 against the old 2600 clamp, so
-  `hugeCount` — settlements past 800 — is nearly unreachable off good plain.
-  The 5 / 7 / 9 ladder was priced when cities routinely passed 800.
+  so it never counts. A pure refuser had `civicStrength` 0 for forty years.
+- A taught settlement now tops out between 600 and 1000 against the old 2600
+  clamp, so the 800 rung is nearly unreachable off good plain.
 
-So the works are gated behind teaching implicitly, hard, and by accident. This is
-the same shape as the stone brake OP-19 found subtracting from zero: a formula
-that was correct under the old growth model and quietly is not under the new one.
+**What that did to the game, 40 games a doctrine:**
 
-**Settled by:** building `landGates` — which is what this entry has claimed was
-already done since it was written — and re-measuring A-13 against it.
+| Playing | Games where any work ever opened | First one at |
+|---|---|---|
+| Cities | **28%** | year 33 |
+| Mixed | **13%** | year 33 |
+| Haunt | never | — |
+| Bands | never | — |
+
+The clinching figure: **the mean Cities game ended at strength 3.1 against a
+first gate of 5.** The average game finished below the bottom rung of a
+three-rung ladder, and the levy fired once in forty games. So this was never a
+mid-game sag. The half of the arc where you lose wonders and gain works had
+quietly lost its second half, and the chip row OP-23 built to empty from the left
+and fill from the right only ever did the first of those.
+
+### The fix, and it turned out to be the largest tuning lever in the project
+
+**`taughtGates`, built and on by default.** The ladder counts **settlements you
+have taught to till** — 1 opens clearance, 2 the colony, 3 the levy.
+
+Three reasons this beat lowering 5 / 7 / 9 in place, which measured the same:
+
+- **It is the number the batch is actually about.** `lostCount` already reads it.
+  So one counter now runs the arc both ways: **every teaching costs you a wonder
+  and buys you a work.** The game was computing that twice, differently, and
+  showing the player only half of it.
+- **It is legible for free.** `taughtCount` is already on the stat bar, so the
+  gate is a number the player is looking at. That is what this entry has wanted
+  since it was raised, and it cost two lines.
+- **`landGates` is cut.** Reading the unlock off tilled ground measured no better
+  and cost a new per-settlement unlock model, which would also have changed what
+  a dim chip in the row means. `registers/rejected.md`.
+
+**And the balance result is the thing to take away, 80 games a cell:**
+
+| | Cities | Mixed | Haunt | Bands |
+|---|---|---|---|---|
+| the old game | 55% | 38% | 11% | 10% |
+| the batch, old 5/7/9 ladder | 53% | 46% | **79%** | **63%** |
+| **the batch, taught 1/2/3** | 50% | 34% | **55%** | **34%** |
+
+Works now open in 85% of Cities games and 91% of Mixed, first one around year 23,
+and all three open in about two thirds of Cities games.
+
+**Haunt 79 → 55 and Bands 63 → 34, from giving the settled side its late game
+back.** That is larger than any knob OP-19 lists — `r`, the taught caps, the
+reckoning budget — and it is *not* a nerf to the magical line; nothing about
+blessing changed. It undoes something that was deleted by accident.
+
+Which means part of what the register has been reading as *the batch made magic
+strong* was really *the batch switched the settled endgame off*. OP-19's
+overshoot is therefore smaller than it looked and partly diagnosed rather than
+merely tuned. **`r` and the caps have still not been touched**, and Haunt at 55%
+is close enough to *possible, and hard* that they may not need to be.
+
+### Still open
+
+- **The per-settlement minimums are untouched, deliberately.** `targets()` still
+  wants 150 / 200 / 300 in the ordering settlement. One thing was moved at a
+  time. Under the new ladder they are much less redundant than they were — a
+  first teaching opens clearance while the place is still growing toward 150 —
+  but they are a second gate and nobody has decided they should be.
+- **A-13 is live again.** The works' costs in people — 10% / 35% / 45% — were
+  priced against a ladder that has been replaced, and against works that in
+  practice never opened. They have never been measured against works that do.
+- **A feedback loop, unwatched.** Teachings per game rose from 3.8 to 5.0 when
+  the gates came down, because a colony is born tilling: more works make more
+  taught settlements, which open more works. Self-limiting in principle, since
+  each teaching also costs a wonder. Not measured.
+- **The refusers still never get a work at all**, at any threshold. That is
+  intended — the works are what the settled do — but it means three of the nine
+  chips are permanently dead for a refusing doctrine, which is a third of the
+  row, and OP-23 should know it.
+- **The original question is still unanswered.** Nobody has played the middle
+  years and mapped which turns go by without hesitation. That was what this entry
+  was opened about and it needs a person, not the harness.
 
 ## OP-06 · high · Does an ascetic strategy ever win?
 

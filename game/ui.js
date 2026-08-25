@@ -621,8 +621,10 @@ function render() {
  $("civic").innerHTML = CIVIC.map((s, i) => {
   const need = [TUNE.t1.v, TUNE.t2.v, TUNE.t3.v][i], ok = open.includes(s.id);
   const n = ok ? targets(s.id, ME).length : 0;
-  return chip(s, "civ", ok && !spent && !!n, n,
-   !ok ? "Not yet — this needs strength " + need + "." : spent ? busy : n ? "" : "Nothing in range.", false);
+  // 1.18. The reason a work is locked names the thing the rule actually reads,
+   // and the engine is asked which that is rather than the interface assuming.
+   return chip(s, "civ", ok && !spent && !!n, n,
+   !ok ? "Not yet — this needs " + need + " " + FG.civicNeed(ME) + "." : spent ? busy : n ? "" : "Nothing in range.", false);
  }).join("");
 
  const IV = {};

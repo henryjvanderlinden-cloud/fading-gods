@@ -168,3 +168,36 @@ problem justifies.
 **Why out:** not rejected, *shelved* — see OP-09. It favours blessing by ~15 points
 because blessing blobs and settlements scatter, and it was tested bolted onto a
 balance built without it. Worth revisiting properly.
+
+## Land-read gates for the works (`landGates`)
+
+**What:** the works unlocking on ground you could see rather than on a population
+count — clearance once a settlement's radius-1 ring is tilled, colony at that ring
+plus two further tiles, levy the year killing is taught. Proposed in OP-05 as the
+answer to two invisible population gates.
+
+**Why out, August 2026:** superseded before it was built, by a version that
+measures the same and costs two lines. `taughtGates` counts settlements taught to
+till — 1 / 2 / 3 for clearance, colony, levy — and it wins on three counts:
+
+- **Same numbers.** 80 games a cell: Cities 50%, Mixed 34%, Haunt 55%, Bands 34%,
+  works opening in 85% of Cities games at about year 23. The land-read version was
+  not measured against this because it would have had to be built first, which is
+  most of the argument.
+- **Already on screen.** `taughtCount` is in the stat bar and already drives the
+  wonder ladder, so the gate is a number the player is looking at. That was the
+  whole point of the proposal and this gets it for nothing.
+- **It keeps the unlock realm-wide.** Land conditions are per-settlement, which
+  would have changed what a dim chip in OP-23's row means — from *you have not
+  come far enough* to *not from this place*. A real change to the interface's
+  grammar, taken on for no measured gain.
+
+**Note the honest weakness of this entry:** it was never built and so was never
+measured, which is not this file's usual standard. It is here rather than left in
+OP-05 because leaving a cut proposal in a live register is how it comes back
+looking attractive. If per-settlement unlocks are ever wanted for their own sake —
+and *not from this place* is a genuinely interesting thing for a row of chips to
+say — this is the design, and it should be re-argued rather than re-derived.
+
+**Where it went:** OP-05, and `engine/rules.js` `civicOpen()`.
+

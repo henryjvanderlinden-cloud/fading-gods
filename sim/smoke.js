@@ -163,7 +163,10 @@ try {
  // here rather than deleted, and the both-directions version is further down.
  ok("the teachings are there with the batch on", chips("teach").length === 2);
  ok("the works begin locked", chips("civic").every(c => c.classList.contains("off")));
- ok("a locked work says what it needs", /strength/.test(chips("civic")[0].dataset.why),
+ // 1.18. The works now open on teachings, so the locked reason has to say so —
+ // and it is read from FG.civicNeed(), so this check fails if the interface and
+ // the rule ever start naming different things.
+ ok("a locked work says what it needs", /taught to till/.test(chips("civic")[0].dataset.why),
     chips("civic")[0].dataset.why);
 
  // Off by class and not by the disabled attribute, deliberately: a disabled
@@ -171,7 +174,7 @@ try {
  // answer when you press it rather than refusing in silence.
  chips("civic")[0].click();
  ok("pressing a locked chip does not arm it", !doc.querySelector(".chip.on"));
- ok("pressing a locked chip explains itself", /strength/.test($$("hint").textContent),
+ ok("pressing a locked chip explains itself", /taught to till/.test($$("hint").textContent),
     $$("hint").textContent);
 
  const live = chips("divine").filter(c => !c.classList.contains("off"))[0];

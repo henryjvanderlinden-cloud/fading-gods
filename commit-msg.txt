@@ -1,73 +1,72 @@
-It came to them in a dream, and it cost something to send it
+The works open on what you taught them, and they open at all
 
-The August batch is on by default. Rick played it across several games and
-reported it a clear improvement, which is the evidence class this project ranks
-above the matrix for anything about choices, so it stops being a candidate and
-becomes the game. FG.R2all(false) still plays exactly what design/rules.md
-describes and sim/smoke.js asserts the A/B, so nothing is lost.
+OP-05 was never a mid-game sag. Read from the code and then measured: the works
+had stopped opening. Under the batch, with the old ladder, any work opened in 28%
+of Cities games and 13% of Mixed, first one around year 33, never at all for
+either refusing doctrine, and the levy fired once in forty games. The mean Cities
+game ended at strength 3.1 against a first gate of 5 — below the bottom rung of a
+three-rung ladder. Section 6's "you begin with none and gain them" had quietly
+stopped being true, and the chip row OP-23 built to empty from the left and fill
+from the right only ever did the first of those.
 
-The six false entries in FG.R2 are false because they are unbuilt, not because
-they lost. The comment now says so, and FG.R2built() exists so that turning the
-batch on does not also turn on six flags nothing reads.
+The cause is logistic growth moving both distributions out from under a ladder
+priced for the old 2600 clamp. An untaught settlement is asymptotic to kWild=150
+and never counts at all, so a refuser sat at strength 0 for forty years. A taught
+one now tops out between 600 and 1000, so the 800 rung is nearly unreachable.
+Same shape as the stone brake subtracting from zero: correct under the old growth
+model, quietly not under the new one, and nothing breaks loudly.
 
-OP-19's fifth answer to where teaching happens, and it is not one of the four
-the register had. All four weakened presence. This keeps presence and prices the
-alternative: teaching reaches wherever a wonder reaches — beside you, or within
-range of a working stone — free in person, 10% of your manifestation permanently
-at range. OP-16 already drew the line at creation at a distance, unmaking only
-in person, and teaching is creation, so the lore did not have to bend.
+taughtGates. The ladder counts settlements taught to till — 1 opens clearance,
+2 the colony, 3 the levy. Chosen over simply lowering 5/7/9, which measures the
+same, for two reasons. lostCount already reads that number, so one counter now
+runs the arc in both directions: every teaching costs you a wonder and buys you a
+work, and the game was computing that twice, differently, and showing the player
+only half of it. And taughtCount is already on the stat bar, so the gate is a
+number being looked at — which is what OP-05 has wanted since it was raised, for
+two lines.
 
-The second price nobody had to write: teaching them to till makes them plough,
-ploughing eats the blessed ground a stone stands in, a stone under MINREG stops
-working, and a working stone is what carried the dream. Teaching at range
-destroys the channel that carried it. No cap, no counter, no timer.
+landGates is cut without ever being built, and moved to rejected.md with the
+reasoning. Reading the unlock off tilled ground measured no better and cost a
+per-settlement unlock model, which would also have changed what a dim chip in the
+row means — from "you have not come far enough" to "not from this place". That is
+a real change to the interface's grammar for no measured gain. The entry says
+plainly that it was never built, because a cut proposal left in a live register is
+how it comes back looking attractive.
 
-dreamWorks charges the same toll on a work aimed outside your hearing. It grants
-nothing — clearance, colony and levy have always reached the whole board for
-free, because targets() builds them from the settlement and never asks where the
-player is. This prices the range they already had.
+The balance result is the thing to take away. 80 games a cell, seeds split:
 
-Measured, 30 games a cell, seeds split: no win rate moves outside the noise, and
-the batch row reproduces OP-19's leave-one-out table exactly. That is the
-expected null and the same one taughtLoss and audible77 returned — a one-ply
-chooser does not value its own body. What does move is the drain. Over 40 games
-Cities finishes with 0.54 of itself and Mixed with 0.49, against 0.94 and 0.89
-for the two refusing doctrines, which never pay it because they never teach.
+                              cities  mixed  haunt  bands
+  the old game                55%     38%    11%    10%
+  the batch, old 5/7/9        53%     46%    79%    63%
+  the batch, taught 1/2/3     50%     34%    55%    34%
 
-Which makes OP-14's open sub-question reachable for the first time. Nothing in
-the game has ever spent that stock fast enough for anyone to arrive at zero.
-What zero is — one movement point forever, or losing the body and playing on as
-a network with no location — is now urgent rather than theoretical.
+Haunt 79 to 55 and Bands 63 to 34, from giving the settled side its late game
+back. Larger than any knob OP-19 lists — r, the taught caps, the reckoning budget
+— and it is not a nerf to the magical line, because nothing about blessing
+changed. So part of what the register has been reading as "the batch made magic
+strong" was really "the batch switched the settled endgame off". The overshoot is
+smaller than it looked and partly diagnosed rather than merely tuned. None of the
+stated knobs has been touched.
 
-The toll is drawn, not narrated: a tolled target outlines dashed, and the hint
-line names the price before the tile is chosen, because a cost you only learn
-about in the chronicle afterwards is not a decision. Asserted in smoke.js so a
-tidy-up cannot quietly start charging people without warning them.
+Works now open in 85% of Cities games and 91% of Mixed, first one about year 23,
+all three in roughly two thirds of Cities games.
 
-One AI change, recorded rather than slipped in, because OP-01 says a twelve-line
-change to this chooser was once worth 35 points: free() prefers a target that
-costs no body when one is in the same list. It is not an improvement in
-judgement — the chooser still cannot weigh a piece of itself against a
-settlement's future — it only stops the AI paying a toll it had no reason to pay,
-without which the matrix measures a tariff against an opponent spending itself at
-random.
+The pre-batch path keeps its own frozen 5/7/9 rather than borrowing the sliders,
+which now read in teachings. FG.R2all(false) still plays exactly section 6. A
+baseline that moves with a slider is not a baseline — A-16, in miniature.
 
-Read from the code and recorded in OP-05: landGates was never built. That entry
-has claimed since it was written that OP-19 removes both population gates. It
-does not. civicOpen() still gates on 5/7/9 over settlements past 150 and 800, and
-logistic moved both distributions underneath those numbers — an untaught
-settlement is asymptotic to 150 and never counts, so a refuser can never open a
-work at all, and a taught one now tops out near 600-1000 against the old 2600, so
-the 800 rung is nearly unreachable. Same shape as the stone brake subtracting
-from zero: correct under the old growth model, quietly not under the new one.
+The locked-chip reason is read from FG.civicNeed() rather than assumed by the
+interface, and smoke.js asserts the wording, so the rule and the row cannot start
+naming different things.
 
-design/rules.md now says at the top that it is the history and constants.js is
-the authority, section by section, and gains a §11 for the two new rules.
-Rewriting the rest of it around the batch is the outstanding debt on that file.
+Left alone on purpose, one thing at a time: the per-settlement minimums in
+targets() at 150/200/300, and A-13's costs in people at 10/35/45, which were
+priced against a ladder that has now been replaced and against works that in
+practice never opened. Both are recorded as live in OP-05, along with a feedback
+loop nobody has measured — teachings per game rose from 3.8 to 5.0 when the gates
+came down, because a colony is born tilling.
 
-sim/smoke.js: 11,783 checks, including the dream reaching a far settlement, the
-toll charged at range and not in person, the dashed outline, the hint naming the
-price, and the flag put back restoring the stricter rule exactly.
+sim/smoke.js: 11,783 checks, all passing.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01Mtgb2n18GChBUXQgBLxcm8

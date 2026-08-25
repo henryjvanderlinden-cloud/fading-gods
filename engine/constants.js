@@ -26,9 +26,13 @@ FG.defaultTune = function () {
   mfrac:{l:"blessing to raise mountains",v:70,min:0,max:100,s:"%"},
   bval:{l:"blessed ground worth",v:3,min:1,max:5,s:""},
   stonecap:{l:"stones allowed",v:4,min:0,max:6,s:""},
-  t1:{l:"clearance at",v:5,min:1,max:12,s:""},
-  t2:{l:"colony at",v:7,min:2,max:14,s:""},
-  t3:{l:"levy at",v:9,min:3,max:16,s:""},
+  // 1.18. These count *teachings* now, not settlements past a population.
+  // 1 / 2 / 3 rather than 5 / 7 / 9, and the ranges come down with them: the
+  // old ceilings were sized for a strength score that ran into double figures
+  // and a taught count does not.
+  t1:{l:"clearance at",v:1,min:1,max:8,s:" taught"},
+  t2:{l:"colony at",v:2,min:1,max:8,s:" taught"},
+  t3:{l:"levy at",v:3,min:1,max:8,s:" taught"},
   turns:{l:"years",v:40,min:10,max:60,s:""}};
 };
 FG.TUNE = FG.defaultTune();
@@ -90,7 +94,11 @@ FG.R2 = {
  fade:       true,   // 1.7   reckoned ground enterable at 10% a year (OP-14)
  unmake:     false,  // 1.8   UNBUILT — taking their blessing returns it to wild
  encircle:   false,  // 1.9   UNBUILT — a ring of blessing takes a settlement
- landGates:  false,  // 1.10  UNBUILT — works unlock on tilled land, not on pop
+ // 1.10 was `landGates` — the works unlocking on ground you had tilled. Cut in
+ // August 2026 without ever being built, in favour of 1.18 below, which measures
+ // the same and costs two lines instead of a new per-settlement unlock model.
+ // See registers/rejected.md and OP-05.
+ taughtGates: true,  // 1.18  the works open on teachings, not on population
  pathFrac:   false,  // 1.11  UNBUILT — blessFrac counts path distance (A-18)
  barren3:    false,  // 1.12  UNBUILT — withered ground stays barren three years
  exitLane:   true,   // 1.15  the fields close slowly, and never seal a place in
@@ -137,7 +145,7 @@ FG.R2all = function (on) {
 // stop being harmless the moment one of them is written. Prefer this.
 FG.R2built = function (on) {
  ["logistic","teaching","taughtLoss","audible77","fade","exitLane",
-  "dreamTeach","dreamWorks"].forEach(k => { FG.R2[k] = !!on; });
+  "dreamTeach","dreamWorks","taughtGates"].forEach(k => { FG.R2[k] = !!on; });
  return FG.R2;
 };
 

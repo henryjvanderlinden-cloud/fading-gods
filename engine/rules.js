@@ -137,13 +137,54 @@ const lostCount = who =>
  Math.max(0, (FG.R2.taughtLoss ? taughtCount(who) : bigCount(who)) - working(who).length);
 function divineLeft(who) { return DIVINE.slice(Math.min(lostCount(who), DIVINE.length)); }
 
+// 1.18. What opens a work.
+//
+// It used to be `civicStrength` — settlements past 150, plus one more for each
+// past 800 — against 5 / 7 / 9. That ladder was priced when a city could reach
+// the old 2600 clamp, and `logistic` moved the ground out from under it without
+// anybody noticing: an untaught settlement is asymptotic to `kWild` = 150 and so
+// never counts at all, and a taught one now tops out between 600 and 1000, so
+// the 800 rung is nearly unreachable. Measured over 40 games, the mean Cities
+// game ended at strength **3.1** against a first gate of **5** — the works
+// opened in 28% of games, at about year 33, and the levy fired once in forty.
+// The half of the arc where you lose wonders and gain works had quietly lost its
+// second half. See OP-05.
+//
+// So the ladder now counts the thing the batch is actually about: **settlements
+// you have taught to till.** One teaching opens clearance, two the colony, three
+// the levy — the same counter that takes a wonder away each time it goes up.
+// Every teaching costs you a wonder and buys you a work, and the chip row empties
+// from the left and fills from the right on one number rather than two.
+//
+// It is also the most legible version available, for free: `taughtCount` is
+// already on the stat bar, so the gate is a number the player is looking at.
+// `landGates` — reading the unlock off ground you had tilled — was the register's
+// proposal and was cut in favour of this; it measured the same and cost a new
+// per-settlement unlock model. registers/rejected.md.
+//
+// Falls back to the old ladder when `teaching` is off, so `FG.R2all(false)`
+// still plays exactly what design/rules.md §6 describes.
+// The pre-batch ladder's own numbers, frozen. TUNE.t1/t2/t3 are the *live*
+// sliders and now read in teachings, so the old path cannot borrow them without
+// silently rescaling the baseline from 5/7/9 to 1/2/3. A baseline that moves is
+// not a baseline. A-16 again, in miniature.
+const OLDGATES = [5, 7, 9];
+
 function civicOpen(who) {
- const cs = civicStrength(who), o = [];
- if (cs >= FG.TUNE.t1.v) o.push("clear");
- if (cs >= FG.TUNE.t2.v) o.push("colony");
- if (cs >= FG.TUNE.t3.v) o.push("levy");
+ const useTaught = FG.R2.taughtGates && FG.R2.teaching;
+ const cs = useTaught ? taughtCount(who) : civicStrength(who), o = [];
+ const g = useTaught ? [FG.TUNE.t1.v, FG.TUNE.t2.v, FG.TUNE.t3.v] : OLDGATES;
+ if (cs >= g[0]) o.push("clear");
+ if (cs >= g[1]) o.push("colony");
+ if (cs >= g[2]) o.push("levy");
  return o;
 }
+
+// What the chip row says a locked work is waiting for, so the interface and the
+// rule cannot drift apart.
+FG.civicNeed = function (who) {
+ return (FG.R2.taughtGates && FG.R2.teaching) ? "taught to till" : "strength";
+};
 
 // The country your stones can still be heard in, without you standing in it.
 // Split out of divineReach for 1.16: a dream travels the stone network and does
