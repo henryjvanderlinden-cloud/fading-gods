@@ -414,6 +414,31 @@ accept that the viable magical line is *few settlements and many stones* and
 rename the doctrine, or to make blessing worth more, which A-09 shows is the lever
 that actually moves this.
 
+### A second played game, 25 August 2026, and it is a different line from the first
+
+The first was a **pure refuser**: 108 to 75, no farmland at all, nine settlements
+sitting at Dunbar. The second is a **hybrid** — a magical enclave walled off with
+mountains and water, agricultural settlements founded in the middle to compete —
+and it went **73 to 83**, a narrow loss after leading for part of the game,
+against a rival holding a 900-strong city and six towns.
+
+**Two people-played lines, two different shapes, neither winning by fiat.** That
+is the thing this open point has been asking for since it was raised: the fiction
+requires the argument to stay open, and a board that can be played two ways with
+the result in doubt to the last year is the argument staying open. The reported
+experience — *"anything can happen, and I wasn't able to gain a substantial
+advantage"* — is the answer in the register's own terms.
+
+A third line is also reported working and is not measured: **walling the rival in
+with mountains and water.** Worth noting that this makes *Raise mountains* and
+*Drown* strategic terrain-shaping rather than harassment, which is not how either
+was priced.
+
+**This does not close the entry**, because the matrix still says Haunt 55% and
+Bands 34% against Cities, and because two games are two games. It does mean the
+central dilemma has stopped being decorative. See A-19 for the ruling that came
+out of the same game.
+
 **A third position on the question arrives August 2026, and it is not a
 rebalance.** The pastoralists (`ideas.md`, live entry OP-12) are neither refusal
 nor conviction but *let them keep animals and keep moving* — which gives Storm &
@@ -636,6 +661,28 @@ working stones subtract from zero — they hold back nothing, because nothing wa
 taken. Under the old population trigger that could not happen. It bites hardest in
 the doctrine that raises the most stones, and it is the third thing in this batch
 to weaken OP-13.
+
+**And the same formula was measured from the other end in play, 25 August 2026 —
+where it turned out to be a feature and was ruled one.** Three settlements taught,
+three working stones, **zero wonders lost at year forty**. A hybrid player kept
+every wonder in the game while running an agricultural arm, because a walled
+magical enclave is an excellent place to grow stones.
+
+**That is deliberate and stays. See A-19.** The arc is a theme rather than a law,
+`concept/concept.md` already says a well-played game can hold a great deal of the
+fading off, and this is a player doing exactly that at real cost — three stones
+held for forty years, two wonders spent on terrain instead of on the rival, and a
+narrow loss on points anyway.
+
+Note what this does *not* excuse. The refuser case above is still a defect: the
+hybrid pays for the cancellation and the refuser gets it against a count of zero.
+Fixing one must not re-break the other, which is the reason both readings are
+recorded here together rather than in separate entries.
+
+**Instrumentation this now wants:** the wonder count as its own series over a
+game, which OP-20 already asks for and nobody has built. Holding the arc off
+should be an achievement. If the row is still full at year forty across several
+played games, the brake is too generous.
 
 **Two smaller readings of the same board.** Six settlements at exactly 150 read as
 a rule rather than as places — jittering the untaught cap per settlement by ±15%
@@ -1129,6 +1176,30 @@ argument:
 
 **Settled by:** playing a game that deliberately spends itself down to nothing,
 which is now possible and was not before.
+
+### Played, 25 August 2026 — and the felt half of this question is answered
+
+**A player finished year forty at 10% of himself: one movement point, four tiles
+reachable, still playing through three stones.** Nobody had ever been near the
+bottom of this stock before; the trespass toll alone does not get you there.
+
+**It reads as a decision, not as a punishment.** That was the open question and
+it needed a person, and the report was unambiguous: *"it felt like real decisions
+and considerations had to be made."* A punishment does not produce that sentence.
+
+**And it got there by a route nobody designed.** Both powers spent themselves
+down keeping levies moving — `dreamWorks` charges for an order issued out of
+hearing, and in a close endgame both sides kept paying. What came out is a war
+fought by the people and paid for by the gods, which the harness could not have
+found: the one-ply chooser pays that toll without knowing it is paying, so the
+matrix records the drain and cannot record what it feels like to choose it.
+
+**What is now decided:** the slope is right, and the drain is worth what it
+costs. **What is still open is only the mechanical half** — what zero *is*. This
+game ended at 10% rather than 0%, so nobody has yet stood at the bottom. Today
+zero means one movement point forever. The alternative in this entry — lose the
+body, keep playing as stones and works — remains unbuilt and still wants OP-13
+first.
 
 ## OP-15 · medium · Endings as an unscored reading of the final board
 

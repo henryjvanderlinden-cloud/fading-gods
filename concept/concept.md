@@ -31,7 +31,13 @@ rather than in the game.
 - Not a 4X. There is no economy to manage, no city screen, no tech menu.
 - Not a war game. There is no combat resolution — an army arrives or it does not.
 - Not a tragedy on rails. The fading is caused by choices, including yours, and a
-  well-played game can hold a great deal of it off.
+  well-played game can hold a great deal of it off. **Played out in full for the
+  first time in August 2026** — a player walled a magical enclave off behind
+  mountains and water, kept three stones working inside it for forty years, and
+  reached the last turn having lost no wonders at all. That is not a hole in the
+  design. A god preserving a chosen people in a mystical place is a position on
+  the one sentence like any other, and it was paid for in the whole early game.
+  See `registers/open-points-archive.md`, A-19.
 - Not melancholy without teeth. Competition is the point, not a concession.
 
 ## The dilemma underneath the dilemma

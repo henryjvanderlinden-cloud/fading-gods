@@ -225,3 +225,76 @@ recursion rather than an annoyance, and left in.
 **Unmeasured.** Settled on argument, and the argument is about what a distance
 means rather than about a balance number. If the founding rate moves noticeably
 when it goes in, reopen it.
+
+## A-19 · Is the arc a law or a theme? — **settled: a theme. Holding it off is a strategy.**
+
+**Raised by a played game, 25 August 2026, and settled by Rick in the same
+breath.** Year 40, a hybrid line: a magical enclave walled off behind mountains
+and water, and agricultural settlements founded in the middle of the board to
+compete with the rival. Final board 73 to 83 — a narrow loss after leading for
+part of it.
+
+The board said something the README does not allow for:
+
+| | |
+|---|---|
+| Taught to till | **3** |
+| Working stones | **3** |
+| **Wonders lost** | **0** |
+
+`lostCount = max(0, taught − working)` cancelled exactly. All six wonders still
+in the row at year forty. *You end the game holding everything you can build, and
+nothing you can call* — and this player ended holding both.
+
+### The ruling
+
+**It is a valid strategy and the player decides.** In Rick's words: the
+commitment was profound — building and shielding the walled-off magical place —
+and from a god's point of view it makes sense to *preserve a chosen people in a
+mystical place somewhere.*
+
+**And `concept/concept.md` already said so**, which is the part worth noticing.
+Under *What it is not*: **"Not a tragedy on rails. The fading is caused by
+choices, including yours, and a well-played game can hold a great deal of it
+off."** This is that line being exercised for the first time by an actual game
+rather than asserted in a design document. The one sentence is the axis every
+decision sits on. It was never a prophecy about where you have to end up.
+
+### Why it is not a loophole
+
+The brake is paid for, and dearly:
+
+- Three **working** stones means three connected blessed regions of at least
+  `MINREG`, held for forty years against a rival who can bless over the ground
+  they stand on. OP-16 measured that 92% of all stones end under farmland.
+- Walling the enclave spends **Raise mountains** and **Drown the ground**, which
+  are the two most expensive things a player owns, on terrain rather than on the
+  rival.
+- Every tile inside the wall is a tile not competing for the middle. This game
+  was lost 73–83, with the rival holding a 900-strong city and six towns.
+
+So the wonders were not kept for free. They were kept by spending the whole early
+game on the conditions for keeping them, and still losing on points.
+
+### It gives the lore a third stance, and the roster had a hole
+
+`concept/lore.md` frames the powers as **refusers** against **convinced**, and
+records Storm & Sky as indifferent because nobody had a third answer for them.
+The pastoralists in `ideas.md` were proposed as one. This is another, and it
+arrived from play rather than from history: **the preserver.** Not *no settling*
+and not *settle everything* — keep a few who can still hear you, somewhere
+defensible, and let the rest count the fields. See OP-06 and OP-12.
+
+### What this does *not* settle
+
+- **The same formula is still broken in the other direction.** For a pure refuser
+  `max(0, 0 − workingStones)` subtracts from zero, so the stones hold back
+  nothing because nothing was taken. That is a real defect and is untouched by
+  this ruling. See OP-19.
+- **Holding the arc off should stay hard.** One game is one game. If the wonder
+  row is still full at year forty across several more, the brake is too generous
+  and the strategy has stopped being an achievement. **Watch the wonder count as
+  its own series** — the same instrumentation OP-20 already asks for.
+
+**Settled by:** a played game, and the player whose game it was.
+
