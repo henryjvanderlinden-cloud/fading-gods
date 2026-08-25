@@ -788,6 +788,12 @@ $("doc").onchange = () => {
 $("even").onchange = () => { FG.HANDICAP = $("even").checked ? 1 : 0; newGame(); };
 $("autopass").onchange = e => { AUTOPASS = e.target.checked; };
 
+// OP-23. The doors. showModal() gives the backdrop and Escape for nothing, and
+// the fallback is there because jsdom does not implement <dialog> — sim/smoke.js
+// clicks #restart and reads #tune, and both now live inside one.
+const openDlg = d => { if (d.showModal) d.showModal(); else d.setAttribute("open", ""); };
+$("termsopen").onclick = () => openDlg($("terms"));
+
 // The map's own viewBox, so the geometry above is the single source of it.
 $("map").setAttribute("viewBox", `0 0 ${BW.toFixed(0)} ${BH.toFixed(0)}`);
 

@@ -1,26 +1,31 @@
-OP-23: the interface is a laboratory with a game in it
+The terms go behind a door
 
-Raised from reading the build rather than playing it. The page interleaves two
-documents that have nothing to do with each other - the valley, and the
-instrument being used on it. A slider reading "growth per year 22%" eight pixels
-under the chronicle does more damage to the register than any colour decision in
-OP-17.
+OP-23, first of three. Everything on the page that was about the experiment
+rather than about the valley now lives in one dialog reached from the header:
+who is in the other seat, the hand-over and even-the-map toggles, which rule set
+is being played, and the knobs.
 
-The split is not taste, and the code says so: almost every control in the
-instrument half restarts the game when touched. They are year-one controls and
-they belong behind one door.
+One door and not two, though the seat block and the rules block looked like
+separate concerns. They are the same category of object, and the code is what
+says so - "even" restarts, every R2 checkbox restarts, both presets restart, the
+knobs need "Restart with these", and choosing the human seat restarts. The only
+control in there that does not is swapping one machine doctrine for another
+mid-game, which is a debugging affordance rather than something a player does.
+They are year-one controls. A year-one control beside the board is clutter with
+a job title.
 
-The entry also records the regression it takes knowingly - 7623cee put the
-primer on the page on purpose, and nothing else on the page teaches the ratchet -
-and it does the tablet arithmetic the register had been carrying as an assertion.
-An 11-inch iPad is 1194 x 834 in landscape, which is the orientation this is
-meant to be played in. Two things fall out. The stacking breakpoint at 1180
-misses that device by fourteen points and leaves it drawing a 792px board, hexes
-at 31 for art authored at 50. And height, not width, is the binding constraint:
-745 points of viewport, 650 of them board, 95 left for the 275 the chrome needs.
-The board has to give.
+The header comes down with them: one line, the title on the left and the door on
+the right, 18px of padding instead of 30.
 
-No rules changed, and nothing is built yet. Three commits follow.
+<dialog> rather than an expander, because you are leaving the game to change the
+terms of it and an expander would shove the board down the page. showModal()
+gives the backdrop and Escape for free. jsdom does not implement <dialog>, so
+openDlg falls back to the open attribute - smoke.js clicks #restart and counts
+the eleven range inputs in #tune, and both are now inside one.
+
+No rules changed. smoke.js passes 11,758 checks, the same count as before,
+including the full game and the two-seat game played through the build's own
+buttons.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BmcC97TZ38RejXMSsFmLp9

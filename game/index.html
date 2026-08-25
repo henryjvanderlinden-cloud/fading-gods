@@ -22,7 +22,7 @@ body{margin:0;padding:0 20px 70px;background:var(--ground);color:var(--ink);
    scale the SVG down gracefully; below 1180 the columns stack and the board
    takes the full width. */
 .wrap{max-width:1660px;margin:0 auto}
-header{padding:30px 0 12px;border-bottom:1px solid var(--line)}
+header{padding:18px 0 11px;border-bottom:1px solid var(--line)}
 h1{font-size:26px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:lowercase}
 .sub{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.22em;
  text-transform:uppercase;color:var(--faint);margin-top:5px}
@@ -30,7 +30,7 @@ h1{font-size:26px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:l
    rather than in the sidebar because choosing a second person changes the shape
    of a year, and a control that changes the game should not be below the fold
    under "your stones". OP-21. */
-.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
 .seat{flex:0 1 auto;min-width:290px;max-width:350px}
 .seat .lab{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:9.5px;letter-spacing:.2em;
  text-transform:uppercase;color:var(--faint);margin-bottom:6px}
@@ -143,15 +143,44 @@ details.blk[open] summary::before{content:"⌄ "}
 .r2 label.off{color:var(--faint)}
 .r2 label span{color:var(--faint);font-size:11px}
 .r2 input{accent-color:var(--bless);margin:0}
+/* OP-23. Two documents shared this page: the valley, and the instrument being
+   used on it. Everything about the instrument is now behind a door in the
+   header. The argument is in the register and it is not taste - almost every
+   control in there restarts the game when you touch it, so all of it is a
+   year-one control and none of it belongs beside the board. */
+.doors{display:flex;gap:8px;flex:0 0 auto}
+dialog.dlg{background:var(--panel);color:var(--ink);border:1px solid var(--line);
+ border-radius:3px;max-width:72ch;width:calc(100% - 32px);padding:22px 26px 28px;
+ font-family:'Spectral',Georgia,serif;font-weight:300;font-size:15.5px;line-height:1.6}
+dialog.dlg::backdrop{background:rgba(6,8,5,.74)}
+.dlg .x{float:right;margin:-4px -6px 12px 12px}
+.dlg h2.dh{font-family:'Spectral',Georgia,serif;font-size:21px;font-weight:400;
+ letter-spacing:.06em;text-transform:lowercase;color:var(--ink);border:none;
+ margin:0 0 18px;padding:0}
+.dlg .seat{max-width:none;min-width:0}
+.dlg .blk:last-child{margin-bottom:0}
+.dlg .ep{margin:0 0 12px}
+.dlg .q:last-child{margin-bottom:0}
 </style>
 </head>
 <body><div class="wrap">
 <header>
  <div class="hd">
   <div><h1>Fading Gods</h1><div class="sub">prototype</div></div>
-  <div class="seat">
-   <div class="lab">the other seat</div>
-   <select id="doc">
+  <div class="doors"><button id="termsopen">the terms</button></div>
+ </div>
+</header>
+
+<!-- OP-23. The instrument, behind one door: who is in the other seat, which rule
+     set is being played, and the knobs. One door rather than two, because these
+     are not related panels - they are the same category of object, and almost
+     every one of them restarts the game when it is touched. -->
+<dialog id="terms" class="dlg">
+ <form method="dialog"><button class="x">close</button></form>
+ <h2 class="dh">the terms</h2>
+ <div class="blk seat">
+  <h2>the other seat</h2>
+  <select id="doc">
     <option value="cities">Cities — founds, never splits, lets them grow</option>
     <option value="bands">Bands — splits at sixty, blesses constantly</option>
     <option value="mixed">Mixed — a bit of both</option>
@@ -165,9 +194,18 @@ details.blk[open] summary::before{content:"⌄ "}
     further is possible</span></label>
    <label class="cb"><input type="checkbox" id="even"><span>even the map — one blessed tile to
     the right hand</span></label>
-  </div>
  </div>
-</header>
+ <div class="blk"><h2>which rules</h2>
+   <div class="tally" id="r2state"></div>
+   <div class="row" style="margin:0 0 8px">
+    <button id="r2off">The shipped game</button><button id="r2on">The August batch</button>
+   </div>
+   <div class="r2" id="r2"></div>
+   <div class="tally" style="margin-top:8px">Changing any of these restarts the year one on the
+    same map, so the two rule sets can be compared on the same ground.</div></div>
+ <div class="blk"><h2>knobs</h2><div class="tune" id="tune"></div>
+   <button id="restart" style="margin-top:6px">Restart with these</button></div>
+</dialog>
 <p class="ep">You can only be remembered by the thing that deafens you.</p>
 <p class="q">You are an old power in a small valley, and you are fading. Nothing takes your power
 away: the people build enough instruments that they stop needing to ask, and then stop being able
@@ -224,16 +262,8 @@ at the end of them wins. You will end holding everything you can build and nothi
   <div class="blk"><h2>settlements</h2><ul class="sl" id="sl"></ul></div>
   <details class="blk" id="logwrap" open><summary id="logsum">what happened</summary>
    <div class="log" id="log"></div></details>
-  <div class="blk"><h2>which rules</h2>
-   <div class="tally" id="r2state"></div>
-   <div class="row" style="margin:0 0 8px">
-    <button id="r2off">The shipped game</button><button id="r2on">The August batch</button>
-   </div>
-   <div class="r2" id="r2"></div>
-   <div class="tally" style="margin-top:8px">Changing any of these restarts the year one on the
-    same map, so the two rule sets can be compared on the same ground.</div></div>
-  <div class="blk"><h2>knobs</h2><div class="tune" id="tune"></div>
-   <button id="restart" style="margin-top:6px">Restart with these</button></div>
+
+
 </div>
 </div></div>
 
