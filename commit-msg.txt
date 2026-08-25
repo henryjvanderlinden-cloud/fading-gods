@@ -1,47 +1,26 @@
-A third leg, stones that grow, and a turn that is a generation
+OP-23: the interface is a laboratory with a game in it
 
-Three ideas, none of them measured, all of them registered rather than built.
+Raised from reading the build rather than playing it. The page interleaves two
+documents that have nothing to do with each other - the valley, and the
+instrument being used on it. A slider reading "growth per year 22%" eight pixels
+under the chronicle does more damage to the register than any colour decision in
+OP-17.
 
-The pastoralists are the third leg OP-12 has been missing since the beginning,
-and they cost less than they look: a third entry in FG.TEACH beside till and
-kill, inheriting everything OP-19 already built for teaching. Taught only to a
-people who never learned the plough, and only once somebody somewhere has
-ploughed - a condition rather than a clock, so A-10 stays intact. They hold no
-ground and score nothing while they roam. What they do is graze reckoned ground
-back, which is Wither the furrows performed by mortals instead of by you.
+The split is not taste, and the code says so: almost every control in the
+instrument half restarts the game when touched. They are year-one controls and
+they belong behind one door.
 
-Two things go in with them. The loop's third row - what stops a host, the
-question wandering hosts never answered - is the other power's blessing only,
-because blessing impassable to herds walls your own herds in with your own
-blessing. And the kurgans, which are the better half of the idea: a mound raised
-over a stone that has already gone under farmland, with no reach, no blessing
-and nothing targeting through it, counting only as a monument standing. OP-16
-measured that 92% of stones end that way and that it cannot be reversed. Kurgans
-do not reverse it. They make it mean something, which is a better answer than the
-one that register went looking for.
+The entry also records the regression it takes knowingly - 7623cee put the
+primer on the page on purpose, and nothing else on the page teaches the ratchet -
+and it does the tablet arithmetic the register had been carrying as an assertion.
+An 11-inch iPad is 1194 x 834 in landscape, which is the orientation this is
+meant to be played in. Two things fall out. The stacking breakpoint at 1180
+misses that device by fourteen points and leaves it drawing a 792px board, hexes
+at 31 for art authored at 50. And height, not width, is the binding constraint:
+745 points of viewport, 650 of them board, 95 left for the 275 the chrome needs.
+The board has to give.
 
-Recorded with its failure mode, because it is a real one: herding is a third door
-out of the central dilemma, and if a player can expand without ever teaching the
-plough then the trade the whole game is built on can simply be declined.
-
-Stones that grow go into ideas.md with the argument that keeps them out of
-rejected.md. A stone growing on an age counter is a timer and A-10 kills it. A
-stone that grows because there are people near it who still hear you is a stock
-you built and can lose - so the course goes on while a settlement under
-seventy-seven stands in reach, and stops the year you teach that band to till.
-
-OP-22 asks whether turns are years or generations. Mostly a label, and the parts
-that are not are gains: the demography stops being nonsense, and it is the unit
-the other two ideas are denominated in. The one real cost is marching, and the
-only question in the entry is what a levy becomes at twenty-five years a tile.
-
-OP-12 goes from low to medium and is blocked on OP-19 - a third leg laid on an
-untuned second leg is the trap OP-19 already names. OP-01 records the AI as
-deliberately deferred: an instrument built against a rule set that is still
-moving would have to be built again. Storm & Sky stop being indifferent in
-lore.md and take the third answer, which is the position pastoralism actually is.
-
-No rules changed. Nothing in engine/, game/ or sim/ was touched.
+No rules changed, and nothing is built yet. Three commits follow.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BmcC97TZ38RejXMSsFmLp9

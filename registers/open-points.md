@@ -1058,6 +1058,106 @@ move OP-06, it is decoration and should stay in the fiction and the artwork only
 `concept/lore.md`: the powers believe the settled path is the next thing, and the
 rules must not agree with them, or the competition becomes ceremonial.
 
+## OP-23 · medium · The interface is a laboratory with a game in it
+
+**Raised August 2026, from reading the build rather than playing it.** The page
+interleaves two documents that have nothing to do with each other. One is the
+valley — on the road, the interventions, the stones, the settlements, the chart,
+the chronicle. The other is the *instrument*: which rules, the knobs, the other
+seat, even the map. A slider reading `growth per year · 22%` eight pixels under
+the chronicle does more damage to the register `concept/concept.md` specifies than
+any colour decision in OP-17.
+
+**The split is not a matter of taste, and the code says so.** Almost every control
+in the instrument half restarts the game when touched — `even` (`ui.js:788`),
+every R2 checkbox (`:763`), both presets (`:765–766`), the knobs by way of
+*Restart with these*, and choosing the human seat (`:784`). The single exception is
+swapping one machine doctrine for another mid-game, which is a debugging
+affordance rather than something a player does. **They are year-one controls.**
+They belong on the way in, behind one door, not beside the board.
+
+### What went in
+
+- **`the terms`** — one dialog holding the other seat, the hand-over and
+  even-the-map toggles, which rules, and the knobs. One door, not two: they are
+  the same category of object.
+- **`what this is`** — the epigraph and the two paragraphs of premise, behind a
+  button. The epigraph stays on the page as the header's subtitle, because it is
+  one line and it is the whole thesis.
+- **The chronicle folds shut by default.** `render()` used to force it open every
+  frame (`$("logwrap").open = !pvp()`), which meant it could not be dismissed.
+
+### The regression this knowingly takes
+
+`7623cee` put the primer on the page *deliberately*, so that "somebody opening
+this for the first time now learns the ratchet — blessed ground, reckoned ground,
+and that your own farmland walls you out — before they are asked to make a
+decision about it." Nothing else on the page teaches the ratchet; the key under
+the board names the colours and does not say that one erases the other. Hiding it
+reverses that decision on purpose, for a quieter page.
+
+**Settled by:** watching somebody who has never seen it open the build, and seeing
+whether they find `what this is` before year five, or ever. If they do not and the
+ratchet surprises them, the answer is probably a line in the key rather than the
+paragraphs coming back.
+
+### The interventions move under the board
+
+They were a 400px column beside the board. Two things were wrong with that, and
+only one of them was size. `design/rules.md` §2 marks **one act and one
+intervention** load-bearing — they are the two halves of a year — and the two
+halves were three hundred pixels apart, in different type, under different
+headings.
+
+They are now a row of chips directly beneath the act row. **The list stays a
+list**, because its shrinking is the story: §6 says the loss order matters
+emotionally as much as mechanically, and the struck-out wonder is the best piece
+of information design on the page. Lost wonders keep their place in the row,
+struck through and dead; locked works keep theirs, dim.
+
+**And the row does something the column could not.** `gone = i < lostN`, so
+wonders die from the front of `FG.DIVINE`, and the works unlock in ladder order.
+The row therefore **empties from the left and fills from the right**, turning from
+blessing-green to farmland-ochre along a single horizontal axis over forty turns.
+That is `ideas.md`'s *the interface becomes administrative over forty years*,
+delivered by a layout decision rather than by a feature, and narrated by nothing.
+
+**The hover problem solved itself.** The descriptions cannot live in tooltips —
+`concept/` wants this playable on an iPad, and OP-21 names the tablet explicitly.
+But arming is *already* two-step: the chip sets `ARM` and the tile is chosen
+afterwards, with a `hintline` under the row that already says *choose an outlined
+tile*. So the description goes into the confirmation step. Hover or keyboard-focus
+a chip and the hintline carries its description; tap one on a tablet and the
+description appears next to the target instruction, before anything is committed.
+No tooltip was needed.
+
+Chips are disabled by class rather than by the `disabled` attribute, so a locked
+one still answers when you press it — *needs strength 9*, *nothing in reach*,
+*gone* — instead of silently refusing.
+
+### Tablets, with the arithmetic done properly
+
+The board is 1272 × 717 at hex 50, aspect 1.775. **An 11-inch iPad is 1194 × 834
+points in landscape**, which is the orientation this is meant to be played in; a
+10.9-inch Air is 1180 × 820. Two consequences the register had not worked out:
+
+- **The stacking breakpoint was in the wrong place.** `max-width:1180px` catches
+  the Air exactly and misses the 11-inch Pro by fourteen points, so that device
+  kept the two-column layout and drew a 792px board — hexes at 31 for art authored
+  at 50. Moved to 1280.
+- **Height, not width, is the binding constraint, and it does not fit.** Landscape
+  gives about 745 points of viewport under Safari's chrome. A full-width board at
+  1154 is 650 of them, leaving 95 for a header, a stat bar, a key, two control
+  rows and a hint line, which need about 275. Something has to give, and it is the
+  board: its column is now capped at `(100vh − 250px) × 1.775`, so the controls are
+  always on screen and the hexes shrink instead. On the iPad that lands around 880
+  wide — hex 35 — which is a real loss and the honest trade.
+
+**Also settled by playing**, on the device, in landscape. The three candidates if
+hex 35 reads badly are a shorter header, folding the key into `what this is`, and
+`design/rules.md` §1's grid — which is marked load-bearing at 14 × 9 and is
+therefore the last thing to touch, not the first.
+
 ## OP-17 · medium · Art direction was never chosen
 
 The palette in `concept/concept.md` — *"cold, dark, northern"*, *"no gradients,
