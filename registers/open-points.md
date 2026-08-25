@@ -128,7 +128,11 @@ it was argued to have — see OP-07.
   decision rather than a handicap. That is A-10's move exactly: a timer is
   weather, an exchange is a decision. Unmeasured, and cheap enough to try.
 - **The board is 1272 × 717 at hex 50 and an 11-inch iPad is 1194 points wide**,
-  before the side panels. Deferred deliberately.
+  before the side panels. Deferred deliberately. **Taken up in OP-23**, August
+  2026, and measured in a browser rather than asserted: the stacking breakpoint
+  was fourteen points too low to catch that device at all, and height binds well
+  before width does. Not closed — the board there is hex 35 against the 50 the art
+  was drawn at — but no longer deferred.
 - **Mis-tapping.** A year is one act and one intervention, and on touch a stray
   tap spends one irreversibly with an opponent watching. The engine reproduces a
   game exactly from a seed, so an undo-within-turn is available in principle.
@@ -1140,6 +1144,17 @@ one still answers when you press it — *needs strength 9*, *nothing in reach*,
 The board is 1272 × 717 at hex 50, aspect 1.775. **An 11-inch iPad is 1194 × 834
 points in landscape**, which is the orientation this is meant to be played in; a
 10.9-inch Air is 1180 × 820. Two consequences the register had not worked out:
+
+**A note on the unit, because this register has been loose about it and the
+stylesheet must not be.** Apple specifies a device in *points*; CSS lays out in
+*px*. With `width=device-width, initial-scale=1` in the head — which this page has
+— and a 2× display, they are the same number: an 11-inch iPad reports an
+`innerWidth` of 1194. So every figure in this entry can be read either way, and
+OP-21's *1194 points wide* was right. **CSS `pt` is a different unit entirely**,
+one seventy-second of an inch and 1.333 px, and nothing in `game/index.html` may
+ever be written in it. The board cap is `calc((100vh - 340px) * 1.775)`, and
+tidying that `340px` to `340pt` would quietly make it 453 and take a hundred and
+forty-five pixels off the board.
 
 - **The stacking breakpoint was in the wrong place.** `max-width:1180px` catches
   the Air exactly and misses the 11-inch Pro by fourteen points, so that device

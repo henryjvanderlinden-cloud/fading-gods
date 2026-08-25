@@ -147,6 +147,70 @@ try {
  ok("restart begins a new game", win.FG.G.turn === 1 && !win.FG.G.over);
  ok("restart clears the ending panel", doc.getElementById("done").innerHTML === "");
 
+ // --- OP-23: the interventions, as a row under the board -----------------
+ // The row is what is being checked here, not the list. Everything keeps its
+ // place in it — a lost wonder struck through, a work that has not opened dim —
+ // because the row emptying from the left as wonders go and filling from the
+ // right as works open is what tells the arc. A tidy-up that started dropping
+ // chips it thought were useless would still look perfectly fine on screen and
+ // would have thrown that away, so it is asserted rather than trusted.
+ const $$ = id => doc.getElementById(id);
+ const chips = id => Array.prototype.slice.call($$(id).children);
+
+ ok("no teachings until the rule is on", chips("teach").length === 0);
+ ok("the works begin locked", chips("civic").every(c => c.classList.contains("off")));
+ ok("a locked work says what it needs", /strength/.test(chips("civic")[0].dataset.why),
+    chips("civic")[0].dataset.why);
+
+ // Off by class and not by the disabled attribute, deliberately: a disabled
+ // button fires no pointer events, and a chip you cannot use still has to
+ // answer when you press it rather than refusing in silence.
+ chips("civic")[0].click();
+ ok("pressing a locked chip does not arm it", !doc.querySelector(".chip.on"));
+ ok("pressing a locked chip explains itself", /strength/.test($$("hint").textContent),
+    $$("hint").textContent);
+
+ const live = chips("divine").filter(c => !c.classList.contains("off"))[0];
+ ok("some wonder can be called in year one", !!live);
+ live.click();
+ ok("arming marks exactly one chip", doc.querySelectorAll(".chip.on").length === 1);
+ // A row has no room for the descriptions and a tablet has no hover, so arming
+ // is where the description has to arrive — before the target is chosen and the
+ // year is spent. If this check fails, the chips are unreadable on an iPad.
+ ok("the armed hint carries the description as well as the instruction",
+    $$("hint").textContent.length > 60 && /outlined tile/.test($$("hint").textContent),
+    $$("hint").textContent);
+ live.click();
+ ok("pressing it again puts it down", doc.querySelectorAll(".chip.on").length === 0);
+
+ const resting = $$("hint").textContent;
+ live.onmouseenter();
+ ok("hover borrows the hint line",
+    $$("hint").textContent === win.FG.DIVINE.filter(s => s.id === live.dataset.iv)[0].d);
+ live.onmouseleave();
+ ok("and gives it back", $$("hint").textContent === resting);
+
+ win.FG.R2all(false); win.FG.R2.teaching = true; win.FG.R2.logistic = true;
+ $$("restart").click();
+ ok("the teachings appear with the rule",
+    chips("teach").length === 2 && $$("ivlteach").style.display === "");
+ win.FG.R2all(false);
+ $$("restart").click();
+ ok("and go away with it",
+    chips("teach").length === 0 && $$("ivlteach").style.display === "none");
+
+ // A doctrine that founds, so that wonders are actually lost — a player who only
+ // blesses never loses one, and the interesting assertion needs them gone.
+ win.FG.G.p[0].doc = "cities";
+ for (let y = 0; y < 40; y++) { win.FG.aiTurn(0); if ($$("end").disabled) break; $$("end").click(); }
+ const lostW = win.FG.lostCount(0);
+ ok("a founding doctrine loses wonders over forty years", lostW > 0, "lost " + lostW);
+ ok("the row is still six wide at the end", chips("divine").length === 6);
+ ok("every lost wonder is still in the row, struck through",
+    chips("divine").filter(c => c.classList.contains("gone")).length === lostW);
+ ok("and they are the first ones, in the order they go",
+    chips("divine").slice(0, lostW).every(c => c.classList.contains("gone")));
+
  // --- OP-21: two people at one board ------------------------------------
  // Driven through the same buttons, because the whole of PvP lives in the
  // interface and the engine barely knows about it. The thing being checked is

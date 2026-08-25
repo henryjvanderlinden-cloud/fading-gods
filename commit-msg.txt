@@ -1,54 +1,37 @@
-The interventions come out from beside the board and go under it
+The chip row gets its own checks, and the register says what a point is
 
-OP-23, last of three. The 400px column of eleven named interventions, each with
-its description and its own button, becomes a row of chips directly beneath the
-act row.
+Seventeen checks fold into sim/smoke.js, driven through the build's own DOM the
+way the rest of that section is. 11,758 -> 11,775.
 
-The size was the smaller of the two problems. design/rules.md §2 marks one act
-and one intervention as separate slots and load-bearing - they are the two halves
-of a year - and the two halves were three hundred pixels apart, in different
-type, under different headings. They are adjacent now.
+What they are actually guarding is not the interventions but the row. Everything
+keeps its place in it - a lost wonder struck through, a work that has not opened
+dim - because the row emptying from the left and filling from the right is what
+tells the arc. A later tidy-up that started dropping chips it thought were
+useless would look perfectly fine on screen and would have thrown that away. So:
+the row is six wide at year forty whatever has been lost, every lost wonder is
+still in it with the gone class, and the struck-out ones are the first lostCount
+of them rather than an arbitrary set.
 
-Nothing is removed from the row. A lost wonder keeps its place struck through, a
-work that has not opened keeps its place dim. That is the point rather than a
-concession: gone = i < lostN, so wonders die from the front of FG.DIVINE while
-works open in ladder order, and the row therefore empties from the left and fills
-from the right. Over forty turns it turns from blessing-green to farmland-ochre
-along a single horizontal axis, which is the arc of the whole game as a progress
-bar, narrated by nothing. The column could not do that.
+The rest cover the things the refactor invented. A locked work says what strength
+it needs and explains itself when pressed instead of arming - it is off by class
+and not by the disabled attribute, precisely so that it can. Arming marks exactly
+one chip and puts it down again. The armed hint carries the description as well
+as the target instruction, which is the whole reason the chips are readable on a
+tablet with no hover. Hover borrows the hint line and gives it back. The
+teachings appear and vanish with FG.R2.teaching, and the group label with them.
 
-The descriptions had nowhere to go and tooltips do not work on a tablet, so they
-go into the hint line, which was already sitting under the act row saying "choose
-an outlined tile". Hover or keyboard-focus a chip and the line describes it; arm
-one and the description arrives beside the target instruction, before anything
-has been spent. Arming was always two-step, so the confirm step was there all
-along and no tooltip was ever needed.
+Verified by breaking it: removing the gone class from the chip template fails two
+of the new checks and nothing else, so they are not vacuous.
 
-Chips are off by class and not by the disabled attribute. A disabled button fires
-no pointer events, and a chip you cannot use still has to answer when you press
-it - "not yet, this needs strength 9", "nothing in reach", "gone, and it does not
-come back" - rather than refusing in silence.
+And a note on units in OP-23, because the register had been writing "points"
+while the stylesheet writes px. On this page they are the same number - the head
+sets width=device-width, initial-scale=1, so an 11-inch iPad reports innerWidth
+1194 - and OP-21's figure was right. But CSS pt is a different unit, 1.333px, and
+tidying the board cap's 340px to 340pt would quietly cost the board a hundred and
+forty-five pixels. Written down so nobody does it. OP-21's tablet bullet stops
+saying "deferred deliberately" and points here.
 
-And the tablet arithmetic, measured in a browser at 1680x1050, 1440x900 and
-1194x745 rather than argued. The stacking breakpoint moves 1180 -> 1280, which it
-had to: 1180 caught a 10.9-inch Air exactly and missed an 11-inch Pro by fourteen
-points, so that device kept two columns and drew a 792px board, hexes at 31 for
-art drawn at 50. The playing column is now capped by the height available rather
-than the width - min(1272, max(880, (100vh - 340px) x 1.775)) - and the 880 floor
-is deliberate, because without it the arithmetic runs away: a narrower board
-wraps the chip row onto more lines, which demands a narrower board.
-
-What that buys, honestly: on an 11-inch iPad in landscape the board is 880 wide,
-hex 35 against 31, with the bar, the board and the act row above the fold and the
-chip row about 60 points below it. Everything fits on a laptop and above. A 14x9
-board at a readable size plus two control rows does not fit in 745 points and no
-layout makes it.
-
-No rules changed. smoke.js passes 11,758 checks, and a separate pass over the
-chips - twenty checks - confirms the six and three stay six and three, that a
-locked chip explains instead of arming, that hover borrows the hint line and
-gives it back, that the teachings appear and vanish with FG.R2.teaching, and that
-by year forty the struck-out wonders are exactly the first lostCount of them.
+No rules changed.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BmcC97TZ38RejXMSsFmLp9
