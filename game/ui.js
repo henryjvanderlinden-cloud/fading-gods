@@ -642,7 +642,9 @@ function render() {
  const L = $("log");
  L.innerHTML = G.log.slice(-45).map(l => `<p class="${l.cls}"><b>y${l.t}</b>${l.x}</p>`).join("");
  L.scrollTop = L.scrollHeight;
- $("logwrap").open = !pvp();
+ // OP-23. The chronicle is folded shut and stays however the player left it —
+ // render() used to force it open every frame, which meant it could not be put
+ // away. Only the label is written from here now.
  $("logsum").textContent = pvp() ? "what happened · told from the left hand" : "what happened";
 
  const k = G.p[ME].pos, a = G.p[ME].acted || G.over;
@@ -792,6 +794,7 @@ $("autopass").onchange = e => { AUTOPASS = e.target.checked; };
 // the fallback is there because jsdom does not implement <dialog> — sim/smoke.js
 // clicks #restart and reads #tune, and both now live inside one.
 const openDlg = d => { if (d.showModal) d.showModal(); else d.setAttribute("open", ""); };
+$("aboutopen").onclick = () => openDlg($("about"));
 $("termsopen").onclick = () => openDlg($("terms"));
 
 // The map's own viewBox, so the geometry above is the single source of it.

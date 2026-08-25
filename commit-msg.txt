@@ -1,31 +1,23 @@
-The terms go behind a door
+The primer goes behind a door, and the chronicle folds shut
 
-OP-23, first of three. Everything on the page that was about the experiment
-rather than about the valley now lives in one dialog reached from the header:
-who is in the other seat, the hand-over and even-the-map toggles, which rule set
-is being played, and the knobs.
+OP-23, second of three. The premise and the paragraph on how a year is spent are
+now behind "what this is". The page keeps one line of them - the epigraph, as the
+header's subtitle in place of "prototype", because it is one line and
+concept/concept.md says every strategic decision in the game is a position on it.
 
-One door and not two, though the seat block and the rules block looked like
-separate concerns. They are the same category of object, and the code is what
-says so - "even" restarts, every R2 checkbox restarts, both presets restart, the
-knobs need "Restart with these", and choosing the human seat restarts. The only
-control in there that does not is swapping one machine doctrine for another
-mid-game, which is a debugging affordance rather than something a player does.
-They are year-one controls. A year-one control beside the board is clutter with
-a job title.
+This reverses 7623cee on purpose and the register says so. That commit put the
+blurb on the page specifically so a first-time player learned the ratchet before
+being asked to decide anything about it, and nothing else on the page teaches it -
+the key under the board names the colours and does not say that one erases the
+other. If somebody who has never seen this opens it and the ratchet surprises
+them at year five, the fix is a line in the key, not the paragraphs coming back.
 
-The header comes down with them: one line, the title on the left and the door on
-the right, 18px of padding instead of 30.
+"what happened" folds shut. It was already a <details>, but render() forced it
+open on every frame, so closing it lasted until the next click and the panel
+could not actually be put away. The label is still written from render(); the
+open state is now the player's.
 
-<dialog> rather than an expander, because you are leaving the game to change the
-terms of it and an expander would shove the board down the page. showModal()
-gives the backdrop and Escape for free. jsdom does not implement <dialog>, so
-openDlg falls back to the open attribute - smoke.js clicks #restart and counts
-the eleven range inputs in #tune, and both are now inside one.
-
-No rules changed. smoke.js passes 11,758 checks, the same count as before,
-including the full game and the two-seat game played through the build's own
-buttons.
+No rules changed. smoke.js passes 11,758 checks.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BmcC97TZ38RejXMSsFmLp9

@@ -26,6 +26,10 @@ header{padding:18px 0 11px;border-bottom:1px solid var(--line)}
 h1{font-size:26px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:lowercase}
 .sub{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.22em;
  text-transform:uppercase;color:var(--faint);margin-top:5px}
+/* The one sentence stays on the page when the rest of the primer goes behind a
+   door. It is one line, and every strategic decision in the game is a position
+   on it — concept/concept.md. OP-23. */
+.epig{font-size:13.5px;font-style:italic;color:var(--faint);margin-top:4px}
 /* The title on the left, who is in the other seat on the right. It lives up here
    rather than in the sidebar because choosing a second person changes the shape
    of a year, and a control that changes the game should not be below the fold
@@ -166,10 +170,32 @@ dialog.dlg::backdrop{background:rgba(6,8,5,.74)}
 <body><div class="wrap">
 <header>
  <div class="hd">
-  <div><h1>Fading Gods</h1><div class="sub">prototype</div></div>
-  <div class="doors"><button id="termsopen">the terms</button></div>
+  <div><h1>Fading Gods</h1><div class="epig">You can only be remembered by the thing that deafens you.</div></div>
+  <div class="doors"><button id="aboutopen">what this is</button><button id="termsopen">the terms</button></div>
  </div>
 </header>
+
+<!-- OP-23. The premise and how a year is spent. It was on the page deliberately
+     (7623cee) so that a first-time player met the ratchet before being asked to
+     decide anything about it, and it is behind a button now for a quieter board.
+     Nothing else on the page teaches the ratchet, which is the risk the register
+     records against this. -->
+<dialog id="about" class="dlg">
+ <form method="dialog"><button class="x">close</button></form>
+ <h2 class="dh">what this is</h2>
+<p class="ep">You can only be remembered by the thing that deafens you.</p>
+<p class="q">You are an old power in a small valley, and you are fading. Nothing takes your power
+away: the people build enough instruments that they stop needing to ask, and then stop being able
+to hear. You put them here yourself, knowing what grows from them. Where you have walked the ground
+is <b class="hh">blessed</b>; where a settlement has counted and ploughed it the ground is
+<b class="rr">reckoned</b>, and you cannot set foot on it again — your own farmland walls you out
+exactly as theirs does. Every settlement that grows loud enough costs you the greatest
+<b>wonder</b> you have left, and opens a <b>work of the settled</b> in its place.</p>
+<p class="q">Each year you have <b>three moves</b>, <b>one act</b> — bless the ground you stand on,
+raise a stone, found a settlement, split one — and <b>one intervention</b>, which is a wonder while
+you still have wonders and a work once you do not. Forty years, and whoever holds the most ground
+at the end of them wins. You will end holding everything you can build and nothing you can call.</p>
+</dialog>
 
 <!-- OP-23. The instrument, behind one door: who is in the other seat, which rule
      set is being played, and the knobs. One door rather than two, because these
@@ -206,19 +232,6 @@ dialog.dlg::backdrop{background:rgba(6,8,5,.74)}
  <div class="blk"><h2>knobs</h2><div class="tune" id="tune"></div>
    <button id="restart" style="margin-top:6px">Restart with these</button></div>
 </dialog>
-<p class="ep">You can only be remembered by the thing that deafens you.</p>
-<p class="q">You are an old power in a small valley, and you are fading. Nothing takes your power
-away: the people build enough instruments that they stop needing to ask, and then stop being able
-to hear. You put them here yourself, knowing what grows from them. Where you have walked the ground
-is <b class="hh">blessed</b>; where a settlement has counted and ploughed it the ground is
-<b class="rr">reckoned</b>, and you cannot set foot on it again — your own farmland walls you out
-exactly as theirs does. Every settlement that grows loud enough costs you the greatest
-<b>wonder</b> you have left, and opens a <b>work of the settled</b> in its place.</p>
-<p class="q">Each year you have <b>three moves</b>, <b>one act</b> — bless the ground you stand on,
-raise a stone, found a settlement, split one — and <b>one intervention</b>, which is a wonder while
-you still have wonders and a work once you do not. Forty years, and whoever holds the most ground
-at the end of them wins. You will end holding everything you can build and nothing you can call.</p>
-
 <div class="cols">
 <div>
   <div class="bar" id="bar"></div>
@@ -260,7 +273,7 @@ at the end of them wins. You will end holding everything you can build and nothi
   </div>
   <div class="blk"><h2>your stones</h2><ul class="sl" id="st"></ul></div>
   <div class="blk"><h2>settlements</h2><ul class="sl" id="sl"></ul></div>
-  <details class="blk" id="logwrap" open><summary id="logsum">what happened</summary>
+  <details class="blk" id="logwrap"><summary id="logsum">what happened</summary>
    <div class="log" id="log"></div></details>
 
 
