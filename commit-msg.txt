@@ -1,72 +1,62 @@
-The works open on what you taught them, and they open at all
+Four rows, in the order the game happens in
 
-OP-05 was never a mid-game sag. Read from the code and then measured: the works
-had stopped opening. Under the batch, with the old ladder, any work opened in 28%
-of Cities games and 13% of Mixed, first one around year 33, never at all for
-either refusing doctrine, and the levy fired once in forty games. The mean Cities
-game ended at strength 3.1 against a first gate of 5 — below the bottom rung of a
-three-rung ladder. Section 6's "you begin with none and gain them" had quietly
-stopped being true, and the chip row OP-23 built to empty from the left and fill
-from the right only ever did the first of those.
+Rick's layout, and the ordering is the argument. One act row plus one flowing
+chip row becomes four labelled rows: action, wonders, teach, works. Read down,
+that is the game — here is what you may do, here is what you still have, here is
+the one thing that trades the one for the other, and here is what it bought. The
+act row gains a label so it is one of the four rather than a different kind of
+object sitting above them.
 
-The cause is logistic growth moving both distributions out from under a ladder
-priced for the old 2600 clamp. An untaught settlement is asymptotic to kWild=150
-and never counts at all, so a refuser sat at strength 0 for forty years. A taught
-one now tops out between 600 and 1000, so the 800 rung is nearly unreachable.
-Same shape as the stone brake subtracting from zero: correct under the old growth
-model, quietly not under the new one, and nothing breaks loudly.
+Teaching now sits physically between the two ladders it moves in opposite
+directions. The single flowing row could not show that, because it put all three
+groups on one line in whatever order they happened to wrap.
 
-taughtGates. The ladder counts settlements taught to till — 1 opens clearance,
-2 the colony, 3 the levy. Chosen over simply lowering 5/7/9, which measures the
-same, for two reasons. lostCount already reads that number, so one counter now
-runs the arc in both directions: every teaching costs you a wonder and buys you a
-work, and the game was computing that twice, differently, and showing the player
-only half of it. And taughtCount is already on the stat bar, so the gate is a
-number being looked at — which is what OP-05 has wanted since it was raised, for
-two lines.
+Knowingly given up: the old row turned from blessing-green to farmland-ochre
+along one continuous horizontal axis over forty years, which was the best thing
+about it. The gradient now runs down the rows instead of across them. Still
+there, still narrated by nothing, and each row still empties from the left and
+fills from the right. One axis rotated, not an axis lost.
 
-landGates is cut without ever being built, and moved to rejected.md with the
-reasoning. Reading the unlock off tilled ground measured no better and cost a
-per-settlement unlock model, which would also have changed what a dim chip in the
-row means — from "you have not come far enough" to "not from this place". That is
-a real change to the interface's grammar for no measured gain. The entry says
-plainly that it was never built, because a cut proposal left in a live register is
-how it comes back looking attractive.
+It costs no screen, which was the thing to check, and it was measured in a real
+browser at six sizes rather than asserted:
 
-The balance result is the thing to take away. 80 games a cell, seeds split:
+                        board   against the fold
+  iPad 11   1194x745    880     102px below (was 108)
+  iPad Air  1180x820    880     27px below
+  laptop    1440x900    994     12px below (was 18)
+  desktop   1920x1080   1272    all above the fold
 
-                              cities  mixed  haunt  bands
-  the old game                55%     38%    11%    10%
-  the batch, old 5/7/9        53%     46%    79%    63%
-  the batch, taught 1/2/3     50%     34%    55%    34%
+Six pixels shorter than the two-row version. The fixed right-aligned label column
+is tighter than the old flowing gap, and four short rows wrap less than two long
+ones. No board size changed anywhere.
 
-Haunt 79 to 55 and Bands 63 to 34, from giving the settled side its late game
-back. Larger than any knob OP-19 lists — r, the taught caps, the reckoning budget
-— and it is not a nerf to the magical line, because nothing about blessing
-changed. So part of what the register has been reading as "the batch made magic
-strong" was really "the batch switched the settled endgame off". The overshoot is
-smaller than it looked and partly diagnosed rather than merely tuned. None of the
-stated knobs has been touched.
+A latent layout bug this surfaced, which had been there all along. .play carries
+margin:0 auto and is a grid item, and auto inline margins make a grid item
+shrink-to-fit rather than stretch — so the playing column has always sized itself
+to its widest child's max-content, and the max-width cap that OP-23's entire
+tablet argument rests on was only ever reached by accident, because the old chip
+row happened to be wider than the cap. Restacked into four rows the widest child
+became the six wonder chips at 803px and the board silently dropped from 994 to
+803 on a laptop: a 19% smaller board caused by a layout change two hundred pixels
+away, in a rule that appears to have nothing to do with it. width:100% is what
+the cap was always written to assume.
 
-Works now open in 85% of Cities games and 91% of Mixed, first one about year 23,
-all three in roughly two thirds of Cities games.
+Worth having as a shape rather than a fix: the board's width was load-bearing on
+the width of the chip row. Nobody would have gone looking for that. It was found
+only because the board gets measured in a browser after every layout change, and
+that habit is the whole of what OP-23 bought.
 
-The pre-batch path keeps its own frozen 5/7/9 rather than borrowing the sliders,
-which now read in teachings. FG.R2all(false) still plays exactly section 6. A
-baseline that moves with a slider is not a baseline — A-16, in miniature.
+The tally moved out of #civic, where it had just been parked — render() rewrites
+that element's innerHTML wholesale, so anything inside it is destroyed on the
+first frame. It now sits beside the works rather than on a fifth row.
 
-The locked-chip reason is read from FG.civicNeed() rather than assumed by the
-interface, and smoke.js asserts the wording, so the rule and the row cannot start
-naming different things.
+strength and past 800 came off the status line. Neither gates anything since
+1.18, the works read taughtCount now, and a number on screen that no rule
+consults is worse than absent because it reads as a thing to aim at. Dropping
+them is also what lets the tally fit beside the works.
 
-Left alone on purpose, one thing at a time: the per-settlement minimums in
-targets() at 150/200/300, and A-13's costs in people at 10/35/45, which were
-priced against a ladder that has now been replaced and against works that in
-practice never opened. Both are recorded as live in OP-05, along with a feedback
-loop nobody has measured — teachings per game rose from 3.8 to 5.0 when the gates
-came down, because a colony is born tilling.
-
-sim/smoke.js: 11,783 checks, all passing.
+sim/smoke.js: 11,783 checks, all passing. The teach-row visibility check follows
+the row rather than the label.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01Mtgb2n18GChBUXQgBLxcm8

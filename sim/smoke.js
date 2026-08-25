@@ -200,11 +200,11 @@ try {
  win.FG.R2all(false); win.FG.R2.teaching = true; win.FG.R2.logistic = true;
  $$("restart").click();
  ok("the teachings appear with the rule",
-    chips("teach").length === 2 && $$("ivlteach").style.display === "");
+    chips("teach").length === 2 && $$("rowteach").style.display === "");
  win.FG.R2all(false);
  $$("restart").click();
  ok("and go away with it",
-    chips("teach").length === 0 && $$("ivlteach").style.display === "none");
+    chips("teach").length === 0 && $$("rowteach").style.display === "none");
 
  // --- 1.16 / 1.17: the toll is shown before it is spent ------------------
  // The whole mechanic is that it is a decision, and a decision needs the price

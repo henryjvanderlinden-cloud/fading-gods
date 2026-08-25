@@ -579,9 +579,16 @@ function render() {
  // interventions
  const lostN = lostCount(ME), bg = bigCount(ME), hg = hugeCount(ME),
        wk = working(ME).length, cs = civicStrength(ME);
+ // 1.18. `strength` and `past 800` came out. Neither gates anything any more —
+ // the works read `taughtCount` now — and a number on the status line that no
+ // rule consults is worse than absent, because it reads as a thing to aim at.
+ // Dropping them is also what lets the tally sit on the works row rather than
+ // taking a fifth line of its own.
+ const gates = FG.R2.taughtGates && FG.R2.teaching;
  $("tally").textContent =
-  (FG.R2.taughtLoss ? `${FG.taughtCount(ME)} taught to till · ` : `${bg} past 150 · `)
-  + `${hg} past 800 · ${wk} working stone${wk === 1 ? "" : "s"} · strength ${cs}`
+  (FG.R2.taughtLoss ? `${FG.taughtCount(ME)} taught to till` : `${bg} past 150`)
+  + (gates ? "" : ` · ${hg} past 800 · strength ${cs}`)
+  + ` · ${wk} working stone${wk === 1 ? "" : "s"}`
   + (FG.R2.fade ? ` · ${Math.round(FG.manifest(ME) * 100)}% of you left` : "")
   + (G.p[ME].cast ? " · intervened" : "");
 
@@ -604,7 +611,7 @@ function render() {
 
  // OP-19. The teachings — neither wonders nor works, and only there at all when
  // the rule is on. First in the row, because they are what the batch is about.
- $("ivlteach").style.display = FG.R2.teaching ? "" : "none";
+ $("rowteach").style.display = FG.R2.teaching ? "" : "none";
  $("teach").innerHTML = !FG.R2.teaching ? "" : FG.TEACH.map(s => {
   const n = targets(s.id, ME).length;
   return chip(s, "tch", !spent && !!n, n,

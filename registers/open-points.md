@@ -1349,6 +1349,70 @@ the intervention names so the chip row holds one line (up to 60), and
 `design/rules.md` §1's grid — which is marked load-bearing at 14 × 9 and is
 therefore the last thing to touch, not the first.
 
+### Four labelled rows, August 2026 — Rick's layout, and it costs nothing
+
+**Changed on request, and the ordering is the argument.** One act row plus one
+flowing chip row became four labelled rows: **action · wonders · teach · works.**
+Read down, that is the game — here is what you may do, here is what you still
+have, here is the one thing that trades the one for the other, and here is what
+it bought. The act row gains a label so it is one of the four rather than a
+different kind of object sitting above them.
+
+**Teaching now sits physically between the two ladders it moves in opposite
+directions.** The single flowing row could not show that, because it put all
+three groups on one line in whatever order they happened to wrap.
+
+**What this knowingly gives up.** The old row turned from blessing-green to
+farmland-ochre along one continuous horizontal axis over forty years, and that
+was the best thing about it. The gradient now runs down the rows rather than
+across them. Still there, still narrated by nothing — one axis rotated, not an
+axis lost. Each row still empties from the left and fills from the right.
+
+**And it costs no screen at all, which was the thing to check.** Measured in a
+real browser at six sizes rather than asserted, because that is why this entry
+exists:
+
+| | Board | Chrome below the board | Against the fold |
+|---|---|---|---|
+| iPad 11 landscape, 1194 × 745 | 880 (unchanged) | 4 rows, 117px | 102px below — **was 108** |
+| iPad Air, 1180 × 820 | 880 (unchanged) | " | 27px below |
+| Laptop 1440 × 900 | 994 (unchanged) | " | 12px below — **was 18** |
+| Desktop 1920 × 1080 | 1272 (unchanged) | " | all above the fold |
+
+Six pixels *shorter* than the two-row version. The fixed, right-aligned label
+column is tighter than the old flowing `gap: 5px 14px`, and four short rows wrap
+less than two long ones. No board size changed anywhere.
+
+### A latent layout bug this surfaced, and it had been there all along
+
+`.play` carries `margin: 0 auto` and is a grid item. **Auto inline margins make a
+grid item shrink-to-fit rather than stretch**, so the playing column has always
+sized itself to its widest child's max-content, and the `max-width` cap that this
+entry's whole tablet argument rests on was only ever reached by accident — the
+old single chip row happened to be wider than the cap, so the cap won.
+
+Restacked into four rows, the widest child became the six wonder chips at 803px,
+and **the board silently dropped from 994 to 803 on a laptop** — a 19% smaller
+board caused by a layout change two hundred pixels away, with nothing in the
+stylesheet appearing to have anything to do with it. Fixed by `width: 100%`,
+which is what the cap was always written to assume.
+
+Worth recording as a shape rather than a fix: *the board's width was
+load-bearing on the width of the chip row.* Nobody would have looked for that,
+and it was found only because the board is measured in a browser after every
+layout change. That habit is the whole of what this open point bought.
+
+**Also:** `strength` and `past 800` came off the status line. Neither gates
+anything since 1.18 — the works read `taughtCount` now — and a number on screen
+that no rule consults is worse than absent, because it reads as a thing to aim
+at. Dropping them is also what lets the tally sit beside the works rather than
+taking a fifth row.
+
+**Still settled by:** playing it, on the device, in landscape. The four-row
+layout does not change that and the 102px below the fold is unchanged in
+character from before — the stat bar, the board and the action row are above it,
+and the three chip rows and the hint are the short scroll.
+
 ## OP-17 · medium · Art direction was never chosen
 
 The palette in `concept/concept.md` — *"cold, dark, northern"*, *"no gradients,

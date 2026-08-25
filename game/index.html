@@ -56,7 +56,16 @@ h1{font-size:22px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:l
    need about 275. So the playing column is capped by the height available and
    the hexes shrink, rather than the controls going off the bottom. 1.775 is the
    board's own aspect, BW/BH in ui.js. */
-.play{max-width:min(1272px,max(880px,calc((100vh - 340px) * 1.775)));margin:0 auto}
+/* `width:100%` is load-bearing and was not here before, which was a latent bug
+   that only surfaced when the chip rows were restacked. `margin:0 auto` on a
+   grid item makes it shrink-to-fit rather than stretch, so this column has
+   always sized itself to its widest child's max-content and merely *looked*
+   right because the old single chip row was wider than the cap. Restacked into
+   four rows the widest child became the six wonder chips at 803px, and the board
+   silently dropped from 994 to 803 on a laptop — a 19% smaller board, caused by
+   a layout change two hundred pixels away. With this, the cap above is what
+   decides the width, which is what it was always written to do. */
+.play{width:100%;max-width:min(1272px,max(880px,calc((100vh - 340px) * 1.775)));margin:0 auto}
 @supports (height:100svh){.play{max-width:min(1272px,max(880px,calc((100svh - 340px) * 1.775)))}}
 h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:10.5px;
  letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 10px;
@@ -121,21 +130,47 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
  font-size:12px;padding:4px 0;border-bottom:1px solid var(--soft);letter-spacing:.04em}
 .b1{color:var(--gold)}.b2{color:var(--dim)}.b3{color:var(--reck)}.b4{color:var(--rust)}
 .dead{color:var(--faint)}.warn{color:var(--rust)}
-/* OP-23. The interventions, as a row of chips under the act row rather than a
-   400px column beside the board. design/rules.md §2 marks one act and one
-   intervention as separate slots and load-bearing, and the two halves of a year
-   were three hundred pixels apart, in different type, under different headings.
+/* OP-23. The interventions, as chips under the act row rather than a 400px
+   column beside the board. design/rules.md §2 marks one act and one intervention
+   as separate slots and load-bearing, and the two halves of a year were three
+   hundred pixels apart, in different type, under different headings.
 
-   Everything keeps its place in the row, including what is gone and what has
-   not opened yet. `gone = i < lostN`, so wonders die from the front of
-   FG.DIVINE and the works open in ladder order: the row empties from the left
-   and fills from the right, and the forty-year turn from blessing-green to
-   farmland-ochre happens along one axis with nothing narrating it. */
-.ivrow{display:flex;flex-wrap:wrap;gap:5px 14px;align-items:center;margin-top:8px}
-.ivrow .tally{margin:0}
+   Everything keeps its place, including what is gone and what has not opened
+   yet. `gone = i < lostN`, so wonders die from the front of FG.DIVINE and the
+   works open in ladder order: each row empties from the left and fills from the
+   right, and the forty-year turn from blessing-green to farmland-ochre happens
+   with nothing narrating it.
+
+   Four labelled rows, not one flowing one, and the order is the argument:
+   action, wonders, teach, works. Read down, that is the game — here is what you
+   may do, here is what you still have, here is the one thing that trades the one
+   for the other, and here is what it bought. Teaching sits physically between
+   the two ladders it moves in opposite directions, which the single flowing row
+   could not show because it put all three groups on the same line in whatever
+   order they happened to wrap.
+
+   What this gives up, knowingly: the old row turned from blessing-green to
+   farmland-ochre along one continuous horizontal axis over forty years, and that
+   was the best thing about it. The gradient now runs down the rows instead of
+   across them. It is still there and it is still narrated by nothing; it is one
+   axis rotated, not an axis lost. It costs vertical space, which is measured
+   rather than asserted — see OP-23.
+
+   The label column is fixed width and right-aligned so every row of chips starts
+   at the same x. Four ragged left edges would read as four unrelated controls. */
+/* minmax(0,1fr) and not 1fr. A bare `1fr` track floors at min-content, and the
+   works row carries the tally, whose text does not wrap — so the track demanded
+   ~750px, dragged the whole left column out to 803, and silently took 77px off
+   the board on an iPad and 191px on a laptop. Measured, not guessed; the board
+   is the thing this layout exists to protect. */
+.ivrow{display:grid;grid-template-columns:52px minmax(0,1fr);gap:0 11px;align-items:center;margin-top:6px}
+.ivrow .ivlab{text-align:right}
+.ivrow .tally{margin:0 0 0 4px}
+.chips.acts{gap:6px}
 .ivlab{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:9.5px;letter-spacing:.2em;
  text-transform:uppercase;color:var(--faint)}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
+.chipwrap{display:flex;flex-wrap:wrap;gap:5px 13px;align-items:center;min-width:0}
 .chip{padding:6px 10px;font-size:10.5px;letter-spacing:.11em;border-color:var(--soft)}
 .chip sup{font-size:9px;margin-left:5px;color:var(--faint);vertical-align:super}
 .chip.tch{color:var(--moss)}.chip.div{color:var(--bless)}.chip.civ{color:var(--reck)}
@@ -276,17 +311,30 @@ at the end of them wins. You will end holding everything you can build and nothi
     <span><i style="border:2px solid #7CF04A"></i>yours</span>
     <span><i style="border:2px solid #A96BF0"></i>theirs</span>
   </div>
-  <div class="row">
+  <!-- OP-23, revised. Four labelled rows rather than one act row and one
+       flowing chip row, in the order the game happens in: what you do, what you
+       still have, the thing that trades one for the other, what that buys. The
+       act row gains a label so that it is one of the four rather than a
+       different kind of object above them. -->
+  <div class="ivrow" id="rowact">
+   <span class="ivlab">action</span><span class="chips acts">
     <button id="bless">Bless</button><button id="stone">Raise a stone</button>
     <button id="found">Found</button><button id="split">Split</button>
     <button id="pass">Do nothing</button><button id="end" class="main">End year</button>
+   </span>
   </div>
-  <!-- OP-23. The other half of the year, next to the first half of it. -->
-  <div class="ivrow" id="ivrow">
-   <span class="ivlab" id="ivlteach">teach</span><span class="chips" id="teach"></span>
+  <div class="ivrow" id="rowdivine">
    <span class="ivlab">wonders</span><span class="chips" id="divine"></span>
-   <span class="ivlab">works</span><span class="chips" id="civic"></span>
-   <span class="tally" id="tally"></span>
+  </div>
+  <div class="ivrow" id="rowteach">
+   <span class="ivlab">teach</span><span class="chips" id="teach"></span>
+  </div>
+  <!-- The tally sits beside the works rather than on a fifth line of its own,
+       and outside #civic because render() rewrites that element's innerHTML
+       wholesale — anything parked inside it is destroyed on the first frame. -->
+  <div class="ivrow" id="rowcivic">
+   <span class="ivlab">works</span><span class="chipwrap">
+    <span class="chips" id="civic"></span><span class="tally" id="tally"></span></span>
   </div>
   <div class="hintline" id="hint"></div>
   <div id="done"></div>
