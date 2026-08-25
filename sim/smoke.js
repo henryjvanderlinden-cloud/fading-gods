@@ -201,15 +201,29 @@ try {
 
  // A doctrine that founds, so that wonders are actually lost — a player who only
  // blesses never loses one, and the interesting assertion needs them gone.
+ //
+ // Seeded first, and worth knowing why: newGame() does not pass a seed, so a game
+ // played through the interface runs on whatever FG.rand was left as — which is
+ // Math.random in this window, because the engine section above seeds a different
+ // FG. Everything in this DOM section has therefore always been a different game
+ // each run. That is fine for "does it play at all" and not fine for counting, so
+ // the counting part pins the seed.
+ win.FG.setSeed(7);
+ $$("restart").click();
  win.FG.G.p[0].doc = "cities";
  for (let y = 0; y < 40; y++) { win.FG.aiTurn(0); if ($$("end").disabled) break; $$("end").click(); }
  const lostW = win.FG.lostCount(0);
+ // The row saturates: lostCount is settlements past the threshold less working
+ // stones and is not clamped, so it can exceed six, and only six chips can ever
+ // be struck through. divineLeft() slices, so the game is right either way.
+ const struck = Math.min(lostW, win.FG.DIVINE.length);
  ok("a founding doctrine loses wonders over forty years", lostW > 0, "lost " + lostW);
  ok("the row is still six wide at the end", chips("divine").length === 6);
  ok("every lost wonder is still in the row, struck through",
-    chips("divine").filter(c => c.classList.contains("gone")).length === lostW);
+    chips("divine").filter(c => c.classList.contains("gone")).length === struck,
+    "lost " + lostW + ", struck " + chips("divine").filter(c => c.classList.contains("gone")).length);
  ok("and they are the first ones, in the order they go",
-    chips("divine").slice(0, lostW).every(c => c.classList.contains("gone")));
+    chips("divine").slice(0, struck).every(c => c.classList.contains("gone")));
 
  // --- OP-21: two people at one board ------------------------------------
  // Driven through the same buttons, because the whole of PvP lives in the

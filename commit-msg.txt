@@ -1,37 +1,27 @@
-The chip row gets its own checks, and the register says what a point is
+Two dead rules, and a check that was counting something unbounded
 
-Seventeen checks fold into sim/smoke.js, driven through the build's own DOM the
-way the rest of that section is. 11,758 -> 11,775.
+Housekeeping found by looking rather than by playing.
 
-What they are actually guarding is not the interventions but the row. Everything
-keeps its place in it - a lost wonder struck through, a work that has not opened
-dim - because the row emptying from the left and filling from the right is what
-tells the arc. A later tidy-up that started dropping chips it thought were
-useless would look perfectly fine on screen and would have thrown that away. So:
-the row is six wide at year forty whatever has been lost, every lost wonder is
-still in it with the gone class, and the struck-out ones are the first lostCount
-of them rather than an arbitrary set.
+button.arm and button.armc are gone. They coloured the arm buttons in the
+intervention column, which no longer exists - the chips carry their own state in
+.chip.on. .hintline.arm is a different selector and stays.
 
-The rest cover the things the refactor invented. A locked work says what strength
-it needs and explains itself when pressed instead of arming - it is off by class
-and not by the disabled attribute, precisely so that it can. Arming marks exactly
-one chip and puts it down again. The armed hint carries the description as well
-as the target instruction, which is the whole reason the chips are readable on a
-tablet with no hover. Hover borrows the hint line and gives it back. The
-teachings appear and vanish with FG.R2.teaching, and the group label with them.
+And the new chip check failed once in five runs, which was worth chasing rather
+than re-running. Two things behind it, both real.
 
-Verified by breaking it: removing the gone class from the chip template fails two
-of the new checks and nothing else, so they are not vacuous.
+lostCount() is settlements past the threshold less working stones, and nothing
+clamps it to six. Once it passes six the row saturates - only six chips exist to
+strike through - and the check was comparing the struck count against a number
+that can be seven. The game is right either way, because divineLeft() slices, but
+the assertion was wrong and is now against min(lostCount, DIVINE.length), with
+the reason written next to it.
 
-And a note on units in OP-23, because the register had been writing "points"
-while the stylesheet writes px. On this page they are the same number - the head
-sets width=device-width, initial-scale=1, so an 11-inch iPad reports innerWidth
-1194 - and OP-21's figure was right. But CSS pt is a different unit, 1.333px, and
-tidying the board cap's 340px to 340pt would quietly cost the board a hundred and
-forty-five pixels. Written down so nobody does it. OP-21's tablet bullet stops
-saying "deferred deliberately" and points here.
-
-No rules changed.
+The second is older and is not mine. newGame() does not pass a seed, and the
+engine section at the top of smoke.js seeds a different FG instance, so every
+game this file has ever played through the interface ran on Math.random. Fine for
+"does it play at all", which is what that section was, and not fine the moment
+anything counts. The counting part now pins the seed. Three runs, 11,775 checks,
+identical.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01BmcC97TZ38RejXMSsFmLp9
