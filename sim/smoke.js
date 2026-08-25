@@ -233,6 +233,154 @@ console.log("\nthe three rules of the second batch");
  console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
 }
 
+// ------------------------------------------------------- 1.19, August 2026
+// The third leg, on constructed boards. Every rule in it is about a choice, and
+// OP-19 recorded what that means for measurement: a greedy chooser produces
+// numbers of roughly zero for rules of this shape. So the harness's job here is
+// not to say whether herding is any good. It is to say that it does what it
+// says — which is the job the constructed half did for 1.6 and 1.9, and which
+// caught both of the things play had missed.
+console.log("\nthe third leg");
+{
+ const before = fail;
+ const {K, NB, T, ring} = FG;
+
+ // The shipped game plus this one rule. Deliberately not `R2built(true)`: that
+ // now means *everything that is built*, and 1.12 and 1.19 are both built and
+ // off. R2reset is the thing that says "the game".
+ function blank() {
+  FG.resetTune(); FG.R2reset(); FG.R2.herds = true;
+  FG.createGame({you: null, them: "passive", seed: 1});
+  FG.G.T.forEach(t => { t.t = "plain"; t.f = 1; t.st = "wild"; t.own = null; t.set = null;
+                        t.bar = 0; t.kur = null; });
+  FG.G.stones = [[], []]; FG.G.armies = []; FG.G.refugees = []; FG.G.herds = []; FG.G.log = [];
+  FG.G.p[0].pos = K(4, 4); FG.G.p[1].pos = K(12, 4);
+ }
+ const settle = (c, r, who, pop, taught) => {
+  const t = T(K(c, r));
+  t.set = FG.newSet(pop, who); t.set.taught = !!taught; t.st = "wild"; t.own = null; return t;
+ };
+ const furrow = (c, r, who) => { const t = T(K(c, r)); t.st = "reck"; t.own = who; return t; };
+ const put = (c, r, who, n) => {
+  const h = {at: K(c, r), to: K(c, r), n, own: who, kill: false, held: 0};
+  FG.G.herds.push(h); return h;
+ };
+
+ // --- availability is a condition, not a clock --------------------------
+ blank(); settle(4, 4, 0, 100);
+ ok("with no plough anywhere, herding is not on offer", FG.teachTargets("herd", 0).length === 0);
+ furrow(9, 4, 1);
+ ok("once somebody has broken ground, it is", FG.teachTargets("herd", 0).includes(K(4, 4)));
+ settle(6, 6, 0, 100, true);
+ ok("a people already shown the plough may not be taught to herd",
+    !FG.teachTargets("herd", 0).includes(K(6, 6)));
+ blank(); settle(4, 4, 0, 100); furrow(9, 4, 1); T(K(4, 4)).set.tabu = true;
+ ok("nor may a forbidden place, which is forbidden both things",
+    FG.teachTargets("herd", 0).length === 0);
+
+ // --- what the teaching costs, and what it does not ---------------------
+ blank(); settle(4, 4, 0, 300); furrow(9, 4, 1);
+ const wonderBefore = FG.lostCount(0), scoreBefore = FG.score()[0].tot;
+ FG.doIntervene("herd", K(4, 4), 0);
+ ok("the settlement leaves the board", T(K(4, 4)).set === null);
+ ok("and a herd stands where it was", FG.G.herds.length === 1 && FG.G.herds[0].at === K(4, 4));
+ ok("it costs no wonder", FG.lostCount(0) === wonderBefore);
+ ok("it costs the three points the place was worth", FG.score()[0].tot === scoreBefore - 3);
+ ok("and a herd is worth nothing at all while it roams", FG.score()[0].tot === 0);
+
+ // --- they move like their god, not like an army ------------------------
+ blank(); const h1 = put(4, 4, 0, 60); h1.to = K(8, 4);
+ FG.herdTick();
+ ok("a herd walks one tile a year", h1.at !== K(4, 4) && NB[K(4, 4)].includes(h1.at));
+
+ blank(); put(4, 4, 0, 60);
+ NB[K(4, 4)].forEach(x => { T(x).st = "bless"; T(x).own = 1; });
+ ok("the other power's blessing is closed country", FG.herdStep(K(4, 4), K(8, 4), 0) === undefined);
+ NB[K(4, 4)].forEach(x => { T(x).own = 0; });
+ ok("their own god's blessing never shuts them in", FG.herdStep(K(4, 4), K(8, 4), 0) !== undefined);
+
+ blank(); put(4, 4, 0, 60); settle(5, 4, 1, 100);
+ ok("a herd may not walk onto a town", FG.herdBlocked(K(5, 4), 0) && !FG.herdBlocked(K(6, 4), 0));
+ blank(); put(4, 4, 0, 60); furrow(5, 4, 1);
+ ok("farmland is wide open, which is the point", !FG.herdBlocked(K(5, 4), 0));
+
+ // --- grazing ------------------------------------------------------------
+ blank(); const h2 = put(4, 4, 0, 60); h2.to = K(5, 4); furrow(5, 4, 1);
+ FG.herdTick();
+ ok("they walk onto the furrows and take them", h2.at === K(5, 4) && T(K(5, 4)).st === "wild");
+ ok("the ground goes back to wild, not over to you", T(K(5, 4)).own === null);
+ ok("and it will not take a furrow for three years", FG.barren(T(K(5, 4))));
+
+ blank(); settle(4, 4, 0, 400, true); T(K(5, 4)).bar = FG.G.turn + 3;
+ T(K(4, 4)).set.spent = 0;
+ for (let i = 0; i < 3; i++) FG.worldTick();
+ ok("a settlement will not plough barren ground", T(K(5, 4)).st !== "reck");
+ ok("and being refused does not spend its lifetime budget",
+    T(K(4, 4)).set.spent <= 3, `spent ${T(K(4, 4)).set.spent}`);
+
+ blank(); settle(4, 4, 0, 400, true); T(K(5, 4)).bar = FG.G.turn + 3;
+ ok("nor may a Clearance be aimed at it", !FG.targets("clear", 0).includes(K(5, 4)));
+
+ // --- what the grass carries --------------------------------------------
+ blank(); const h3 = put(4, 4, 0, 300);
+ for (let i = 0; i < 15; i++) FG.herdTick();
+ ok("a herd falls back to the Seventy-Seven", h3.n > 60 && h3.n < 90, `carried ${Math.round(h3.n)}`);
+ blank(); const h4 = put(4, 4, 0, 20);
+ for (let i = 0; i < 15; i++) FG.herdTick();
+ ok("and a small one grows up to it", h4.n > 60 && h4.n < 90, `carried ${Math.round(h4.n)}`);
+
+ // --- stopping, which is the answer to the third-door objection ----------
+ blank(); const h5 = put(4, 4, 0, 70); FG.G.p[0].pos = K(4, 4);
+ ok("a herd may stop on open ground", FG.canStop(h5));
+ FG.doAct("stop", 0);
+ ok("and comes back as a settlement", !!T(K(4, 4)).set && FG.G.herds.length === 0);
+ ok("untaught, standing at the fork it walked away from", T(K(4, 4)).set.taught === false);
+
+ blank(); const h6 = put(4, 4, 0, 70); settle(5, 4, 0, 100);
+ ok("it may not stop beside another settlement", !FG.canStop(h6));
+
+ // The bug a played game found in year 32 of seed 7, and the reason foundBlock
+ // grew a fourth argument: the greedy chooser dropped a colony onto a camp.
+ blank(); put(4, 4, 0, 70); ring(K(4, 4), 2).forEach(x => { T(x).st = "bless"; T(x).own = 0; });
+ ok("nobody may found a settlement on a camp", !FG.canFound(K(4, 4), 0));
+ ok("nor send a colony onto one", !FG.canFound(K(4, 4), 0, true));
+ ok("but the herd itself may still stop there", FG.canStop(FG.G.herds[0]));
+ FG.G.p[0].pos = K(4, 4);
+ ok("and no wonder may be dropped on a camp either",
+    !FG.targets("drown", 0).includes(K(4, 4)) && !FG.targets("mountains", 0).includes(K(4, 4)));
+
+ // --- kurgans ------------------------------------------------------------
+ blank(); FG.G.stones[0] = [K(4, 4)]; furrow(4, 4, 1);
+ const h7 = put(4, 4, 0, 100); FG.G.p[0].pos = K(4, 4);
+ ok("a stone that has gone under the plough may be mounded", FG.canMound(h7));
+ FG.doAct("mound", 0);
+ ok("the mound stands", T(K(4, 4)).kur === 0 && FG.moundCount(0) === 1);
+ ok("the ground is still farmland, and still theirs",
+    T(K(4, 4)).st === "reck" && T(K(4, 4)).own === 1);
+ ok("it cost a fifth of them", Math.round(h7.n) === 80, `left ${Math.round(h7.n)}`);
+ ok("a mound never becomes a working stone", FG.working(0).length === 0);
+ ok("and never touches the wonder brake", FG.lostCount(0) === 0);
+ ok("one grave to a stone", !FG.canMound(h7));
+
+ blank(); FG.G.stones[0] = [K(4, 4)];
+ ring(K(4, 4), 2).forEach(x => { T(x).st = "bless"; T(x).own = 0; });
+ ok("a stone that still answers is not a grave", !FG.canMound(put(4, 4, 0, 100)));
+ blank(); FG.G.stones[1] = [K(4, 4)]; furrow(4, 4, 1);
+ ok("and a people bury their own god's stone, not the other one's",
+    !FG.canMound(put(4, 4, 0, 100)));
+
+ // --- with the flag off, none of it exists -------------------------------
+ blank(); FG.R2.herds = false;
+ settle(4, 4, 0, 100); furrow(9, 4, 1);
+ ok("flag off: nothing may be taught to herd", FG.teachTargets("herd", 0).length === 0);
+ const h8 = put(6, 6, 0, 60); h8.to = K(8, 6);
+ FG.herdTick();
+ ok("flag off: a herd left in state does not move", h8.at === K(6, 6));
+
+ FG.R2reset(); FG.resetTune();
+ console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
+}
+
 // ------------------------------------------------- the A/B baseline, exact
 // The one thing that must never move. FG.R2all(false) plays the pre-batch game,
 // and a rule added to the batch must not be able to reach it.
@@ -252,6 +400,20 @@ console.log("\nthe baseline is still exact");
  for (let s = 0; s < OLD.length; s++)
   ok("the old game is unchanged, seed " + s, play("bands", "cities", s) === OLD[s],
      `got ${play("bands", "cities", s)}, want ${OLD[s]}`);
+
+ // 1.19. And the *current* game, frozen the day the third leg went in.
+ //
+ // This one is new and it is here because the old fingerprint above stopped
+ // being enough. It only ever asserted that a new rule cannot reach the
+ // pre-batch game — which is a claim about `R2all(false)`, and 1.12 and 1.19
+ // ship off, so a rule of theirs that leaked would leak into the game people
+ // actually play and this file would not have noticed. `R2reset()` is the game.
+ const NOW = ["30:79", "75:144", "114:126", "120:123", "42:165", "120:66", "93:62", "93:135"];
+ FG.R2reset();
+ for (let s = 0; s < NOW.length; s++)
+  ok("the shipped game is unchanged, seed " + s, play("bands", "cities", s) === NOW[s],
+     `got ${play("bands", "cities", s)}, want ${NOW[s]}`);
+
  FG.R2all(false); FG.R2built(true); FG.resetTune();
  console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
 }
@@ -371,6 +533,48 @@ try {
  $$("restart").click();
  ok("and go away with it",
     chips("teach").length === 0 && $$("rowteach").style.display === "none");
+
+ // --- 1.19: the third leg in the interface -------------------------------
+ // The row follows the rule here too, and this is the check that says so. With
+ // herding off there must be two teachings and no herd buttons at all — not
+ // three teachings with one permanently dark, which advertises a rule that is
+ // not running, and not three dead buttons in the action row, which teaches a
+ // player that the row has dead things in it.
+ win.FG.R2reset();
+ $$("restart").click();
+ ok("herding is not in the row when its rule is off", chips("teach").length === 2);
+ ok("and neither are its buttons", $$("drive").style.display === "none"
+    && $$("stopherd").style.display === "none" && $$("mound").style.display === "none");
+ win.FG.R2reset(); win.FG.R2.herds = true;
+ $$("restart").click();
+ ok("with the rule on there are three teachings", chips("teach").length === 3);
+ // Nobody has ploughed in year one, so the chip must be dark — and it must give
+ // the *right* reason. "None of yours is in reach" would send a player walking.
+ const hc = chips("teach")[2];
+ ok("the herd chip is dark before anyone has broken ground", hc.classList.contains("off"));
+ ok("and says why, which is not about reach", /broken ground/.test(hc.dataset.why), hc.dataset.why);
+
+ // The buttons come and go with what is possible here, and this is a layout
+ // check as much as a teaching one: measured in a browser, nine buttons wrap
+ // the action row onto a second line and the four labelled rows are the layout.
+ const shown = () => ["drive", "stopherd", "mound"]
+   .filter(id => $$(id).style.display !== "none").join(",");
+ ok("no herd buttons before there is a herd", shown() === "", shown());
+ const GH = win.FG.G, HK = GH.p[0].pos;
+ // a camp somewhere the player is not standing
+ const away = win.FG.NB[HK].find(x => !win.FG.impassable(win.FG.T(x)) && !win.FG.T(x).set);
+ GH.herds.push({at: away, to: away, n: 60, own: 0, kill: false, held: 0});
+ $$("sf").checked = !$$("sf").checked; $$("sf").onchange({target: $$("sf")});
+ ok("Send appears once a people are walking", shown() === "drive", shown());
+ GH.p[0].pos = away;
+ $$("sf").checked = !$$("sf").checked; $$("sf").onchange({target: $$("sf")});
+ ok("and Stop and Mound when you are standing on them",
+    shown() === "drive,stopherd,mound", shown());
+ ok("Mound is dark with no stone under the ground", $$("mound").disabled);
+
+ win.FG.R2reset();
+ $$("restart").click();
+ ok("and all three go away with the rule", shown() === "", shown());
 
  // --- 1.16 / 1.17: the toll is shown before it is spent ------------------
  // The whole mechanic is that it is a decision, and a decision needs the price

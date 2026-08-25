@@ -41,7 +41,12 @@ FG.createGame = function (opts) {
  let tries = 0, G = null;
  do {
   G = {T: gen(), turn: 1, over: false, log: [], hist: [],
-       stones: [[], []], warned: 0, armies: [], refugees: [], claims: {},
+       stones: [[], []], warned: 0, armies: [], refugees: [],
+       // 1.19 / OP-12. Roaming peoples. Present whatever FG.R2.herds says, so
+       // state stays one shape and the flag only decides whether anything ever
+       // puts anything in it — the same discipline `taught` and `kill` follow on
+       // a settlement. Each is {at, to, n, own, kill, held}.
+       herds: [], claims: {},
        seed: (opts.seed === undefined ? null : opts.seed),
        pvp: !!opts.pvp,
        // `body` is what is left of your manifestation — OP-14. It is only read

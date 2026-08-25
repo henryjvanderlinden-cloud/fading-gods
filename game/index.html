@@ -275,6 +275,7 @@ at the end of them wins. You will end holding everything you can build and nothi
     <option value="cities">Cities — founds, never splits, lets them grow</option>
     <option value="bands">Bands — splits at sixty, blesses constantly</option>
     <option value="mixed">Mixed — a bit of both</option>
+    <option value="storm">Storm &amp; Sky — sends them after the grass</option>
     <option value="passive">Passive — does nothing at all</option>
     <option value="human">A second person, at this board</option>
    </select>
@@ -323,7 +324,21 @@ at the end of them wins. You will end holding everything you can build and nothi
   <div class="ivrow" id="rowact">
    <span class="ivlab">action</span><span class="chips acts">
     <button id="bless">Bless</button><button id="stone">Raise a stone</button>
-    <button id="found">Found</button><button id="split">Split</button>
+    <button id="found">Found</button><button id="split">Split</button
+    ><!-- 1.19. Only there when the rule is, and hidden rather than disabled: a
+         permanently greyed button in the action row teaches a player that the
+         row has dead things in it. Send is not an act and never spends the
+         year — a herd never stops hearing you, and that is the whole
+         compensation for their counting nothing. Stop and Raise a mound are
+         acts, and both are done standing on the herd itself.
+         The labels are short because they were measured: nine buttons wrap the
+         action row onto a second line, and the four labelled rows are the
+         layout. "Send the herds · Let them stop · Raise a mound" is 74px and
+         two lines; this is 36px and one. The descriptions live on the hint
+         line, which is where every other description in this build lives.
+    --><button id="drive">Send them on</button
+    ><button id="stopherd">Stop here</button
+    ><button id="mound">Mound it</button>
     <button id="pass">Do nothing</button><button id="end" class="main">End year</button>
    </span>
   </div>

@@ -1,169 +1,115 @@
-Three rules from the interesting pile, and a fourth that had never once run
+The third leg, built and left switched off
 
-Rick's pick: encirclement and the taboo, the Bless/Quicken split, and split at
-path distance 2 — "and check the split logic thoroughly, because I haven't been
-able to use it."
+`FG.R2.herds`, 1.19. OP-12 has wanted a third leg since before the current
+design and never had one. It has one now: a people never shown the plough may
+be taught to keep herds instead, and then they stop standing still.
 
-He hasn't been able to use it because it has never been legal. Not tuned badly,
-not rarely available: impossible, in every position, since it was written.
-`canSplit` asked for a neighbour of the settlement that passed the whole founding
-test, and `foundBlock` refuses any tile with a settlement in its own
-neighbourhood — which every neighbour of a settlement has, namely the settlement
-doing the splitting. The two conditions are mutually exclusive by construction.
-Measured before anything was touched: **true in 0 of 1,047 settlement-years**,
-playing the doctrine that weights it highest. A-20.
+    farmland beats blessing   the ratchet — furrows erase the quiet beside them
+    herds beat farmland       they overrun it and graze it back to thorn
+    blessing beats herds      a rival power's blessing is closed country to them
 
-`bands` weights split at 14, second only to raising a stone. Its whole share of
-the chooser's attention has been going to an option that could not be selected,
-so every number ever measured for the doctrine the dropdown calls *splits at
-sixty* is a number for a doctrine playing with one fewer act than it thinks it
-has. Fifth thing in this project found by reading the code against the prose
-rather than by measuring, and the register's rule that produced it holds again: a
-legality test that is always false produces no anomaly, only an absence, and the
-harness cannot report an absence.
+**It ships off.** That is as much the point of the commit as the rule is. This is
+the largest engine change since armies, going in on top of a batch that has been
+played exactly once, and this project's own evidence hierarchy puts a person above
+the matrix for anything about choices. So it is built, tested, drawn — and dark
+until somebody sits in front of it. The batch of 1.6 / 1.8 / 1.9 is still exactly
+the thing that was measured and played.
 
-## 1.6 — where a splinter goes
+Three decisions, all taken before a line was written, all Rick's, all archived:
 
-Ground you have blessed, at path distance 2, with the 85% founding requirement
-waived. Everything else `foundBlock` asks is still asked, and one of those
-questions does the shaping: *not beside a settlement* rules out distance 1 by
-itself, so two is not a chosen radius, it is the only one available. Path
-distance rather than ring distance (A-18) — a place ringed by water has nowhere
-to send anyone, and a split cannot leapfrog terrain.
+- **A-24 — no wonder, and no points.** `lostCount` counts settlements taught to
+  till and a herd is not a settlement, so nothing is taken from you: they were
+  never shown the plough, they still hear you, nothing about you has gone quieter.
+  And nothing is given either — a herd holds no ground and `score()` never sees
+  it. They deny; they do not accumulate. Neither half works alone. Let them score
+  and the central trade can simply be declined; charge a wonder and herding is a
+  strictly worse plough that nobody ever takes.
+- **A-25 — grazed ground goes to wild, and stays barren three years.** Not to you:
+  the herd unmakes and the god still has to walk out and make. And with A-14's
+  lifetime budget already in place, grazed ground is lost twice — once when the
+  furrows go, and again when re-ploughing spends a tile of a settlement's thirty
+  that it had already spent. The second cost is invisible and permanent.
+- **A-26 — the other power's blessing is closed country.** They move the way their
+  god does rather than the way an army does, because a people who were never
+  taught the plough can still hear, and what a people can hear they can be shut
+  out of. *Theirs* only — blessing impassable to herds would wall your own herds
+  in with your own quiet, which is the self-walling problem OP-19 already strained
+  to breaking.
 
-The blessing requirement is kept and the percentage dropped: the people are
-already there, and what they need is somewhere quiet to stop, not a country.
-That keeps §3's *all expansion begins with blessing* true of splitting as well as
-founding.
+What it costs to send a people out, and none of it had to be written: the three
+points the place was worth, everything it would have grown into, and most of the
+people — `kHerd` is the Seventy-Seven, and a village that has been standing a
+while is above it and sheds the surplus. Going nomadic costs you most of a town.
 
-One price nobody had written, because nothing had ever done it: a settlement
-stands on wild ground, so **the founding spends that tile's blessing.** Splitting
-costs you a tile of your own quiet country, permanently.
+**Herding is not a door out of the central dilemma, it is a detour.** A herd that
+stops comes back untaught. You may walk around the fork for twenty years and you
+arrive at the same fork, with fewer people and nothing scored in between. That is
+the answer to the one objection OP-12 has never been able to answer, and it is why
+the rule survives at all.
 
-In the build it now arms and waits for the tile, like an intervention. Where the
-splinter lands is a founding, and founding is the one thing every expansion in
-this game begins with; it should not be a random pick out of a list of one. A-21.
+**Kurgans came with it.** A herd on farmland over a stone of its own god that has
+already stopped working may raise a mound: a fifth of them, and the year. The
+ground stays reckoned — a mound in a field — and the stone counts as *standing*
+without ever working, blessing, or feeding the wonder brake. Working stones carry
+presence, dead stones carry orders, buried stones carry memory. OP-16 measured
+that 92% of stones end under farmland and that it is irreversible; this does not
+reverse it, it makes it mean something. A refuser cannot have their shrines back
+as engines, and can have them back as graves.
 
-## 1.8 — taking their ground returns it to wild
+`moundCount` gates nothing and scores nothing, deliberately. It is for OP-15's
+*Forgotten*, which is unwritten — so that entry is now the blocker on half of a
+built rule, and if the endings never arrive the mounds are decoration.
 
-OP-16's Bless/Quicken split, built on **presence** rather than on which spell it
-is. Bless happens under your feet and always unmakes. Quicken asks whether its
-target was within arm's reach — the same test `tolled` uses, so the game's two
-prices are read off one line — and sent down the stone network it takes wild
-ground and passes over theirs.
+**1.12 `barren3` is half-built alongside, and stays off.** Barren ground exists in
+the engine and grazing writes it; the flag now governs only whether *Wither* does
+too. One writer per rule, one reader for both. It is a separate question and it
+moves four numbers on its own — do not turn it on with 1.19.
 
-*Creation at a distance, unmaking only in person*, said on the board instead of
-asserted in a register. It answers OP-16's original complaint without cutting
-Quicken's reach, which that entry had already warned would be a net nerf to the
-magical player.
+**A played game found the bug, in the way things get found here.** Year 32 of seed
+7: *a herd is standing on a settlement*. The greedy chooser had dropped a colony
+onto a camp, because `foundBlock` had never heard of herds. Found, colony and
+split all had to refuse a camp; so did Drown and Raise mountains; and
+`mountainLine` needed its own guard, because that loop keeps a private copy of the
+exclusions and only the aimed-at tile was ever checked. Fourth instance of the
+standing lesson: the legality test and the thing that mutates the board are
+written twice in this engine, and they drift.
 
-**The spread it produced is not about blessing. It is about turn order.** A-17's
-swing exists because Bless overwrote, so the second mover overwrote after the
-first had committed. Take the overwrite away and most of the mechanism goes with
-it. Mirror matches, 60 games, mean margin with the starting-position bias
-subtracted:
+**Built-and-off broke something the harness was leaning on.** `FG.R2built(true)`
+used to mean both *everything built* and *the game*; it does not any more.
+`FG.R2reset()` is the game, and `sim/smoke.js` now freezes a fingerprint of that
+as well as of the pre-batch baseline — the old one only ever asserted that a new
+rule could not reach `R2all(false)`, which is a claim about a game nobody plays.
 
-| doctrine | order was worth | with 1.8 | with all three |
-|---|---|---|---|
-| cities | −1.1 | −8.3 | **−19.4** |
-| haunt | −11.6 | **−6.5** | −6.5 |
-| bands | −14.5 | **−1.8** | +1.2 |
+Measured, 80 games a cell against Cities, the build's own turn order:
 
-So this is A-17's second candidate arriving by another road. It is not
-`BLESS_WILD_ONLY` — it takes their ground and gives it to nobody rather than
-refusing to take it — but it removes the same overwrite. A-17 is not reopened; it
-is re-pointed, and OP-21's fourth candidate, letting the second player choose
-their seat, is worth more now than when it was written. A-22.
+|                          | cities | mixed | haunt | bands | storm |
+|--------------------------|--------|-------|-------|-------|-------|
+| the game as it ships     |   34%  |  36%  |  54%  |  29%  |  63%  |
+| + herds                  |   34%  |  36%  |  54%  |  29%  |  61%  |
+| + barren3 (Wither only)  |   39%  |  44%  |  50%  |  26%  |  66%  |
 
-## 1.9 — the ring closes, and the place is forbidden
+The first row reproduces §10 exactly. The second row is the finding: **the rule
+moves nothing.** Four doctrines identical to the digit; storm wins 63% without it
+and 61% with it. Over 300 games across every doctrine pairing, the chooser taught
+herding 1.65 times a game, grazed 2.3 tiles, spent more than half of every
+herd-year standing still, settled a herd once, and raised zero kurgans.
 
-Two years ringed and the settlement changes hands. Rock and water count as part
-of the ring, so a coastal place is closed in by three tiles rather than six —
-accepted deliberately, and now built.
+That is the expected result and not a disappointment. A one-ply chooser cannot
+decide that a place is worth more walking than standing, will not drive a people
+four years across the board to reach a city's fields, and never rings anything on
+purpose. OP-19 recorded `taughtLoss` and `audible77` measuring at exactly zero for
+the same reason. **OP-21 is the instrument for this, and it exists.**
 
-**The taboo is not offered, it is what happens.** Rick's call, and it deletes the
-entry's hardest problem instead of answering it: a captured ringed-in place is
-forbidden both teachings, for good. OP-20's argument that forbidding must return
-a wonder or nobody would choose it was written when it *was* a choice. It is not
-one now, and the wonder moves anyway — `lostCount` is derived from the board, so
-un-teaching the place drops the count of whoever owned it and the wonder goes
-back to the side that lost the loud city. Exactly what taking a taught city by
-levy already does. No stored counter. The note above `lostCount` predicted this
-in the same commit that moved the trigger onto teaching, and it was right.
+The interface: a third teaching chip, only in the row when the rule is on, saying
+*nobody has broken ground anywhere yet* rather than *none of yours is in reach*;
+three action buttons that appear when they apply, because nine buttons wrap the
+row onto a second line and the four labelled rows are the layout — board measured
+at 1038px in every state, unchanged. Herds drawn as a horned token with a loosely
+dotted line to where they are going; barren ground as a scatter of dashes; kurgans
+as a low barrow with kerb stones, redrawn once after looking at it, because the
+first version was a hump and a hump was already taken twice over.
 
-Which makes the trade sharper than the entry imagined: you stop their farmland
-engine, take three points of settlement, and **hand them back a wonder.** Your
-rival comes out weaker agriculturally and more dangerous magically, and nobody
-designed that.
+`sim/smoke.js` at 11,884 checks, all passing, with a constructed-board section for
+every rule in 1.19 and both frozen fingerprints.
 
-Everything downstream needed no new rule. `carryCap` reads `taught`, so the
-ceiling falls to Dunbar the moment the place is forbidden and the decline floors
-itself at 28% a year: 929 → 669 → 481 → 347 → 250 → 197 → 177 → 167 → 161. The
-ones who leave become refugee columns on §7's machinery, and they walk back to
-the country of the power that **lost** them, because they are leaving over the
-plough and they go where ploughing is still allowed. Forbidding one loud place
-makes the rival's next town bigger. You cannot forbid your way to silence.
-
-## The rule that had to be added, and it is the good one
-
-The mechanic did not fire. Farmland erases blessing; a taught settlement ploughs
-its own first ring; a ring is made of blessing; and blessing cannot be laid on
-farmland. So one season's ploughing broke every siege **permanently**, and a
-taught settlement — precisely the one OP-20 exists to be able to take — was
-structurally immune. Before the fix, a 900-strong city under a closed ring grew
-929 → 950 → 965 for nine years.
-
-**A place closed in on every side does not go out to the fields.** One line, and
-it is what a siege is. It also hands the defender the counter the entry had no
-answer for: break the ring — a tile of your own blessing beside the place, a
-Wither, or a Clearance ordered onto a besieging tile from another of your
-settlements — and the fields resume the same year and the clock goes back to
-zero. **Relief by clearance is a settled-doctrine answer to a magical attack**,
-which this board did not have, and it is not written anywhere. It falls out.
-
-A mature city still cannot be ringed until its existing farmland has been
-Withered away, so taking one is a three-stage project over several years. That is
-the late-game work OP-20 asked for, and no one-ply chooser will ever attempt it.
-A-23.
-
-## Measured
-
-80 games a cell against Cities, the build's own turn order. The first row
-reproduces the table in OP-19 exactly, so these are comparable.
-
-| | cities | mixed | haunt | bands |
-|---|---|---|---|---|
-| the batch as it was | 50% | 34% | 55% | 34% |
-| + 1.6 split alone | 45% | **43%** | 48% | **39%** |
-| + 1.8 unmake alone | 40% | 30% | **66%** | **24%** |
-| + 1.9 encircle alone | 56% | 40% | **70%** | 44% |
-| **all three, shipped** | 34% | 36% | 54% | 29% |
-
-1.6 gives an act back to the doctrines that weight it and takes the points off
-the two that do not, which is what a repair should look like. 1.8 and 1.9 pull
-hard in opposite directions on the blessing doctrines and largely cancel. Haunt
-lands at 54% against 55% before, which is not a result anybody aimed at.
-
-**Left untuned**, on the standing rule: tuning an unfinished rule set means
-tuning it twice, and none of OP-19's knobs has moved yet either.
-
-**And the matrix undercounts 1.9 and always will.** A one-ply chooser never
-builds a ring on purpose — every capture measured is an accident of blessing, 0.2
-to 0.5 a game. The number that matters will come from a played game.
-
-## Also
-
-- **`taughtGates` was missing from the interface's list of built rules**, so the
-  panel showed the largest tuning lever in the project as *not built* and the
-  "whole batch" button switched it off. The engine owns the list now and the
-  interface asks for it. A-16 in miniature, again.
-- Split is legal in 29% of `bands` settlement-years and taken 0.44 times a game:
-  a flat weight of 14 loses to `bless × gain` reaching 24 nearly every time.
-  Making an option legal did not make a greedy chooser want it. OP-01.
-- `sim/smoke.js` at **11,825 checks**, all passing, including a frozen
-  eight-seed fingerprint of `FG.R2all(false)` — a rule in this batch must not be
-  able to reach the pre-batch game, and now that is checked rather than assumed.
-- Board measured after the layout touch: 994px on a laptop, unchanged.
-
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01WRWQuaZ51QWu38v1bkLATx
+Nobody has played it. That is the whole of what is open. OP-12.

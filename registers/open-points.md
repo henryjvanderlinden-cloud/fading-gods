@@ -1146,6 +1146,94 @@ tune the batch, close it, then measure this.
 **Settled by:** as before — deciding whether two legs are enough. The difference is
 that there is now something concrete to say no to.
 
+### Built, August 2026 — and it ships off
+
+`FG.R2.herds`, 1.19. `design/rules.md` §16 is the rule; **A-24**, **A-25** and
+**A-26** are the three decisions it was built on, all three taken by Rick before a
+line was written. The blocking condition this entry recorded — *do not tune an
+unfinished rule set* — was not waived. It was **stepped around**: the rule is
+built, tested and off, so the batch of 1.6 / 1.8 / 1.9 remains exactly the thing
+that has been measured and played, and this sits beside it rather than on top.
+
+**It is the first flag in the project that is built and off**, and that broke an
+equivalence the harness had been leaning on: `FG.R2built(true)` used to mean both
+*everything built* and *the game*. It does not any more. `FG.R2reset()` is the
+game, and `sim/smoke.js` now freezes a fingerprint of that as well as of the
+pre-batch baseline — the old one only ever asserted that a new rule could not
+reach `R2all(false)`, which is a claim about a game nobody plays.
+
+**The shape of it, in one paragraph.** A settlement never shown the plough may be
+taught to herd, once somebody somewhere has broken ground. It stops being a
+settlement: it walks a tile a year, holds nothing, scores nothing, costs no
+wonder, carries the Seventy-Seven, and grazes the farmland it stands on back to
+wild and barren. It moves the way the *player* does rather than the way an army
+does — the other power's blessing is closed country to it, because a people who
+were never taught the plough can still hear. It stops when you tell it to,
+standing on it, and comes back untaught. And on a stone of yours that has gone
+under somebody's fields, it may raise a kurgan.
+
+**The objection this entry has always had to answer, and the answer.** *It is a
+third door out of the central dilemma.* It is not a door, it is a **detour**: a
+herd scores nothing while it roams and comes back untaught, so a player may walk
+around the fork for twenty years and arrive at the same fork with fewer people.
+The pairing that carries this is **no wonder, no points**, and neither half works
+without the other — see A-24.
+
+### One thing was found by playing it, in the way things get found here
+
+A full game threw *a herd is standing on a settlement* in year 32 of seed 7. The
+greedy chooser had dropped a colony straight onto a camp, because `foundBlock` had
+never heard of herds. Found, colony and split all had to refuse a camp, and so did
+Drown and Raise mountains — and `mountainLine` needed its own guard, because that
+loop has always kept a private copy of the exclusions and only the aimed-at tile
+was ever checked for anything.
+
+Worth recording as a fourth instance of the standing lesson: **the legality test
+and the thing that actually mutates the board are written twice in this engine,
+and they drift.** A-20 was that, 1.9's ploughing-through-a-siege was that, and this
+is that.
+
+### What is still open
+
+- **Nobody has played it.** That is the whole of it. It is off for that reason, and
+  it should be turned on by a person reporting it better — the way the batch was —
+  and not by a table.
+- **The matrix says nothing, and always will.** 80 games a cell: the four standing
+  doctrines are identical to the digit with the rule on and off, and `storm` wins
+  63% without it and 61% with it. Over 300 games across every doctrine pairing the
+  chooser taught herding 1.65 times a game, grazed 2.3 tiles, spent **more than
+  half of every herd-year standing still**, settled a herd once, and raised zero
+  kurgans. OP-01, and OP-21 is the instrument.
+- **`storm` is a poor instrument for its own rule.** It wins 63% *without* herds —
+  its weights are simply strong — so its win rate measures the weights and not the
+  leg. If a number is wanted here, the comparison to run is storm against storm
+  with the flag on one side only.
+- **The availability condition gates harder than it looks.** Herding needs the
+  plough to exist somewhere, and against a slow-ploughing opponent the first
+  furrow lands around year 25. **A refuser cannot unlock herding on its own at
+  all**, and in a refuser-against-refuser game it never becomes available. That is
+  arguably right — no farming, no pastoralism — but it means the third leg only
+  exists in games where the settled side is already turning the ratchet, and it
+  can never be a plan you start with. Not a defect. Also not something anybody
+  chose. It wants a decision.
+- **A herd with nothing left to graze has no behaviour.** Half of all herd-years
+  are spent standing still. Under the chooser that is OP-01, but the hole
+  underneath is real: once the farmland in reach is grazed and barren there is
+  nothing for a people to do, and the rule offers them nothing to be. *Stones that
+  grow* in `ideas.md` is the obvious candidate — a herd standing where you can
+  hear it ought to be doing something.
+- **Nomad ⇄ settled cycling is unpriced.** A herd that stops is untaught, so it may
+  be taught to herd again. Each cycle costs a year's intervention and most of the
+  people, which is probably enough, and nothing has tested whether it is.
+- **Kurgans gate nothing and score nothing**, deliberately, and are therefore
+  currently unmeasurable. They exist for OP-15's *Forgotten*, and that ending is
+  unwritten. If it stays unwritten, this half of the rule is decoration and should
+  be cut. See OP-15 and OP-16.
+- **`barren3` is now half-built and is a separate question.** Barren ground exists
+  in the engine; whether *Wither* should also leave it is unmeasured beyond one
+  row, and that row moves four numbers — cities 34→39, mixed 36→44, haunt 54→50,
+  bands 29→26. It is off. It is not this rule and must not be turned on with it.
+
 ## OP-13 · high · Do dead stones carry orders?
 
 A stone below power 6 currently stops blessing and does nothing. The proposal is
@@ -1328,6 +1416,17 @@ OP-09.
 
 **Settled by:** writing all of them and reading the endings of forty simulated
 games. If one fires in 80% of them, the set is wrong.
+
+**Kurgans are now built, and this entry is what they are for.** August 2026, inside
+1.19 — see OP-12 and OP-16. `FG.moundCount(who)` exists, is on the board and in
+the stat bar, gates nothing and scores nothing, and reads from state this entry's
+own admission test already allows. **Nothing else in the game consults it.**
+
+That makes this entry the blocker on half of a built rule, which it has never been
+before. A kurgan is a disposition for a stone that has gone under farmland and its
+only purpose is to be read at the end. **If the endings never get written, the
+mounds are decoration and should be cut** — which is the cleanest argument this
+register has ever had for writing them.
 
 **Kurgans give *Forgotten* something to be escaped by**, August 2026. As drafted
 it reads *too few stones standing at the end, whatever the score*, and under
@@ -1757,3 +1856,23 @@ It is an answer to the question this register said was the real one and then did
 not answer: **what the other 92% are for.** They are not a loss to be reversed.
 They are what the people build on top of once they have stopped hearing you, which
 is the thesis with a mound over it.
+
+**Built, August 2026, inside 1.19.** A herd standing on farmland over a stone of
+**its own god** that has already stopped working may raise a mound: a fifth of
+them, and the year. The ground stays reckoned and stays whosever ploughed it — if
+raising a mound cleared its own tile, herding would be a permanent tile-conversion
+engine with a monument bolted on, and this entry says so already. The stone counts
+as *standing* and never works, never blesses, is never targeted through, and never
+touches the wonder brake. One grave to a stone. See OP-12 and `design/rules.md`
+§16.
+
+**What that does and does not settle here.** It gives the 92% a disposition, which
+is what this section asked for. It does **not** touch the larger half above —
+*Clearance can still be aimed at a stone, on purpose, and is indistinguishable in
+the log from a settlement paving one by accident.* That is still open, still
+undocumented in the build, and still unmeasured, and 1.19 does not go near it.
+
+**And a mound currently gates nothing and scores nothing**, deliberately. Its
+whole purpose is OP-15's *Forgotten*, and that ending does not exist. `moundCount`
+is tracked and shown against the day it does. If that day does not come, this is
+decoration and should be cut.

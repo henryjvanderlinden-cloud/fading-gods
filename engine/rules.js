@@ -100,6 +100,52 @@ function walkStep(from, to) {
  return undefined;
 }
 
+// 1.19 / OP-12. How a people who were never taught the plough move, and it is
+// deliberately neither of the two movement rules the game already has.
+//
+// `walkStep` above is how mortals move: rock and water only, because a levy
+// cannot hear you and a god's walls are not there for it. `cost()` is how *you*
+// move. A herd moves the way you do, minus the part about your own country —
+// they were never shown the plough, so they can still hear, and what a people
+// can hear, they can be shut out of.
+//
+// Rock and water block. A settlement blocks; you cannot graze a town. And the
+// **other** power's blessing blocks, which is the third row of the loop: closed
+// country, because it is another god's quiet and they know it. Their own god's
+// blessing never blocks them, and writing the rule this way round rather than as
+// *blessing is impassable to herds* is what keeps §2's self-walling problem out
+// of it. Farmland is wide open. That is the point of the whole mechanic.
+function herdBlocked(k, who) {
+ const t = T(k);
+ if (impassable(t)) return true;
+ if (t.set) return true;
+ return t.st === "bless" && t.own !== null && t.own !== who;
+}
+
+// The next tile on a herd's road; null if it is already there, undefined if
+// there is no road at all. The same shape as walkStep, deliberately — tick.js
+// reads the two of them the same way.
+//
+// Note there is no exception for the destination, which walkStep does have. A
+// levy is aimed *at* a settlement and has to be allowed to arrive on it. A herd
+// aimed somewhere it may not stand simply has no road, and having no road is a
+// state this rule needs to be able to reach — see herdTick.
+function herdStep(from, to, who) {
+ if (from === to) return null;
+ const prev = {}, seen = new Set([from]), q = [from];
+ while (q.length) {
+  const k = q.shift();
+  for (const nk of NB[k]) {
+   if (seen.has(nk)) continue;
+   if (herdBlocked(nk, who)) continue;
+   seen.add(nk); prev[nk] = k;
+   if (nk === to) { let c = to; while (prev[c] !== from) c = prev[c]; return c; }
+   q.push(nk);
+  }
+ }
+ return undefined;
+}
+
 // --- blessed regions ----------------------------------------------------
 // Connected, not total. [load-bearing] — severing a blessed region halves the
 // stones standing in it, which is what makes defensive geometry matter.
@@ -255,10 +301,23 @@ function blessFrac(k, who) {
 }
 
 // Returns null if founding is legal, otherwise the reason, in the log's voice.
-function foundBlock(k, who, free) {
+//
+// 1.19 adds `ignoreHerd`, and it is the fourth argument rather than a separate
+// predicate because there turned out to be five callers and only one of them
+// wants the exception. A people camped on a tile is as good a reason not to
+// build a town there as a town already being there — found, colony and split all
+// have to refuse it, and this was found the way things get found here: a full
+// game threw *a herd is standing on a settlement* in year 32 of seed 7, because
+// the greedy chooser dropped a colony straight on top of one.
+//
+// The single exception is a herd **settling itself**, where the camp is not an
+// obstacle to the founding but the reason for it.
+function foundBlock(k, who, free, ignoreHerd) {
  const t = T(k);
  if (impassable(t)) return t.t === "mount" ? "rock" : "water";
  if (t.set) return "already a settlement";
+ const camp = FG.G.herds.find(h => h.at === k);
+ if (camp && camp !== ignoreHerd) return "a people are camped here";
  if (FG.G.stones[0].includes(k) || FG.G.stones[1].includes(k)) return "a stone stands here";
  if (NB[k].some(x => T(x).set)) return "too close to a settlement";
  for (const x of ring(k, 2)) {
@@ -272,7 +331,7 @@ function foundBlock(k, who, free) {
   return "only " + Math.round(f * 100) + "% of the country two tiles round is blessed — needs " + FG.TUNE.frac.v + "%";
  return null;
 }
-const canFound = (k, who, free) => !foundBlock(k, who, free);
+const canFound = (k, who, free, ignoreHerd) => !foundBlock(k, who, free, ignoreHerd);
 
 // How much ground a Bless here would actually take. The FG.CONTEST branch is a
 // rejected A-17 candidate, kept behind its toggle: under it, ground the other
@@ -325,6 +384,58 @@ function splitTargets(k, who) {
  });
 }
 const canSplit = (k, who) => splitTargets(k, who).length > 0;
+
+// --- 1.19 / OP-12: roaming peoples --------------------------------------
+const herdsOf = who => FG.G.herds.filter(h => h.own === who);
+const herdAt  = k => FG.G.herds.find(h => h.at === k) || null;
+
+// The condition on teaching herding, and it is a condition rather than a clock
+// on purpose: `rejected.md` cut the reverse tech tree because a timer is
+// weather, and A-10 stands. Herding is a secondary product of farming and not a
+// stage before it, so the plough has to exist somewhere on the board before
+// anyone can be shown the alternative to it. It self-balances as well — a valley
+// nobody ever ploughed has no herders in it.
+const ploughed = () => FG.G.T.some(t => t.st === "reck");
+
+// 1.12. Ground taken back off the plough does not take a furrow again at once.
+// One reader, whatever wrote it: Wither writes `bar` only when `barren3` is on,
+// a herd grazing writes it always, and everything that reckons ground asks here.
+const barren = t => (t.bar || 0) > FG.G.turn;
+
+// Where a herd may stop, and it is `canFound` with the blessing requirement
+// waived — exactly as a colony waives it, and for the same reason. The people
+// are already standing there; what they need is somewhere to stop, not a
+// country. Every other question founding asks is still asked, including the one
+// about a rival's blessing within two tiles, so a herd cannot simply sit down in
+// the middle of somebody else's quiet.
+const canStop = h => !!FG.R2.herds && !!h && canFound(h.at, h.own, true, h);
+
+// Where a herd may raise a kurgan: standing on ground that has gone under the
+// plough, over a stone of **its own god** that has already stopped working. Not
+// the rival's — the motivating case is a refuser whose shrines are all under
+// somebody else's fields, and OP-16's answer is that they come back as graves
+// rather than as engines.
+//
+// The working test is `region(...).length < 6`, and it does double duty for
+// free: a reckoned tile is not blessed, so its region is empty, so a stone under
+// farmland always fails it. It is written as the general test anyway, because
+// what matters is that the stone is silent and not how it was silenced.
+function canMound(h) {
+ if (!FG.R2.herds || !h) return false;
+ const t = T(h.at);
+ if (t.st !== "reck") return false;
+ if (t.kur !== undefined && t.kur !== null) return false;
+ if (!FG.G.stones[h.own].includes(h.at)) return false;
+ return region(h.at, h.own).length < 6;
+}
+
+// Mounds standing, by power. Nothing in the engine scores this or gates on it,
+// deliberately: a kurgan is memory and not a point. It is counted because
+// OP-15's *Forgotten* is the thing it is for, and that ending does not exist
+// yet — so the number is here, on the board and in the stat bar, waiting for the
+// reading that will use it. If it never gets one, this rule is decoration and
+// should be cut.
+const moundCount = who => FG.G.T.filter(t => t.kur === who).length;
 
 // 1.9 / OP-20. Who, if anyone, has closed this place in.
 //
@@ -397,10 +508,16 @@ function teachTargetsAt(from, id, who) {
  const cand = FG.R2.dreamTeach
    ? [...new Set([...near, ...stoneReach(who)])]
    : near;
+ // 1.19. Herding is the one teaching that is not always on offer. It needs the
+ // plough to exist somewhere first, and it is refused to a people who have
+ // already been shown it — a people are only ever taught one thing about how to
+ // live, and this is where that sentence is enforced.
+ if (id === "herd" && (!FG.R2.herds || !ploughed())) return [];
  return cand.filter(k => {
   const t = T(k);
   if (!t.set || t.set.own !== who) return false;
   if (t.set.tabu) return false;                  // OP-20 — forbidden for good
+  if (id === "herd") return !t.set.taught;
   return id === "till" ? !t.set.taught : !t.set.kill;
  });
 }
@@ -412,13 +529,20 @@ function targets(id, who) {
  if (DIVINE.some(s => s.id === id)) {
   divineReach(who).forEach(k => {
    const t = T(k);
+   // 1.19. A camp counts as a place, for exactly the two wonders that already
+   // refuse to be aimed at one. Raising rock under a people or drowning them
+   // would be a new rule — a wonder that kills mortals outright, which this game
+   // has never had — and it is not one being written by accident here. If it is
+   // ever wanted it should be argued for on its own. `herdAt` on the whole
+   // mountain line as well, because that line is three tiles long and only the
+   // aimed-at one was ever checked for anything.
    if (id === "mountains") {
-    if (impassable(t) || t.set || FG.G.stones[0].includes(k) || FG.G.stones[1].includes(k)) return;
+    if (impassable(t) || t.set || herdAt(k) || FG.G.stones[0].includes(k) || FG.G.stones[1].includes(k)) return;
     if (blessFrac(k, who) * 100 < FG.TUNE.mfrac.v) return;
-    if (mountainLine(k).some(x => T(x).set)) return;
+    if (mountainLine(k).some(x => T(x).set || herdAt(x))) return;
     out.push(k);
    }
-   else if (id === "drown") { if (!impassable(t) && !t.set && !FG.G.stones[0].includes(k) && !FG.G.stones[1].includes(k)) out.push(k); }
+   else if (id === "drown") { if (!impassable(t) && !t.set && !herdAt(k) && !FG.G.stones[0].includes(k) && !FG.G.stones[1].includes(k)) out.push(k); }
    else if (id === "blight") { if (t.set && t.set.own !== who && t.set.pop > 40) out.push(k); }
    else if (id === "omen") { if (t.set && t.set.own === who && t.set.pop > 40 && settlements(who).length > 1) out.push(k); }
    else if (id === "wither") { if (ring(k, 1).some(x => { const q = T(x); return !q.set && q.st === "reck" && q.own !== who; })) out.push(k); }
@@ -436,7 +560,12 @@ function targets(id, who) {
  settlements(who).forEach(o => {
   if (id === "clear" && o.t.set.pop >= 150)
    ring(o.k, 2).forEach(x => { const q = T(x);
-    if (!impassable(q) && !q.set && !(q.st === "reck" && q.own === who)) out.push(x); });
+    // 1.12. Ground that has just been taken back off the plough will not take a
+    // furrow again yet, and a work cannot buy its way past that. Clearance is
+    // the one thing that could have — the year-end reckoning is slow and
+    // budgeted, but a Clearance is three tiles at once and would have undone a
+    // herd's whole season for a tenth of a town.
+    if (!impassable(q) && !q.set && !barren(q) && !(q.st === "reck" && q.own === who)) out.push(x); });
   if (id === "colony" && o.t.set.pop >= 200)
    ring(o.k, 3).forEach(x => { if (canFound(x, who, true)) out.push(x); });
   if (id === "levy" && o.t.set.pop >= 300)
@@ -478,7 +607,8 @@ Object.assign(FG, {cost, reach, walkStep, pathWithin, region, stoneRange, workin
  civicOpen, divineReach, stoneReach, atRange, tolled, blessFrac, foundBlock, canFound,
  blessGain, canSplit, splitTargets, encircledBy, stoneBlock, canStone, mountainLine,
  targets, teachTargets, teachTargetsAt, nearestSource, score, band, manifest,
- manifestMp, wouldSeal});
+ manifestMp, wouldSeal,
+ herdBlocked, herdStep, herdsOf, herdAt, ploughed, barren, canStop, canMound, moundCount});
 
 if (typeof module !== "undefined" && module.exports) module.exports = FG;
 })(typeof globalThis !== "undefined" ? globalThis : this);

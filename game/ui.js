@@ -24,6 +24,16 @@ let ARM = null;   // the intervention currently armed, awaiting a target
 // founding, and founding is the one thing in the game every expansion begins
 // with. So it arms like an intervention rather than firing like a button.
 let ARMACT = null;
+// 1.19. Steering a herd is not an act and never spends a year, so it cannot use
+// ARMACT — a player must be able to send the herds and *then* bless. It is its
+// own two-stage arming: null, then "pick" while the herds themselves are the
+// targets, then the chosen herd while the whole country it can walk to is.
+//
+// Two stages rather than one because a player may have more than one, and
+// because the second stage is the only moment in the game that draws the third
+// movement rule — the country a herd can reach is not the country you can, and
+// seeing the difference is most of learning what the rule is.
+let ARMHERD = null;
 // OP-23. The hint line is now shared: render() computes what it says by default,
 // and hovering or pressing a chip borrows it to describe that intervention. The
 // descriptions used to sit under every name in a column; there is no room for
@@ -383,7 +393,7 @@ function boundaries(G) {
 }
 
 function newGame() {
- ARM = null; ARMACT = null;
+ ARM = null; ARMACT = null; ARMHERD = null;
  SEAT = 0;
  LAND = {key: null, html: ""};      // a new board is always a new land layer
  const doc = $("doc").value, human = doc === "human";
@@ -398,7 +408,7 @@ function newGame() {
 // does not move until the second has finished too.
 function endTurn() {
  if (FG.G.over) return;
- ARM = null; ARMACT = null;
+ ARM = null; ARMACT = null; ARMHERD = null;
  if (pvp() && SEAT === 0) { SEAT = 1; render(); return; }
  if (FG.endYear()) finish();
  SEAT = 0;
@@ -430,8 +440,24 @@ function maybeHandOver() {
 function render() {
  const G = FG.G, TUNE = FG.TUNE, ME = SEAT, THEM = other(SEAT);
  const R = reach(ME), S = score(), walk = Object.keys(R).length - 1;
+ // 1.19. Where the herds are, and where the one you have picked up can walk to.
+ // `herdReach` is a flood fill through `herdBlocked`, which is the whole third
+ // movement rule made visible — farmland open, the other power's quiet shut.
+ const myHerds = FG.R2.herds ? FG.herdsOf(ME) : [];
+ const herdReach = () => {
+  const h = ARMHERD, s = new Set(), q = [h.at];
+  s.add(h.at);
+  while (q.length) FG.NB[q.shift()].forEach(x => {
+   if (s.has(x) || FG.herdBlocked(x, ME)) return;
+   s.add(x); q.push(x);
+  });
+  s.delete(h.at);
+  return s;
+ };
  const tg = ARM ? new Set(targets(ARM, ME))
-   : ARMACT === "split" ? new Set(FG.splitTargets(G.p[ME].pos, ME)) : null;
+   : ARMACT === "split" ? new Set(FG.splitTargets(G.p[ME].pos, ME))
+   : ARMHERD === "pick" ? new Set(myHerds.map(h => h.at))
+   : ARMHERD ? herdReach() : null;
  const isCivic = ARM && CIVIC.some(c => c.id === ARM);
  // 1.16 / 1.17. Which of the outlined tiles are out past your hearing and will
  // take a piece of you. Drawn rather than written: a solid outline is a thing
@@ -541,6 +567,67 @@ function render() {
    font-size="${u(8).toFixed(1)}" font-weight="700" fill="#12181A">${Math.round(f.n)}</text></g>`;
  });
 
+ // 1.19. Roaming peoples. Drawn as a ring of beasts rather than a column's
+ // wedge, because they are not marching anywhere in the sense a levy is — the
+ // line to where they are going is dotted much more loosely than an army's, and
+ // a herd that has arrived has no line at all.
+ G.herds.forEach(h => {
+  const t = T(h.at), [x, y] = px(t.c, t.r), col = h.own === 0 ? shift(COL[0], .1) : shift(COL[1], .1);
+  if (h.to !== h.at) {
+   const d = T(h.to), [dx, dy] = px(d.c, d.r);
+   over += `<line x1="${x}" y1="${y}" x2="${dx}" y2="${dy}" stroke="${col}" pointer-events="none"
+    stroke-width="${u(1.1)}" stroke-dasharray="${u(1.4)} ${u(6)}" stroke-linecap="round" opacity=".5"/>`;
+  }
+  over += `<g pointer-events="none">
+   <ellipse cx="${x}" cy="${y + u(9.6)}" rx="${u(8)}" ry="${u(2.2)}" fill="#000" opacity=".28"/>
+   <path d="M${x - u(9)} ${y + u(3)} q${u(3)} ${u(-11)} ${u(9)} ${u(-8)} q${u(6)} ${u(-3)} ${u(9)} ${u(8)} Z"
+    fill="${col}" stroke="#000" stroke-width="${u(0.9)}"/>
+   <path d="M${x - u(7)} ${y - u(5)} q${u(-3)} ${u(-4)} ${u(1)} ${u(-5)}" fill="none" stroke="#000"
+    stroke-width="${u(1.1)}" stroke-linecap="round" opacity=".8"/>
+   <path d="M${x + u(7)} ${y - u(5)} q${u(3)} ${u(-4)} ${u(-1)} ${u(-5)}" fill="none" stroke="#000"
+    stroke-width="${u(1.1)}" stroke-linecap="round" opacity=".8"/>
+   ${h.held > 0 ? `<circle cx="${x}" cy="${y - u(12)}" r="${u(3)}" fill="${P.ink}" opacity=".8"/>` : ""}
+   <text x="${x}" y="${y + u(1)}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
+   font-size="${u(8).toFixed(1)}" font-weight="700" fill="#12181A">${Math.round(h.n)}</text></g>`;
+ });
+
+ // 1.12. Ground that will not take a furrow yet. A short scatter of dashes
+ // rather than a fill, because the tile is *wild* — it is already drawn as
+ // thorn, and this says only that it is thorn nothing can plough back under.
+ // It comes off on its own after three years and nothing announces it, which is
+ // right: the settled player finds out by trying.
+ G.T.forEach((t, k) => {
+  if (!FG.barren(t)) return;
+  const [x, y] = px(t.c, t.r);
+  over += `<path d="${hexPath(x, y, SZ - u(7))}" fill="none" stroke="${P.ink}" opacity=".33"
+   stroke-width="${u(1.3)}" stroke-dasharray="${u(2)} ${u(5)}" pointer-events="none"/>`;
+ });
+
+ // 1.19. Kurgans. A mound in a field: the ground stays farmland and stays
+ // theirs, and this sits on top of it. Nothing about it is a stone any more —
+ // the stone layer above draws it cracked and leaning, and this is the earth
+ // heaped over that.
+ // Drawn as a barrow and not as a bump, because the first version was a bump and
+ // a bump is already taken twice over: the hill glyph is a brown hump at the top
+ // of a tile, and a herd is a bright hump with horns. Measured by looking at it
+ // — three humps on one board is one hump. So: wide and low, in earth rather
+ // than in a power's colour, with kerb stones round the foot, and the colour
+ // reduced to a line over the crest saying whose memory it is.
+ G.T.forEach((t, k) => {
+  if (t.kur === undefined || t.kur === null) return;
+  const [x, y] = px(t.c, t.r), col = COL[t.kur];
+  const kerb = [-13, -7.5, 7.5, 13].map(dx =>
+   `<rect x="${x + u(dx) - u(1.6)}" y="${y + u(3.4)}" width="${u(3.2)}" height="${u(4.4)}"
+     rx="${u(0.8)}" fill="#2A2420" stroke="#000" stroke-width="${u(0.6)}"/>`).join("");
+  over += `<g pointer-events="none">
+   <ellipse cx="${x}" cy="${y + u(7)}" rx="${u(15)}" ry="${u(3)}" fill="#000" opacity=".3"/>
+   <path d="M${x - u(15)} ${y + u(6)} q${u(15)} ${u(-15)} ${u(30)} 0 Z" fill="#4A3E30"
+    stroke="#000" stroke-width="${u(1)}"/>
+   <path d="M${x - u(11)} ${y + u(2.5)} q${u(11)} ${u(-8)} ${u(22)} 0" fill="none" stroke="${col}"
+    stroke-width="${u(1.6)}" opacity=".9" stroke-linecap="round"/>
+   ${kerb}</g>`;
+ });
+
  // the two powers, as figures
  [0, 1].forEach(w => {
   const t = T(G.p[w].pos), [x, y] = px(t.c, t.r), col = COL[w];
@@ -580,6 +667,23 @@ function render() {
     if (doAct(ARMACT, SEAT, k)) { FG.G.p[SEAT].acted = true; ARMACT = null; }
     render(); maybeHandOver(); return;
    }
+   // 1.19. Sending the herds: pick one, then say where. Neither click spends
+   // anything — no act, no intervention, no toll — so there is no
+   // maybeHandOver() here and no `acted` set. A herd never stops hearing you.
+   if (ARMHERD) {
+    if (ARMHERD === "pick") {
+     const h = FG.G.herds.find(x => x.at === k && x.own === SEAT);
+     if (h) ARMHERD = h;
+     render(); return;
+    }
+    if (k === ARMHERD.at || FG.herdBlocked(k, SEAT)) return;
+    // Refuse a destination with no road rather than accepting it and having the
+    // herd stand still for forty years wondering. The reach set drawn on the
+    // board is the same test, so this only catches a mis-tap.
+    if (FG.herdStep(ARMHERD.at, k, SEAT) === undefined) return;
+    ARMHERD.to = k; ARMHERD = null;
+    render(); return;
+   }
    const RR = reach(SEAT);
    if (RR[k] === undefined || k === FG.G.p[SEAT].pos) return;
    FG.G.p[SEAT].mp -= RR[k]; FG.G.p[SEAT].pos = k; render();
@@ -599,6 +703,19 @@ function render() {
  });
  G.refugees.forEach(f => road.push(`<li><span class="b2">${f.own === ME ? "your people on the road" : "their people"} · ${Math.round(f.n)}</span>
    <span>${f.at === f.to ? "arriving" : "walking"}</span></li>`));
+ // 1.19. Herds belong in this list and not in the settlement list beside it,
+ // which is the whole point of them: they are people on the move, they hold no
+ // ground, and the list of places has nowhere to put them.
+ G.herds.forEach(h => {
+  const steps = (() => {
+   let c = h.at, n = 0;
+   while (c !== h.to && n < 60) { const s = FG.herdStep(c, h.to, h.own); if (s === undefined) return null; c = s; n++; }
+   return n;
+  })();
+  road.push(`<li><span class="b2">${h.own === ME ? "your herds" : "their herds"} · ${Math.round(h.n)}</span>
+   <span>${h.held > 0 ? "raising a mound" : steps === null ? "no way through"
+     : steps === 0 ? "grazing" : steps + " year" + (steps === 1 ? "" : "s") + " out"}</span></li>`);
+ });
  $("march").innerHTML = road.join("") || '<li style="color:var(--faint);border:none">nobody is marching</li>';
 
  // interventions
@@ -637,10 +754,20 @@ function render() {
  // OP-19. The teachings — neither wonders nor works, and only there at all when
  // the rule is on. First in the row, because they are what the batch is about.
  $("rowteach").style.display = FG.R2.teaching ? "" : "none";
- $("teach").innerHTML = !FG.R2.teaching ? "" : FG.TEACH.map(s => {
+ // 1.19. The third teaching is only in the row when its rule is on. It would
+ // otherwise sit there permanently dark saying *none of yours is in reach*,
+ // which advertises a rule that is not running and gives the wrong reason for
+ // it being unavailable.
+ $("teach").innerHTML = !FG.R2.teaching ? "" :
+  FG.TEACH.filter(s => s.id !== "herd" || FG.R2.herds).map(s => {
   const n = targets(s.id, ME).length;
-  return chip(s, "tch", !spent && !!n, n,
-   spent ? busy : n ? "" : "None of yours is in reach.", false);
+  // And when it *is* on, the reason it is dark is usually not reach at all.
+  // Herding needs the plough to exist somewhere first, and a player who has not
+  // seen a furrow yet should be told that rather than told to walk further.
+  const why = s.id === "herd" && !FG.ploughed()
+    ? "Nobody has broken ground anywhere yet. There is nothing to keep herds instead of."
+    : "None of yours is in reach.";
+  return chip(s, "tch", !spent && !!n, n, spent ? busy : n ? "" : why, false);
  }).join("");
 
  const open = civicOpen(ME);
@@ -726,13 +853,38 @@ function render() {
  $("found").disabled = a || !!ARM || !canFound(k, ME);
  $("split").disabled = a || !!ARM || !canSplit(k, ME);
  $("split").classList.toggle("armed", ARMACT === "split");
- $("pass").disabled = a || !!ARM || !!ARMACT;
+
+ // 1.19. The three herd buttons come and go rather than sitting there dark, and
+ // that is a layout decision as much as a teaching one. Measured in a browser:
+ // nine buttons wrap the action row onto a second line, and the four labelled
+ // rows are the layout. So Send appears once you have a people walking, and Stop
+ // and Raise a mound appear when you are standing on them — which is also when
+ // each of the three is the thing you might want, so the row says what is
+ // possible here rather than what is possible in general.
+ //
+ // Stop and Mound show *dark* when you are on a herd and the act is not legal,
+ // because "you may not stop beside another settlement" is worth learning and a
+ // button that vanishes teaches nobody anything.
+ const mine = FG.R2.herds ? (FG.herdAt(k) && FG.herdAt(k).own === ME ? FG.herdAt(k) : null) : null;
+ const showHerd = (id, on) => { $(id).style.display = on ? "" : "none"; };
+ showHerd("drive", FG.R2.herds && (myHerds.length > 0 || !!ARMHERD));
+ showHerd("stopherd", !!mine);
+ showHerd("mound", !!mine);
+ if (FG.R2.herds) {
+  // Send is not an act, so it stays live after you have acted — the only button
+  // in this row of which that is true, and it is true on purpose.
+  $("drive").disabled = G.over || !!ARM || !!ARMACT;
+  $("drive").classList.toggle("armed", !!ARMHERD);
+  $("stopherd").disabled = a || !!ARM || !!ARMACT || !!ARMHERD || !FG.canStop(mine);
+  $("mound").disabled   = a || !!ARM || !!ARMACT || !!ARMHERD || !FG.canMound(mine);
+ }
+ $("pass").disabled = a || !!ARM || !!ARMACT || !!ARMHERD;
  $("end").disabled = G.over;
  $("end").textContent = !pvp() ? "End year"
   : SEAT === 0 ? "Hand to the right" : "End the year";
 
  const hint = $("hint");
- hint.className = "hintline" + (ARM || ARMACT ? " arm" : "");
+ hint.className = "hintline" + (ARM || ARMACT || ARMHERD ? " arm" : "");
  const sb = stoneBlock(k, ME), fb = foundBlock(k, ME);
  // The armed chip says what it is as well as what to do with it, so a player on
  // a tablet who has never hovered anything still reads the description once,
@@ -747,6 +899,10 @@ function render() {
    : "";
  HINT = G.over ? "" : ARMACT === "split"
     ? "Half of them go over the rise. Choose the blessed tile they stop at, or press Split again to put it down."
+  : ARMHERD === "pick"
+    ? "Choose which herd. This costs you nothing — they never stop hearing you."
+  : ARMHERD
+    ? "Say where they are to go. They walk a tile a year, over fields and through your own country, and not into anyone else's blessing."
   : ARM ? (armed ? armed.d + "  ·  " : "")
     + "Choose an outlined tile, or press the chip again to put it down." + dash
   : a ? (pvp() && SEAT === 0 ? "Acted this year. You may still intervene, then hand over."
@@ -834,6 +990,7 @@ const R2LABEL = {
  taughtGates:"the works open on teachings, not on numbers",
  landGates:"works open on tilled land, not on numbers", pathFrac:"distance is measured by road",
  barren3:"withered ground stays barren three years", exitLane:"the fields never quite close over",
+ herds:"a people may be taught to keep herds, and then they walk",
  dreamTeach:"you may teach where you are heard, at 10% of you", 
  dreamWorks:"a work beyond your hearing costs 10% of you"
 };
@@ -853,7 +1010,7 @@ function r2sync() {
   : on + " of " + R2BUILT.length + " built rules on";
 }
 // Same seed, so the only difference between two runs is the rules.
-function r2restart() { r2sync(); ARM = null; ARMACT = null; SEAT = 0; LAND = {key:null, html:""};
+function r2restart() { r2sync(); ARM = null; ARMACT = null; ARMHERD = null; SEAT = 0; LAND = {key:null, html:""};
  const doc = $("doc").value, human = doc === "human";
  FG.HANDICAP = $("even").checked ? 1 : 0;
  FG.createGame({them: human ? null : doc, pvp: human, seed: R2SEED.v});
@@ -877,6 +1034,26 @@ $("split").onclick = () => {
  ARMACT = ARMACT === "split" ? null : "split";
  render();
 };
+// 1.19. Send arms the two-stage herd gesture and — unlike every other button in
+// this row — does not check `acted`, because steering costs nothing.
+$("drive").onclick = () => {
+ if (FG.G.over || ARM || ARMACT) return;
+ ARMHERD = ARMHERD ? null : "pick";
+ // One herd and no choice to make: skip straight to asking where.
+ const mine = FG.R2.herds ? FG.herdsOf(SEAT) : [];
+ if (ARMHERD === "pick" && mine.length === 1) ARMHERD = mine[0];
+ render();
+};
+// Stop and Raise a mound are acts, and both are done standing on the herd, so
+// they fire immediately like Bless rather than arming like Split.
+["stopherd", "mound"].forEach(id => {
+ $(id).onclick = () => {
+  if (FG.G.p[SEAT].acted || FG.G.over || ARM || ARMACT || ARMHERD) return;
+  if (doAct(id === "stopherd" ? "stop" : "mound", SEAT)) {
+   FG.G.p[SEAT].acted = true; render(); maybeHandOver();
+  }
+ };
+});
 $("pass").onclick = () => { FG.G.p[SEAT].acted = true; render(); maybeHandOver(); };
 $("end").onclick = endTurn;
 $("restart").onclick = newGame;

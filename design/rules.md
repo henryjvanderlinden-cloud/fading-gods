@@ -637,3 +637,157 @@ a Wither, or a Clearance ordered from another of your settlements onto a besiegi
 tile — and the fields resume the same year and the clock resets to zero. A mature
 city cannot be ringed at all until its existing farmland has been Withered away,
 which makes taking one a three-stage project across several years.
+
+## 16. The third leg — herds, and what they leave behind
+
+**Built August 2026 as `FG.R2.herds`, and it ships OFF.** See OP-12, and note the
+flag's state before reading any of this as the game: it is built, engine/ reads it
+everywhere, and it is off because nobody has played it. The three rules before it
+were turned on by a person reporting them better; this one has had nobody.
+
+`FG.R2.barren3` was half-built alongside it and also ships off. Barren ground now
+exists in the engine and grazing writes it; the flag governs only whether *Wither*
+writes it too.
+
+### Teaching them to herd
+
+A third entry in `FG.TEACH` beside *till* and *kill*, and it inherits everything
+§11 and §12 built: taught per settlement, in person or down the stone network at
+the same 10% toll, one thing only about how a people live.
+
+It is refused to a settlement that has already been shown the plough, refused to a
+forbidden place, and **it is not on offer at all until somebody, somewhere on the
+board, has broken ground.** That is a condition and not a clock — `rejected.md` cut
+the reverse tech tree because a timer is weather. It is also the right history:
+herding is a secondary product of farming and not a stage before it.
+
+**It costs no wonder, and it earns no points.** That pairing is the whole safety of
+the rule and neither half works without the other. `lostCount` counts settlements
+taught to till, and a herd is not a settlement at all, so nothing is taken from
+you: they were never shown the plough, they still hear you, nothing about you has
+gone quieter. And nothing is given either — a herd holds no ground and `score()`
+never sees it. **They deny; they do not accumulate.**
+
+What it does cost is the three points the place was worth, everything it would
+have grown into, and most of the people. A herd's ceiling is `kHerd` = **77**, the
+Seventy-Seven, and a village that has been standing a while is above it, so the
+surplus walks away over the following years. Going nomadic costs you most of a
+town, and nothing had to be written for that.
+
+### How they move
+
+Neither of the two movement rules the game already had.
+
+§7 says the player's movement rules do not apply to mortals, and that is still
+true of levies and refugee columns: they cross anything but rock and water. A herd
+moves **the way you do, minus your own country**. Rock and water block. A
+settlement blocks — you cannot graze a town. And **the other power's blessing
+blocks**, because a people who were never shown the plough can still hear, and
+what a people can hear they can be shut out of. Their own god's blessing never
+blocks them, which is what keeps §2's self-walling problem out of it.
+
+Farmland is wide open. That is the point of the entire mechanic.
+
+One tile a year, toward a standing order. **Steering costs nothing** — not the
+act, not the intervention, no toll, at any range. A herd is the one thing in the
+game you never lose touch with, and that is the compensation for their counting
+nothing.
+
+|  | beats | how |
+|---|---|---|
+| Farmland | blessing | §1's ratchet — furrows erase the quiet beside them |
+| Herds | farmland | they overrun it and graze it back to thorn |
+| Blessing | herds | a rival power's blessing is closed country to them |
+
+### Grazing, and barren ground
+
+Each year, the tile a herd is standing on — and only that one, because a ring
+would be locusts and this is a people. If it is farmland it goes back to **wild**,
+not over to you. They are undoing the plough, not performing your miracle: somebody
+still has to walk out there afterwards and bless it. The herd unmakes and the god
+makes, which is §14's line running through mortals.
+
+And it will not take a furrow again for **three years**. Nothing may reckon barren
+ground: not a settlement's year-end spread, not a Clearance. Without that the
+settled side re-ploughs next season and grazing is one year of tempo. With it, and
+with the thirty-tile lifetime budget of §4, **grazed ground is lost twice** — once
+when the furrows go, and again when re-ploughing spends a tile of a settlement's
+thirty that it had already spent. The second cost is invisible and permanent.
+
+A tile refused for barrenness is not charged to the budget, so a settlement whose
+ring is grazed bare keeps its remaining tiles and spends them again later.
+
+### Stopping
+
+A herd stops when you tell it to — an act, done standing on it, because every
+founding in this game happens under your feet — or automatically when it has no
+road anywhere and the ground allows it. It comes back as an ordinary settlement,
+**untaught**, with what the grass was carrying.
+
+Everything §3 asks of a founding is still asked except the blessing, which is
+waived exactly as a colony waives it: the people are already there, and what they
+need is somewhere to stop, not a country.
+
+**This is the answer to the one way this rule goes wrong.** If herding let a
+player expand without ever teaching the plough, the trade the whole game is built
+on could simply be declined. It cannot. Herding is not a door out of the dilemma,
+it is a **detour**: you may walk around the fork for twenty years and you arrive
+at the same fork, with fewer people and nothing scored in between.
+
+A camp blocks a founding, a colony, a splinter, a Drown and a Raise mountains, in
+the same way a settlement does. The herd itself is the single exception, when it
+is the one stopping.
+
+### Kurgans
+
+A herd standing on farmland over a stone **of its own god** that has already
+stopped working may raise a mound. It costs a fifth of them and the year.
+
+The ground stays reckoned and stays whosever it was. That is load-bearing: if
+raising a mound cleared its own tile, herding would be a permanent tile-conversion
+engine with a monument bolted on, and the rule would be about score rather than
+about memory. **A mound in a field** is the whole image.
+
+What changes is that the stone counts as *standing*. It never works, never
+blesses, nothing targets through it, and it never feeds the wonder brake. One
+grave to a stone.
+
+OP-16 measured that 92% of stones end under farmland and that it is irreversible,
+because reckoned ground cannot be walked to and so cannot be blessed back. This
+does not reverse it. It makes it mean something, which is the better answer:
+**working stones carry presence, dead stones carry orders, buried stones carry
+memory.** A refuser cannot have their shrines back as engines and can have them
+back as graves.
+
+`moundCount` is tracked and shown and gates nothing. It is there for OP-15's
+*Forgotten*, which is the ending this rule is for and which does not exist yet.
+**If that ending never gets written, this half of the rule is decoration and
+should be cut.**
+
+### What the harness can say about it, which is very little
+
+Eighty games a cell against Cities, the build's own turn order:
+
+| | cities | mixed | haunt | bands | storm |
+|---|---|---|---|---|---|
+| the game as it ships | 34% | 36% | 54% | 29% | 63% |
+| + herds | 34% | 36% | 54% | 29% | 61% |
+| + barren3 (Wither only) | 39% | 44% | 50% | 26% | 66% |
+| + both | 39% | 44% | 50% | 26% | 66% |
+
+The first row reproduces §10's table exactly. The second row is the finding:
+**turning the rule on moves nothing at all.** The four standing doctrines are
+identical to the digit, and `storm` — the herding doctrine — wins 63% without the
+rule and 61% with it.
+
+That is the expected result and not a disappointment. Over 300 games across every
+doctrine pairing the greedy chooser taught herding 1.65 times a game, grazed 2.3
+tiles, spent **more than half of every herd-year standing still**, settled a herd
+again once, and raised **zero** kurgans. A one-ply chooser cannot decide that a
+place is worth more walking than standing, will not drive a people four years
+across the board to reach a city's fields, and never rings anything on purpose.
+OP-19 recorded `taughtLoss` and `audible77` measuring at exactly zero for the same
+reason. OP-21 is the instrument for this, and it exists.
+
+`barren3` is a different matter — it moves four numbers and it is not this rule.
+It is off, unmeasured beyond that row, and it is its own question.

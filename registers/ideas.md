@@ -54,6 +54,18 @@ in the game becomes a warning.
 
 ## The pastoralists
 
+> **Built, August 2026, as `FG.R2.herds` — and it ships off.** This entry stays as
+> written, because the argument in it is why the rule has the shape it has. Three
+> of the questions it leaves open were put to Rick and answered before a line was
+> written: **A-24** (no wonder, and no points), **A-25** (grazed ground goes to
+> wild and barren), **A-26** (the other power's blessing is closed country). The
+> rule is `design/rules.md` §16; the live entry is **OP-12**.
+>
+> Of the two candidates it offers for what stops a herd, the *ringed herd must
+> settle* version was not built as its own rule — it falls out of a herd having no
+> road, which is what A-26 records. And **kurgans went in with it**, which this
+> entry proposes below and OP-16 was asking for.
+
 **Raised August 2026, and it is not a new system.** It is a third entry in
 `FG.TEACH` beside *till* and *kill*. OP-19 has already built teaching as a
 per-settlement decision, made in person, spending the year's intervention, and

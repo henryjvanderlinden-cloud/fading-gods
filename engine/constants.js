@@ -80,11 +80,17 @@ FG.HANDICAP = 0;
 // Set before a run and put back afterwards — like FG.SOFT and FG.CONTEST,
 // these are not reset between games.
 //
-// **The six `false` entries are false because they are unbuilt**, not because
-// they were measured and declined. Nothing in engine/ reads them. They are
-// declarations of intent, kept here so the numbering does not move; turning one
-// on today changes nothing at all. Do not read this block as eight rules that
-// won and six that lost.
+// **`pathFrac` is false because it is unbuilt**, not because it was measured and
+// declined. Nothing in engine/ reads it. It is a declaration of intent, kept
+// here so the numbering does not move; turning it on today changes nothing at
+// all. Do not read this block as rules that won and rules that lost.
+//
+// **`herds` is the one flag that is off for a different reason, and the
+// difference matters.** It is built — engine/ reads it everywhere — and it is
+// off because nothing has measured it and nobody has played it. It is the
+// largest engine change since armies and it went in on top of a batch that has
+// been played exactly once. It stays off until a person has sat in front of it.
+// See OP-12.
 FG.R2 = {
  logistic:   true,   // 1.2   logistic growth; K set by teaching and terrain
  teaching:   true,   // 1.3   tilling and killing, taught per settlement
@@ -140,7 +146,20 @@ FG.R2 = {
  // See registers/rejected.md and OP-05.
  taughtGates: true,  // 1.18  the works open on teachings, not on population
  pathFrac:   false,  // 1.11  UNBUILT — blessFrac counts path distance (A-18)
- barren3:    false,  // 1.12  UNBUILT — withered ground stays barren three years
+ // 1.12. Half-built, August 2026, and the halves are deliberately separate.
+ //
+ // *Barren ground* now exists in the engine: a tile carries `bar`, the year the
+ // furrows will take again, and nothing may reckon it before then. 1.19 needed
+ // that, because grazing without it is a tempo cost the settled side undoes in
+ // one season, and the third leg is not a leg.
+ //
+ // **This flag is only about Wither.** Whether a wonder should leave the ground
+ // barren as well as bare is the question it was raised to ask, and it is still
+ // unmeasured, so it stays off and Wither behaves exactly as it always has. A
+ // herd grazing leaves ground barren whatever this says, because that is part of
+ // the herd rule and lives behind `herds`. One writer per rule; one reader for
+ // both. Turning this on changes Wither and nothing else.
+ barren3:    false,  // 1.12  Wither also leaves the ground barren for three years
  exitLane:   true,   // 1.15  the fields close slowly, and never seal a place in
 
  // OP-19, the fifth answer to *where does teaching happen* — August 2026, and
@@ -172,7 +191,56 @@ FG.R2 = {
  // orders into country that cannot hear you is what wears you away. That is the
  // arc, and it is the first thing in the game that makes the settled doctrine
  // pay a price in *you* rather than in people.
- dreamWorks: true    // 1.17  a toll on a work aimed outside divineReach
+ dreamWorks: true,   // 1.17  a toll on a work aimed outside divineReach
+
+ // 1.19 / OP-12. **The third leg.** A people never taught the plough may be
+ // taught to keep herds instead, and then they stop standing still.
+ //
+ // Not a new system — a third entry in FG.TEACH, inheriting everything OP-19
+ // built: taught per settlement, in person or by dream, one thing only about how
+ // to live. The rock-paper-scissors the design called for and never had:
+ //
+ //   farmland beats blessing   the §1 ratchet — furrows erase the quiet beside them
+ //   herds beat farmland       they overrun it and graze it back to thorn
+ //   blessing beats herds      a rival power's blessing is closed country to them
+ //
+ // **Availability is a condition, not a clock** — you may teach herding only
+ // once ground has been tilled somewhere on the board. `rejected.md` cut the
+ // reverse tech tree because a timer is weather, and A-10 stands. It is also
+ // historically right: herding is a secondary product of farming, not a stage
+ // before it. And it self-balances, because a valley nobody ploughed has no
+ // herders in it.
+ //
+ // **It costs no wonder, and it earns no points.** That pairing is the whole
+ // safety. `lostCount` reads settlements taught to till and a herd is not a
+ // settlement at all, so nothing is taken from you — and nothing is given
+ // either: a herd holds no ground and `score()` never sees it. They deny, they
+ // do not accumulate. This is the answer to the one way this rule goes wrong,
+ // which is that it becomes a third door out of the central dilemma. It is not a
+ // door. It is a detour: a herd that stops is an ordinary untaught settlement
+ // standing at the same fork it left.
+ //
+ // **They move like their god, not like an army.** §7 says the player's movement
+ // rules do not apply to mortals, and that is still true of levies and refugee
+ // columns — but a people who were never taught the plough can still hear, and
+ // what they can hear, they can be shut out of. The other power's blessing is
+ // impassable to them; their own god's never is, which is the §2 self-walling
+ // trap and it is avoided by writing the rule this way round.
+ //
+ // The reverse of that is the compensation for scoring nothing: **a herd is
+ // always audible.** Steering one costs no act, no intervention, and no toll,
+ // wherever it is. You never lose touch with the people who never stopped
+ // listening. See concept/lore.md — Storm & Sky were recorded as indifferent
+ // because nobody had a third answer for them, and this is it.
+ //
+ // **Kurgans** come with it. A herd standing on farmland over one of your own
+ // dead stones may raise a mound: a fifth of them, and the year. The tile stays
+ // reckoned — a mound in a field — and the stone counts as *standing* without
+ // ever working, blessing, or feeding the wonder brake. OP-16 measured that 92%
+ // of stones end under farmland and that it is irreversible. This does not
+ // reverse it. It makes it mean something, which is the better answer: a refuser
+ // cannot have their shrines back as engines, and can have them back as graves.
+ herds:      false   // 1.19  a people taught to herd, who then stop standing still
 };
 
 FG.R2all = function (on) {
@@ -180,9 +248,24 @@ FG.R2all = function (on) {
  return FG.R2;
 };
 
-// The batch as it actually runs: the built rules on, the unbuilt ones off.
-// `FG.R2all(true)` sets the unbuilt flags too, which is harmless today and will
-// stop being harmless the moment one of them is written. Prefer this.
+// The shipped defaults, frozen at load, and restorable by name.
+//
+// Added August 2026 because 1.12 and 1.19 broke an equivalence the harness had
+// been leaning on: **built** and **on** used to be the same set, so
+// `FG.R2built(true)` was also a way of saying *the game*. It is not any more —
+// both of those are built and both are off. A caller that wants the game as it
+// actually ships should ask for it rather than reconstruct it, which is exactly
+// how the interface's private copy of R2BUILT came to drift. A-16.
+const R2SHIPPED = Object.assign({}, FG.R2);
+FG.R2reset = function () {
+ Object.keys(R2SHIPPED).forEach(k => { FG.R2[k] = R2SHIPPED[k]; });
+ return FG.R2;
+};
+
+// Every built rule on, or every built rule off. Note this is *not* the shipped
+// game — see R2reset above. `FG.R2all(true)` additionally sets the unbuilt
+// flags, which is harmless today and will stop being harmless the moment one of
+// them is written. Prefer one of these two.
 FG.R2built = function (on) {
  FG.R2BUILT.forEach(k => { FG.R2[k] = !!on; });
  return FG.R2;
@@ -192,9 +275,14 @@ FG.R2built = function (on) {
 // to keep its own copy — which had drifted: `taughtGates` was missing from it,
 // so the build showed the largest tuning lever in the project as *not built*,
 // and the "whole batch" button switched it off. One list, read by both. A-16.
+//
+// `barren3` and `herds` join it built-and-off, which is a state this list has
+// never had to carry before. The interface reads the list to know what to offer
+// a toggle for, and it must offer one for a rule that is off, or the largest
+// thing in the build is invisible in it.
 FG.R2BUILT = ["logistic", "teaching", "taughtLoss", "audible77", "fade", "exitLane",
               "dreamTeach", "dreamWorks", "taughtGates",
-              "split2", "unmake", "encircle"];
+              "split2", "unmake", "encircle", "barren3", "herds"];
 
 // The caps in FG.R2. Separate from FG.TUNE because TUNE is the slider panel and
 // these are not sliders yet — if they earn their way into the build they move.
@@ -208,6 +296,15 @@ FG.R2TUNE = {
  splitRad: 2,     // path distance, not ring distance
  encircle: 2,     // years a settlement must stay ringed before it changes hands
  spread1:  1,     // tiles a settlement ploughs a year in its own first ring
+ // 1.19. What a roaming people carries, and it is the Seventy-Seven on purpose
+ // rather than a new constant nobody can justify. A herd is the audible band
+ // made mobile. Two consequences fall out of choosing this number and both are
+ // wanted: a mature village taught to herd is far *above* its new ceiling and
+ // sheds people to reach it, so going nomadic costs you most of a town — which
+ // makes it a thing you do to a small place, deliberately, early; and a herd
+ // that stops and settles again starts as a band rather than as a village.
+ kHerd:    77,    // what the grass carries. The Seventy-Seven, walking.
+ mound:    0.20,  // of the herd, to raise a kurgan over a stone in a field
  toll:     0.10,  // of your corporeal being, for ending a year in their fields
  dreamToll: 0.10, // ...and for saying something in country you are not standing in
  mp:       3      // movement at full manifestation
@@ -282,9 +379,14 @@ FG.DIVINE = [
 // OP-19. Neither wonders nor works: the two things you teach a people, in person,
 // once, and cannot take back except by forbidding the place entirely (OP-20).
 // Only present when FG.R2.teaching is on.
+// 1.19. `herd` is third and is the odd one out in every way that matters: it is
+// the only teaching that costs no wonder, the only one that takes a settlement
+// off the board, and the only one that is not always available — the plough has
+// to exist somewhere before anyone can be shown the alternative to it.
 FG.TEACH = [
  {id:"till",n:"Teach tilling the land",d:"They learn to plough. The ground answers them instead of you, and you lose a wonder for it."},
- {id:"kill",n:"Teach killing",d:"They learn to march on their neighbours. Nothing else in the world changes."}];
+ {id:"kill",n:"Teach killing",d:"They learn to march on their neighbours. Nothing else in the world changes."},
+ {id:"herd",n:"Teach them to keep herds",d:"They put up the roofs and go after the grass. They will hold no ground and count for nothing, and they will never stop hearing you."}];
 
 FG.CIVIC = [
  {id:"clear",n:"Clearance",d:"Fell and plough three tiles at once. Costs a tenth of the town."},

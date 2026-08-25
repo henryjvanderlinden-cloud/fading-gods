@@ -83,6 +83,39 @@ function doAct(kind, who, opt) {
   // priced: it spends a tile of your own quiet country to make a place.
   T(nk).set = FG.newSet(half, who); T(nk).st = "wild"; T(nk).own = null;
   say(me ? "They keep the Seventy-Seven. Half go over the rise." : "They split one of theirs.", me ? "good" : "riv");
+
+ // 1.19 / OP-12. The two things you can do to a people who are already walking,
+ // and both of them are acts done **in person**, standing on the herd itself.
+ //
+ // Steering one is free — a herd never stops hearing you, and that is the whole
+ // compensation for their scoring nothing. Stopping one is not steering. It is a
+ // founding, and every founding in this game happens under your feet.
+ } else if (kind === "stop") {
+  const h = FG.herdAt(k);
+  if (!h || h.own !== who || !FG.canStop(h)) return false;
+  const s = FG.newSet(Math.max(15, Math.round(h.n)), who);
+  s.kill = h.kill;              // they remember the other thing, if they knew it
+  t.set = s; t.st = "wild"; t.own = null;
+  FG.G.herds.splice(FG.G.herds.indexOf(h), 1);
+  // The sentence to get right, because it is the answer to the objection that
+  // this rule is a third door out of the game's one dilemma. It is not a door.
+  // It is a detour, and this is where it comes back out.
+  say(me ? "They stop, and put the roofs back up. They are a settlement again, and they have been taught nothing."
+         : "One of theirs has stopped walking and put up roofs.", me ? "good" : "riv");
+
+ } else if (kind === "mound") {
+  const h = FG.herdAt(k);
+  if (!h || h.own !== who || !FG.canMound(h)) return false;
+  h.n = Math.max(10, h.n * (1 - FG.R2TUNE.mound));
+  h.held = 1;                   // they are not going anywhere this year
+  t.kur = who;
+  // The ground stays reckoned. That is load-bearing: if raising a mound cleared
+  // its own tile, herding would be a permanent tile-conversion engine with a
+  // monument bolted on, and the mechanic would be about score rather than about
+  // memory. A mound in a field is the whole image.
+  say(me ? "They pile the earth over it, course by course, and it is a grave now instead of a shrine. It is still there."
+         : "They have raised a mound over one of theirs, out in the fields.", me ? "omen" : "riv");
+
  } else return true;   // do nothing
  return true;
 }
@@ -124,10 +157,32 @@ function doIntervene(id, k, who) {
  // OP-19. Teaching. No people are deducted — the price of tilling is a wonder,
  // and it is charged by lostCount() reading the board. 1.16 adds the second
  // price, and only when the teaching is done at range.
- if (id === "till" || id === "kill") {
+ if (id === "till" || id === "kill" || id === "herd") {
   if (!FG.R2.teaching) return false;
   if (!FG.teachTargets(id, who).includes(k)) return false;
   if (FG.tolled(id, k, who)) payDream(who, "teach");
+  // 1.19 / OP-12. The one teaching that takes a settlement off the board.
+  //
+  // No wonder is charged and none can be: `lostCount` reads settlements taught
+  // to till, and after this line there is no settlement here at all. That is the
+  // rule and not an oversight — they were never shown the plough, they still
+  // hear you, and nothing about you has gone quieter. What it costs instead is
+  // the three points the place was worth and everything it would ever have grown
+  // into, paid the moment you say it.
+  //
+  // And most of the people, usually. A herd carries `kHerd` and a village that
+  // has been standing a while carries more than that, so the surplus walks away
+  // over the next few years: going nomadic costs you most of a town. Nothing had
+  // to be written for that. It falls out of putting the ceiling at the
+  // Seventy-Seven, which is what a herd is.
+  if (id === "herd") {
+   const s = t.set;
+   FG.G.herds.push({at:k, to:k, n:s.pop, own:who, kill:!!s.kill, held:0});
+   t.set = null;
+   say(me ? "They take down the roofs and go out after the grass. They will hold nothing now, and they will hear you to the end."
+          : "One of theirs has taken down its roofs and gone after the grass.", me ? "omen" : "riv");
+   return true;
+  }
   if (id === "till") {
    t.set.taught = true;
    say(me ? "You show them the plough, and they take to it. The ground will answer them now."
@@ -142,7 +197,11 @@ function doIntervene(id, k, who) {
 
  if (id === "mountains") {
   mountainLine(k).forEach(x => { const q = T(x);
-   if (!q.set && !FG.G.stones[0].includes(x) && !FG.G.stones[1].includes(x) && q.t !== "water") {
+   // 1.19. And not under a camp. `targets()` refuses to offer the line if a herd
+   // is anywhere on it, but this loop is the thing that actually converts the
+   // ground and it has always had its own copy of the exclusions — which is the
+   // shape of bug this project keeps finding, so the guard goes in both places.
+   if (!q.set && !FG.herdAt(x) && !FG.G.stones[0].includes(x) && !FG.G.stones[1].includes(x) && q.t !== "water") {
     q.t = "mount"; q.f = 0; q.st = "wild"; q.own = null; }});
   say(me ? FG.pick(MOUNT) : "Rock came up across your road.", me ? "omen" : "bad");
 
@@ -170,7 +229,15 @@ function doIntervene(id, k, who) {
  } else if (id === "wither") {
   let n = 0;
   ring(k, 1).forEach(x => { const q = T(x);
-   if (!q.set && q.st === "reck" && q.own !== who) { q.st = "wild"; q.own = null; n++; }});
+   if (!q.set && q.st === "reck" && q.own !== who) {
+    q.st = "wild"; q.own = null; n++;
+    // 1.12, and only behind its own flag. Whether a wonder should leave the
+    // ground *barren* as well as bare is the question barren3 was raised to
+    // ask, and it is still unmeasured, so by default Wither does exactly what
+    // it has always done. A herd grazing writes this unconditionally; the two
+    // writers are separate on purpose. See constants.js 1.12.
+    if (FG.R2.barren3) q.bar = FG.G.turn + FG.R2TUNE.wither;
+   }});
   say(me ? "The furrows go back to thorn in " + n + " tile" + (n > 1 ? "s" : "") + "." : "Their fields go to waste.", me ? "omen" : "riv");
 
  } else if (id === "quicken") {
@@ -203,7 +270,11 @@ function doIntervene(id, k, who) {
    src.t.set.pop *= 0.9;
    let n = 0;
    ring(k, 1).forEach(x => { const q = T(x);
-    if (!impassable(q) && !q.set && !(q.st === "reck" && q.own === who) && n < 3) { q.st = "reck"; q.own = who; n++; }});
+    // 1.12. `FG.barren` here as well as in targets(), because a Clearance takes
+    // three tiles round the one it is aimed at and only the aimed-at tile was
+    // ever checked for legality. Without this line a work aimed beside grazed
+    // ground ploughs straight back through it.
+    if (!impassable(q) && !q.set && !FG.barren(q) && !(q.st === "reck" && q.own === who) && n < 3) { q.st = "reck"; q.own = who; n++; }});
    say(me ? "They fell the wood and put the plough through it — " + n + " tiles in one season." : "They clear a stretch of wood.", me ? "civ" : "riv");
   }
   if (id === "colony") {

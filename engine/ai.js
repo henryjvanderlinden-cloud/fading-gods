@@ -27,6 +27,28 @@ const DOCTRINE = {
  bands:  {found:5,  bless:4,   split:14, stone:16, till:0,   kill:0,   tillAt:0},
  mixed:  {found:8,  bless:3.5, split:6,  stone:10, till:0.6, kill:0.5, tillAt:140},
  haunt:  {found:2,  bless:9,   split:2,  stone:12, till:0,   kill:0,   tillAt:0},
+ // 1.19 / OP-12. The third answer to *was settling the right thing to allow* —
+ // not yes, not no, but let them keep animals and keep moving. `concept/lore.md`
+ // records Storm & Sky as indifferent, which was a way of saying nobody had a
+ // third position for them. This is it, and the dropdown gains a theology rather
+ // than a fourth set of weights.
+ //
+ // **Read every number this doctrine produces as a floor, not a measurement.** A
+ // one-ply greedy chooser cannot play herds. It cannot judge that a place is
+ // worth more walking than standing, it will not drive a herd four years across
+ // the board to reach a city's fields, and it grazes nothing on purpose that it
+ // did not happen to be beside. OP-19 recorded `taughtLoss` and `audible77`
+ // measuring at exactly zero for that reason, and this rule is more
+ // decision-shaped than either of them. OP-21 is the instrument. See OP-01.
+ // `found` is high and `stone` is low, against the instinct — a doctrine whose
+ // whole idea is sending peoples out has to make peoples first, and at found 6
+ // it made 0.2 settlements a game and taught herding 0.38 times, which measures
+ // nothing at all. `herdAt` is a floor of 35 rather than the 130 Cities waits
+ // for, because the point of sending them out is that they are small: a village
+ // held back until it is ready to plough has already grown past what the grass
+ // will carry.
+ storm:  {found:12, bless:3.5, split:3,  stone:4,  till:0,   kill:0,   tillAt:0,
+          herd:1,   herdAt:35, mound:9,  stop:5},
  passive:null
 };
 
@@ -51,10 +73,40 @@ const free = (id, tg, who) => {
  return cheap.length ? cheap : tg;
 };
 
+// 1.19 / OP-12. Where a chooser sends its herds, and it is the crudest thing
+// that is not nothing: walk at the nearest reckoned tile there is a road to.
+//
+// Free, so it happens outside the act and the intervention and costs the year
+// nothing — which is the rule, not a shortcut. What it is not is a strategy. It
+// will not starve a city, it will not ring anything, and it will not cross the
+// board for a better target than the one under its nose. A player driving herds
+// at a rival's breadbasket is doing something this function has no concept of.
+function driveHerds(who) {
+ if (!FG.R2.herds) return;
+ FG.herdsOf(who).forEach(h => {
+  if (h.held > 0) return;
+  if (h.to !== h.at && FG.herdStep(h.at, h.to, who) !== undefined) return;  // still walking
+  let best = null, bd = 99;
+  FG.G.T.forEach((t, k) => {
+   if (t.st !== "reck" || t.set || k === h.at) return;
+   const d = Math.abs(t.c - FG.T(h.at).c) + Math.abs(t.r - FG.T(h.at).r);
+   if (d >= bd) return;
+   if (FG.herdStep(h.at, k, who) === undefined) return;
+   best = k; bd = d;
+  });
+  // Nothing to graze anywhere it can walk. Stop if the ground allows it — a herd
+  // standing still forever is worse than a settlement, and the chooser has no
+  // reason to be holding one.
+  if (best === null) { h.to = h.at; return; }
+  h.to = best;
+ });
+}
+
 function aiTurn(who) {
  const doc = FG.G.p[who].doc;
  if (!doc || doc === "passive") return;
  const w = DOCTRINE[doc] || DOCTRINE.mixed;
+ driveHerds(who);
 
  // --- the act: move somewhere reachable and do the best thing there
  //
@@ -73,6 +125,17 @@ function aiTurn(who) {
   if (hg) c.push([w.bless * hg, "bless"]);
   if (canSplit(k, who)) c.push([w.split, "split"]);
   if (canStone(k, who)) c.push([w.stone, "stone"]);
+  // 1.19. Standing on your own herd is worth an act if there is a grave to
+  // raise, and worth one if the herd has run out of anywhere to be. Both are
+  // included so that the two acts are exercised in a played-out game at all —
+  // read them as coverage, not as judgement. Deciding *when* a people should
+  // stop walking is the whole of this rule and it is precisely the kind of
+  // decision a one-ply chooser has no way to make. OP-01, OP-21.
+  const hh = FG.R2.herds ? FG.herdAt(k) : null;
+  if (hh && hh.own === who) {
+   if (FG.canMound(hh)) c.push([w.mound || 0, "mound"]);
+   else if (hh.to === hh.at && FG.canStop(hh)) c.push([w.stop || 0, "stop"]);
+  }
   // standing next to something teachable is worth a detour, whatever else the
   // act turns out to be — including doing nothing at all when there is nothing
   // else worth doing there
@@ -114,12 +177,21 @@ function aiTurn(who) {
  // worth less than the settlement's whole future, and a refuser skips this
  // entire block because its weights are zero.
  if (FG.R2.teaching) {
-  for (const id of ["till", "kill"]) {
+  // 1.19. Herding is offered first, and only to a doctrine that wants it. Order
+  // matters more than the weight does: `till` and `herd` are mutually exclusive
+  // on the same settlement, so whichever is tried first is the one that ever
+  // happens. A doctrine with both weights set would teach only this one, which
+  // is worth knowing before anybody sets both.
+  for (const id of ["herd", "till", "kill"]) {
    if (!w[id]) continue;
    if (id === "till" && FG.rand() > w[id]) continue;   // mixed teaches some, not all
    // not before the place is judged ready — teaching ploughs the blessing that
-   // the next founding needs
-   const tg = free(id, targets(id, who).filter(k => T(k).set.pop >= (w.tillAt || 0)), who);
+   // the next founding needs. Herding has its own floor and a much lower one:
+   // the point of sending a people out is that they are small, and a village
+   // held back until it is ready to plough is a village that has already grown
+   // past what the grass will carry.
+   const floor = id === "herd" ? (w.herdAt || 0) : (w.tillAt || 0);
+   const tg = free(id, targets(id, who).filter(k => T(k).set.pop >= floor), who);
    if (tg.length) { doIntervene(id, tg[0], who); return; }
   }
  }

@@ -79,6 +79,63 @@ function moveColumns() {
  });
 }
 
+// 1.19 / OP-12. Roaming peoples: they walk, they graze, and they shrink to what
+// the grass carries.
+//
+// Placed with the other mortal movement rather than with growth, and before
+// `stoneTick`, which matters: ground grazed back to wild this year is ground a
+// stone may bless this year. The herd unmakes and the god makes, in that order,
+// inside one tick. That is 1.8's line — creation at a distance, unmaking only in
+// person — running through mortals instead of through you.
+function herdTick() {
+ if (!FG.R2.herds) return;
+ FG.G.herds.slice().forEach(h => {
+  // a year spent raising a mound is a year spent standing still
+  if (h.held > 0) { h.held--; }
+  else if (h.to !== h.at) {
+   const step = FG.herdStep(h.at, h.to, h.own);
+   if (step === undefined) {
+    // No road. Either they are ringed, or the place you sent them cannot be
+    // walked to any more. They stop where they are if the ground allows it, and
+    // if it does not they simply stand — a herd doing nothing, visibly, until
+    // you open a way or give them somewhere else to be.
+    if (FG.canStop(h)) {
+     const s = FG.newSet(Math.max(15, Math.round(h.n)), h.own);
+     s.kill = h.kill;
+     T(h.at).set = s; T(h.at).st = "wild"; T(h.at).own = null;
+     FG.G.herds.splice(FG.G.herds.indexOf(h), 1);
+     say(h.own === 0 ? "There is nowhere left to take the herds. They stop, and the roofs go back up."
+                     : "One of theirs has run out of grass, and settled.", h.own === 0 ? "" : "riv");
+     return;
+    }
+    if (h.own === 0) say("The herds have nowhere to go and nowhere to stop. They are standing in the open.", "bad");
+   } else if (step !== null) h.at = step;
+  }
+
+  // Grazing: the tile they are standing on, and only that one. A ring would be a
+  // plague of locusts and this is a people. Farmland goes back to **wild**, not
+  // to you — they are undoing the plough, not performing your miracle for you,
+  // and somebody still has to walk out here afterwards and bless it.
+  const t = T(h.at);
+  if (t.st === "reck" && !t.set) {
+   t.st = "wild"; t.own = null;
+   // And it will not take a furrow again for three years. Without this the
+   // settled side re-ploughs it next season and grazing is one year of tempo.
+   // With it — and with A-14's lifetime budget, which re-ploughing spends a
+   // second time — grazed ground is lost twice. See constants.js 1.12.
+   t.bar = FG.G.turn + FG.R2TUNE.wither;
+   say(h.own === 0 ? "The herds are over their furrows, and the furrows are going."
+                   : "Their herds are over your fields.", h.own === 0 ? "good" : "bad");
+  }
+
+  // What the grass carries. The same logistic the settled side grows on, at the
+  // same rate, against a ceiling of the Seventy-Seven — so a village that was
+  // above it when it took down its roofs sheds people until it is a band again.
+  const m = 1 + FG.R2TUNE.r / 100 * (1 - h.n / FG.R2TUNE.kHerd);
+  h.n = Math.max(8, h.n * Math.max(1 - FG.R2TUNE.decline, m));
+ });
+}
+
 // 1.9 / OP-20. People who leave a place go somewhere; they do not evaporate.
 // Reuses the refugee machinery §7 already has for Bad omen, and reuses it
 // deliberately — the second-order consequence documented there is the best
@@ -180,6 +237,7 @@ function worldTick(snap) {
  snap = snap || snapshot();
  resolveContested();
  moveColumns();
+ herdTick();      // 1.19 — before stoneTick, so grazed ground can be blessed back
  stoneTick();
  // Before growth, so a place that changes hands this year declines at its new
  // ceiling this year rather than getting one more season of the old one.
@@ -259,6 +317,13 @@ function worldTick(snap) {
     if (n >= cap) break;
     const q = T(x);
     if (impassable(q) || q.set || (q.st === "reck" && q.own === o)) continue;
+    // 1.12. Ground taken back off the plough will not take a furrow again yet.
+    // This is the line that makes grazing cost more than a season — see the note
+    // on `barren` in rules.js, and note that it *also* holds the budget: a tile
+    // refused here is not spent here, so a settlement whose ring is grazed bare
+    // keeps its remaining thirty and spends them again when the ground comes
+    // back. Lost twice, and the second time invisibly. A-14.
+    if (FG.barren(q)) continue;
     if (FG.wouldSeal(x)) continue;
     q.st = "reck"; q.own = o; t.set.spent++; n++;
    }
@@ -270,7 +335,7 @@ function worldTick(snap) {
   // the harness asserted it.
   const allowed = Math.min(FG.TUNE.spread.v, FG.TUNE.budget.v - t.set.spent);
   ring(k, rad).filter(x => { const q = T(x);
-   return !impassable(q) && !q.set && !(q.st === "reck" && q.own === o); })
+   return !impassable(q) && !q.set && !FG.barren(q) && !(q.st === "reck" && q.own === o); })
    .slice(0, allowed)
    .forEach(x => { T(x).st = "reck"; T(x).own = o; t.set.spent++; });
  });
@@ -342,8 +407,8 @@ function endYear() {
  return worldTick(snap);
 }
 
-Object.assign(FG, {stoneTick, moveColumns, snapshot, worldTick, endYear, resolveContested,
- encircleTick, exodus});
+Object.assign(FG, {stoneTick, moveColumns, herdTick, snapshot, worldTick, endYear,
+ resolveContested, encircleTick, exodus});
 
 if (typeof module !== "undefined" && module.exports) module.exports = FG;
 })(typeof globalThis !== "undefined" ? globalThis : this);

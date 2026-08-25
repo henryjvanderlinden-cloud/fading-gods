@@ -461,3 +461,133 @@ game.
 
 **Settled by:** building it, measuring nothing happening, and reading the tick
 order.
+
+---
+
+## A-24 · What does a people taught to herd cost, and what do they earn? — **settled: no wonder, and no points**
+
+**Asked and answered August 2026, before a line of 1.19 was written.** Rick's call,
+from three options put to him. See OP-12 and `design/rules.md` §16.
+
+The candidates were *no wonder and no score*, *a wonder like the plough*, and *no
+wonder but let them score*.
+
+**The answer is the first, and the two halves are one rule.** A herd costs no
+wonder because `lostCount` counts settlements taught to till and a herd is not a
+settlement: they were never shown the plough, they still hear you, and nothing
+about you has gone quieter. And a herd scores nothing because it holds no ground
+and `score()` never sees it. **They deny; they do not accumulate.**
+
+**Why the pairing and not either half.** *A wonder like the plough* makes herding a
+strictly worse plough and nobody ever takes it. *No wonder but let them score* is
+the failure mode `concept/concept.md` names outright: a player expands without
+teaching anyone, and the trade the whole game is built on can simply be declined.
+The rule survives only as the pair, and the pair says something true — **you are
+not diminished by a people who never stopped listening, and you are not enlarged
+by them either.**
+
+**What it costs instead**, and none of this had to be written:
+
+- the three points the settlement was worth, at the moment you say it;
+- everything it would have grown into — a taught place tops out between 600 and
+  1000, a herd carries 77;
+- **most of the people**, because a village that has been standing a while is
+  already above the herd's ceiling and sheds the surplus over the next few years.
+  Going nomadic costs you most of a town. That falls out of putting `kHerd` at the
+  Seventy-Seven and nothing else.
+
+**The safety this rests on is A-26's other half — stopping.** A herd that stops
+comes back untaught, so herding defers the central dilemma rather than dissolving
+it. If that ever changes, this entry is wrong.
+
+**Unmeasured, and the register should not pretend otherwise.** The greedy chooser
+teaches herding 1.65 times a game and the win rates do not move. See OP-12.
+
+**Settled by:** Rick, on the design, August 2026. Built the same day.
+
+---
+
+## A-25 · What does grazed farmland become? — **settled: wild, and barren for three years**
+
+**August 2026.** Rick's call, from three options. See OP-12, `ideas.md`, and
+`design/rules.md` §16.
+
+The candidates were *wild then barren*, *wild and immediately re-ploughable*, and
+*straight back to your blessing*.
+
+**Straight to blessing was the one to refuse and it is worth saying why**, because
+it is the attractive one: it makes herds do your work for you, and a herding line
+could then win on points without ever teaching anybody. That is A-24's failure
+mode reached by a different road.
+
+**Wild and immediately re-ploughable makes the third leg not a leg.** The settled
+side re-ploughs next season and the whole mechanic is one year of tempo denial.
+
+**So: wild, and barren.** The ground goes back to thorn, belonging to nobody, and
+nothing may reckon it for three years — not a settlement's year-end spread and not
+a Clearance, which had to be blocked in two places because that work takes three
+tiles round the one it is aimed at.
+
+**The second cost is the good one and it is invisible.** A-14's thirty-tile
+lifetime budget is spent per tile ploughed, so re-ploughing grazed ground spends a
+tile of a settlement's thirty that it had already spent. **Grazed ground is lost
+twice**, and the second loss is permanent, unannounced, and only felt decades
+later when a place stops short of where it should have reached. This project likes
+that kind of cost and this is the cleanest instance of it yet.
+
+A tile *refused* for barrenness is not charged to the budget, so the settlement
+keeps what it did not get to spend. Checked in `sim/smoke.js`.
+
+**Note what this rule deliberately does not do:** it does not give the ground to
+you. Somebody still has to walk out there and bless it. **The herd unmakes and the
+god makes**, which is A-22's line — creation at a distance, unmaking only in
+person — running through mortals instead of through the player. `herdTick` runs
+before `stoneTick` so that a stone may take the ground back in the same year.
+
+**It also half-built `barren3`.** Barren ground now exists in the engine; whether
+*Wither* should leave it as well as bare is that flag's own question, is still
+unmeasured, and stays off. One writer per rule, one reader for both.
+
+**Settled by:** Rick, on the design, August 2026. Built the same day.
+
+---
+
+## A-26 · What stops a herd? — **settled: the other power's blessing is closed country**
+
+**August 2026.** Rick's call, from three options. See OP-12 and `design/rules.md`
+§16.
+
+The candidates were *rival blessing blocks movement*, *a herd ringed by blessing
+must settle*, and *both*.
+
+**The answer is the first, and the reason it beats the second is that it is a rule
+with a reason rather than an exception with a patch.** §7 says the player's
+movement rules do not apply to mortals — a levy crosses anything but rock and
+water, because a levy cannot hear you and a god's walls are not there for it. A
+people who were never shown the plough **can** still hear. So they move the way
+their god does, and what a people can hear, they can be shut out of. That is the
+third row of the loop and it is the same sentence as `audible77`.
+
+**The half that had to be got right: the *other* power's blessing only.** Blessing
+impassable to herds walls your own herds in with your own quiet, which is §2's
+self-walling problem that OP-19 already strained to breaking. Writing the rule as
+*theirs blocks, yours never does* avoids it completely, and costs nothing, and is
+better lore besides.
+
+**The ring version was not wrong, it was redundant.** A herd that cannot move at
+all settles where it stands if the ground allows it, which is what `herdTick` does
+when `herdStep` returns undefined — so the second candidate's outcome is already
+reachable, without a second clock and without borrowing OP-20's machinery. *Both*
+would have bought one behaviour twice.
+
+**And the third thing that stops a herd is you.** Stopping is an act, done standing
+on the people, because every founding in this game happens under your feet. It
+waives the blessing requirement exactly as a colony does — they are already there,
+what they need is somewhere to stop rather than a country — and keeps every other
+question §3 asks, including the one about a rival's blessing within two tiles.
+
+**A herd comes back untaught. That is the load-bearing part of this entry**, and it
+is what makes herding a detour rather than a door: you may walk around the central
+fork for twenty years and you arrive at the same fork. See A-24.
+
+**Settled by:** Rick, on the design, August 2026. Built the same day.
