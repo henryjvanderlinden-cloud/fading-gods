@@ -627,7 +627,16 @@ console.log("\nthe baseline is still exact");
  // than passing over: four of eight games are unchanged to the point, so the
  // batch is not a wash over the whole board — it changes the games where its
  // rules actually come up.
- const NOW = ["21:117", "75:144", "114:126", "120:123", "42:165", "177:34", "84:77", "147:50"];
+ //
+ // Re-frozen again the same day for **A-31**, the furrow guard in `ai.js`. No
+ // rule changed; the chooser stopped walking into ploughed ground. The same four
+ // seeds moved and the same four did not, and **every one that moved moved the
+ // same way** — 117 to 126, 34 to 60, 77 to 94, 50 to 104. That is seat 1 no
+ // longer spending itself to nothing, and it is the whole of the change. The
+ // baseline array above did not move at all, which is the point: `fade` is off
+ // under `R2all(false)`, so the guard cannot reach the pre-batch game by
+ // construction rather than by luck.
+ const NOW = ["21:126", "75:144", "114:126", "120:123", "42:165", "129:60", "72:94", "57:104"];
  FG.R2reset();
  for (let s = 0; s < NOW.length; s++)
   ok("the shipped game is unchanged, seed " + s, play("bands", "cities", s) === NOW[s],

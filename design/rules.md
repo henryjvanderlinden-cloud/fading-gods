@@ -949,3 +949,106 @@ last-quarter event and not a mid-game collapse.
 `sim/smoke.js` at **11,924 checks**, all passing, including a constructed-board
 block for all four rules and both A/B fingerprints re-frozen. `sim/sweep.js` is
 new and produces the table above.
+
+## 18. A second change to the chooser, and what it did to §17
+
+**No rule changed here.** This section is about `engine/ai.js`, and it is in
+`design/rules.md` rather than only in the archive because it moves every number in
+§17.6 and several of the sentences written under them are now wrong.
+
+### 18.1 The furrow toll, and what the chooser did not know about it
+
+1.7 charges a tenth of your manifestation for **ending a year on reckoned ground**.
+It does not ask who ploughed it. The constant's own comment says *"for ending a
+year in **their** fields"* and the chronicle line says *"standing in **their**
+furrows"*, and both have always been wrong about the code, which reads only `st`.
+
+Offered the choice between correcting the code to match the comments and correcting
+the comments to match the code, Rick took the second: **gods have no place on
+tilled lands, it destroys them.** So the rule is unchanged and now says what it
+does. A god pays for standing in a furrow it commanded exactly as it pays for
+standing in one it did not.
+
+The chooser, however, had no concept of a body. It would spend a year among its own
+fields for a teaching nudge worth nothing, pay the tenth, and be back next spring.
+`free()` — added in 1.23 for precisely this failure — covers the **dream** toll
+alone. Measured over 200 games a row against Cities, the rival walked itself to
+nothing in **21%** of games against Bands, **32%** against Mixed and **38%**
+against itself. Two doctrines that never plough did it in **0%**.
+
+### 18.2 Three guards, none of them judgement
+
+- **The act.** Two-tier, in the shape `free()` already established: the best act
+  that does not leave the token in a furrow, and only if every candidate does, the
+  best act there is. The nothing-worth-doing fallback picks clean ground too.
+- **The clearance.** A Clearance ploughs the six tiles *round* the one it is aimed
+  at. After the act guard, **49 of the 51 remaining tolls in a hundred games were a
+  god putting the plough through its own feet.** `notUnderfoot` aims elsewhere when
+  there is an elsewhere.
+- **The walk out.** `stepOff` asks `reach` again after the turn, from where the
+  token stands, **with the movement the act did not spend**, and walks to the
+  nearest clean tile. A god that used the whole year's movement getting to its act
+  has none left and stays in what it ordered.
+
+None of the three weighs a tenth of a body against the act it would buy. That is
+the decision 1.7 and 1.23 exist to hand a player, and OP-01 says this chooser
+cannot see it. They are preferences with fallbacks.
+
+**What survives is the rule, and it is the half worth keeping.** Over a hundred
+games of Mixed against Cities the dominant cause of a toll is now **the fields
+growing out under the token during the world tick — 71 of them**, against 13 where
+it had spent its movement getting somewhere and 0 where it was boxed in. The plough
+comes to the god. A player has exactly that exposure and can see it a year out.
+
+### 18.3 The corrected table
+
+80 games a cell, against Cities, the build's own turn order.
+
+| | cities | mixed | haunt | bands | storm |
+|---|---|---|---|---|---|
+| **the game as it ships** | **36%** | **36%** | **53%** | **33%** | **61%** |
+| less 1.20 stones grow | 36% | 31% | 53% | 34% | 61% |
+| less 1.21 dead orders | 45% | 36% | 54% | 33% | 63% |
+| less 1.22 wild folk | 44% | 41% | 53% | 28% | 65% |
+| less 1.23 zero spent | 38% | 39% | 53% | 33% | 61% |
+| less 1.19 herds | 36% | 36% | 53% | 33% | 59% |
+| less 1.12 barren3 | 35% | 38% | 53% | 30% | 59% |
+| the batch before this one | 48% | 35% | 53% | 30% | 61% |
+| the pre-batch game | 55% | 38% | 11% | 10% | 55% |
+
+**§17.6's two headline results do not survive.** Re-measured at 300 games a cell,
+where the interval on a difference of proportions is about ±7 points:
+
+| §17.6 said | measured again |
+|---|---|
+| `wildFolk` is worth **+11** to Bands | **−3.7** |
+| `deadOrders` is worth **+9** to Mixed | **+2.0** |
+| `wildFolk` is worth **+4** to Storm | **−2.0** |
+| `stonesGrow` measures at nothing | **−0.7**, unchanged |
+
+And the arc, at 300 games a cell: **Bands 13% → 38% → 34%**, not 10% → 28% → 41%.
+The August batch is what moved Bands from nothing to a real doctrine. **The batch
+after it did not move Bands at all**, and the eleven points credited to `wildFolk`
+were the rival killing itself at different rates with the rule in and out.
+
+**None of this un-ships anything.** `taughtLoss` and `audible77` were kept on
+judgement against a measurement of exactly zero, and the reasoning in OP-19 covers
+these four as well: the rules are about decisions this chooser cannot make. What it
+does mean is that **OP-06's answer is 34%, not 41%** — still yes, still hard — and
+that no figure in §17.6 should be quoted again without re-running it. **§17.6 is
+superseded by this section. Read them in that order.**
+
+### 18.4 The fingerprints
+
+`sim/smoke.js` at **11,924 checks**, all passing.
+
+**`R2all(false)` did not move on a single seed.** That is the check that matters:
+the guards read `FG.R2.fade`, which is off in the pre-batch game, so a change to
+the chooser cannot reach the baseline by construction rather than by luck.
+`R2reset()` moved on four of eight seeds and **every seed that moved, moved the
+same way** — 117→126, 34→60, 77→94, 50→104 — which is the rival no
+longer spending itself to nothing, and is the whole of the change.
+
+**Third time.** OP-01 has now been the largest term in a measurement three times:
+the teaching weight worth 35 points, Split never having been legal, and this. It
+carries a fourth entry.

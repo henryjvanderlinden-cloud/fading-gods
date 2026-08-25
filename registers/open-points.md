@@ -217,6 +217,28 @@ against `FG.R2` half-finished would have to be written again.
 OP-21 already supplies the instrument that reads choice-shaped rules, and it reads
 them today. Revisit when `FG.R2` is tuned and closed.
 
+
+### A fourth, 25 August 2026, and it is the largest of them
+
+**The chooser had no concept of a body, and it was worth up to thirty-two points of
+win rate in a single cell.** 1.7 charges a tenth of your manifestation for ending a
+year on ploughed ground; `free()` guarded the dream toll and nothing guarded the
+standing one. The rival walked itself to nothing in **21%** of games against Bands
+and **38%** against itself, then stood inert for a mean of two years and as many as
+eighteen. Every cell of §17.6 was reading some of that.
+
+Three guards later — see A-31 — the rate is 6% and 10.5%, and the two headline
+results of the 1.20–1.23 batch are gone: `wildFolk`'s eleven points to Bands
+measure at −3.7 and `deadOrders`'s nine to Mixed at +2.0, both inside the noise at
+300 games a cell.
+
+**What this one adds to the argument above.** The first three entries said the
+chooser cannot *see* certain decisions. This one says something worse and simpler:
+the chooser was **losing games to a resource it did not know it had**, and the
+matrix scored that as the other doctrine playing well. A rule does not have to be
+about an invisible decision to be mismeasured. It only has to change how often the
+opponent falls over.
+
 ## OP-03 · high · Does being walled in feel like an ending or like confiscation?
 
 At forty turns with hard walls, late-game reachable area falls to single digits and

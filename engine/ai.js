@@ -91,6 +91,51 @@ const free = (id, tg, who) => {
 // in which something actually matters, and stops before the year that ends it.
 const RESERVE = 2;
 
+// A-31. Where the chooser will not end its year, if it has any choice at all.
+//
+// The furrow toll in `endYear` charges for ending a year on reckoned ground of
+// **any** owner, and Rick's ruling is that this is the rule and stays the rule:
+// *gods have no place on tilled lands, it destroys them.* The defect was never
+// the toll. It was that the chooser had no concept of one. It would stand a year
+// in its own fields for a teaching nudge worth nothing, pay a tenth of itself
+// for the privilege, and be back there next spring.
+//
+// Measured before this line existed, 100 games a row against Cities: seat 1
+// walked all the way to nothing in **17%** of games against Bands and **31%**
+// against Mixed, then stood inert a mean of five to eight years and as many as
+// eighteen. Two doctrines that never plough did it in **0%**. That is not a rule
+// being tested. That is an opponent falling over, and every cell of the sweep
+// table was reading some of it.
+//
+// Like `free()` above, this is deliberately **not** an improvement in judgement.
+// It does not weigh a tenth of a body against the act it would buy — that is the
+// decision 1.7 and 1.23 exist to hand a *player*, and OP-01 says this chooser
+// cannot see it. It is a preference with a fallback, and the fallback is the
+// whole point: **a power whose country is all furrows still has nowhere to
+// stand, and still pays.** The toll keeps its teeth exactly where it earned
+// them, and loses them where it never had any business having them.
+//
+// Inert under `R2all(false)`, because `fade` is off there — so the pre-batch
+// fingerprint is untouched by construction rather than by luck. OP-01, OP-21.
+const furrow = k => !!FG.R2.fade && T(k).st === "reck";
+
+// A-31, the other half, and the larger one. A clearance ploughs the six tiles
+// **round** the one it is aimed at, and the chooser had no idea that one of the
+// six was the tile it was standing on. Measured after the act-phase guard above
+// went in: of the 51 tolls that survived it across a hundred games, **49 were a
+// god ordering the plough through its own feet.** The remaining two were a token
+// boxed in by fields on every side, which is the rule working.
+//
+// A player steps aside. This one aims somewhere else, and only when there is
+// nowhere else does it stand in what it ordered — so a country with one stretch
+// of wood left still costs its god a tenth of itself to clear it.
+const notUnderfoot = (tg, who) => {
+ if (!FG.R2.fade) return tg;
+ const here = FG.G.p[who].pos;
+ const away = tg.filter(k => !ring(k, 1).includes(here));
+ return away.length ? away : tg;
+};
+
 // 1.19 / OP-12. Where a chooser sends its herds, and it is the crudest thing
 // that is not nothing: walk at the nearest reckoned tile there is a road to.
 //
@@ -120,14 +165,14 @@ function driveHerds(who) {
  });
 }
 
-function aiTurn(who) {
+// A-31. How much of the year's movement the act used up. Module-local because
+// `aiPlay` and `stepOff` run back to back on one seat and nothing else may read
+// it — the chooser has never decremented `mp` and this does not start.
+let walked = 0;
+
+function aiPlay(who) {
  const doc = FG.G.p[who].doc;
  if (!doc || doc === "passive") return;
- // 1.23 / OP-14. A power with nothing left of it does not take a turn. Note it
- // does not even drive its herds: steering costs no act and no toll, but it is
- // still a thing said to somebody, and there is nobody left to say it. The rival
- // fades on exactly the terms the player does.
- if (FG.spent(who)) return;
  const w = DOCTRINE[doc] || DOCTRINE.mixed;
  driveHerds(who);
 
@@ -140,7 +185,7 @@ function aiTurn(who) {
  // is still one-ply — see OP-01, which this does nothing to fix.
  const wantsTeach = FG.R2.teaching && (w.till > 0 || w.kill > 0);
  const R = reach(who);
- let best = null;
+ let best = null, off = null;
  Object.keys(R).forEach(ks => {
   const k = +ks, c = [];
   if (canFound(k, who)) c.push([w.found * (0.6 + T(k).f), "found"]);
@@ -177,10 +222,21 @@ function aiTurn(who) {
   c.forEach(([v, a]) => {
    const s = v + pull - R[k] * 0.35 + FG.rand() * 0.9;
    if (!best || s > best.s) best = {s, k, a};
+   if (!furrow(k) && (!off || s > off.s)) off = {s, k, a};
   });
  });
- if (best) { FG.G.p[who].pos = best.k; doAct(best.a, who); }
- else { FG.G.p[who].pos = FG.pick(Object.keys(R).map(Number)); }
+ // A-31. The best act that does not end the year in a furrow, and only if every
+ // single one of them does, the best act there is.
+ const go = off || best;
+ if (go) { FG.G.p[who].pos = go.k; walked = R[go.k] || 0; doAct(go.a, who); }
+ else {
+  // Nothing worth doing anywhere in reach. Stand somewhere — and out of the
+  // fields, which is the branch that was quietly doing most of the damage: a
+  // token with no act and no preference wandered into the furrows at random.
+  const all = Object.keys(R).map(Number), dry = all.filter(k => !furrow(k));
+  FG.G.p[who].pos = FG.pick(dry.length ? dry : all);
+  walked = R[FG.G.p[who].pos] || 0;
+ }
 
  // --- the intervention
  const dl = divineLeft(who).map(s => s.id);
@@ -223,7 +279,8 @@ function aiTurn(who) {
  const cv = civicOpen(who);
  for (const id of ["levy", "colony", "clear"]) {
   if (!cv.includes(id)) continue;
-  const tg = free(id, targets(id, who), who);
+  let tg = free(id, targets(id, who), who);
+  if (id === "clear") tg = notUnderfoot(tg, who);   // A-31
   if (tg.length) {
    let p = tg[0];
    if (id === "levy") p = tg.reduce((a, b) => T(a).set.pop >= T(b).set.pop ? a : b);
@@ -246,6 +303,46 @@ function aiTurn(who) {
   }
   doIntervene(s.id, p, who); return;
  }
+}
+
+// A-31, the last of it. The turn is over. If the year is going to end with the
+// token standing in a furrow, walk out of one — with whatever is left of the
+// year's movement and **not a step more**.
+//
+// This is the one thing a player does that the chooser could not. The act and
+// the order both happen where you are standing, and then you walk on; that is
+// ordinary play and the interface has always allowed it. So `reach` is asked
+// again from where the token now stands, with the budget the act did not spend.
+// A god that jumped the whole year's movement to get to its act has nothing
+// left and stays in what it ordered. Nothing here is free, and nothing here is
+// judgement — it walks to the *nearest* clean tile, not the best one.
+function stepOff(who) {
+ const p = FG.G.p[who];
+ if (!furrow(p.pos)) return;
+ const left = Math.min(p.mp, FG.manifestMp(who)) - walked;
+ if (left < 1) return;
+ const save = p.mp; p.mp = left;
+ const R = reach(who);
+ p.mp = save;
+ let best = null;
+ Object.keys(R).forEach(ks => { const k = +ks;
+  if (furrow(k)) return;
+  if (best === null || R[k] < R[best]) best = k; });
+ if (best !== null) p.pos = best;
+}
+
+function aiTurn(who) {
+ const doc = FG.G.p[who].doc;
+ if (!doc || doc === "passive") return;
+ // 1.23 / OP-14. A power with nothing left of it does not take a turn. Note it
+ // does not even drive its herds: steering costs no act and no toll, but it is
+ // still a thing said to somebody, and there is nobody left to say it. The rival
+ // fades on exactly the terms the player does. It does not walk out of a furrow
+ // either — A-31 is a decision, and there is nobody left to make it.
+ if (FG.spent(who)) return;
+ walked = 0;
+ aiPlay(who);
+ stepOff(who);
 }
 
 FG.DOCTRINE = DOCTRINE;
