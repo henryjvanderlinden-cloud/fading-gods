@@ -145,12 +145,46 @@ function civicOpen(who) {
  return o;
 }
 
-// Where a wonder may be aimed: within reach of a working stone, or next to you.
-function divineReach(who) {
+// The country your stones can still be heard in, without you standing in it.
+// Split out of divineReach for 1.16: a dream travels the stone network and does
+// not travel through your feet, so the two halves of reach now have separate
+// names.
+function stoneReach(who) {
  const s = new Set();
  working(who).forEach(k => ring(k, stoneRange(region(k, who).length)).forEach(x => s.add(x)));
+ return s;
+}
+
+// Where a wonder may be aimed: within reach of a working stone, or next to you.
+function divineReach(who) {
+ const s = stoneReach(who);
  ring(FG.G.p[who].pos, 1).forEach(x => s.add(x));
  return s;
+}
+
+// 1.16 / 1.17. Is this said rather than done — is the target out of arm's reach?
+// Deliberately *not* the same test as divineReach. Standing on a settlement or
+// beside it is in person and free; everything else is at range and is charged,
+// even when a stone is what carries it.
+const atRange = (k, who) => !ring(FG.G.p[who].pos, 1).includes(k);
+
+// Does aiming this at k cost a piece of you? One predicate, because the two
+// rules have two different tests and having them written out twice is how they
+// drift apart.
+//
+//   teaching — legal only inside divineReach, free only in person. The stone
+//              carries the dream; sending it still costs.
+//   a work   — legal anywhere, as it always was, because a work needs your
+//              people and not you. Free anywhere you can be heard. Charged
+//              only out past that, where the order has to be carried.
+//
+// Everything else — the wonders — is unchanged and never charged. They are
+// bounded by divineReach already, and OP-14's trespass toll is the only thing
+// that has ever taken a piece of you.
+function tolled(id, k, who) {
+ if (FG.TEACH.some(s => s.id === id)) return !!FG.R2.dreamTeach && atRange(k, who);
+ if (FG.CIVIC.some(s => s.id === id)) return !!FG.R2.dreamWorks && !divineReach(who).has(k);
+ return false;
 }
 
 // --- legality -----------------------------------------------------------
@@ -218,13 +252,30 @@ function mountainLine(k) {
 }
 
 // --- targeting ----------------------------------------------------------
-// OP-19. Teaching is done in person: you must be standing on the settlement or
-// beside it. No stone relays it — this is the one thing that cannot be said at a
-// distance. A settlement tile is walkable, so standing on one is possible; its
-// reckoned ring is not, which is why OP-14 had to be adopted alongside this.
+// OP-19. Teaching was done in person: standing on the settlement or beside it,
+// with no stone relaying it, on the reasoning that this was the one thing that
+// could not be said at a distance.
+//
+// 1.16 reverses that reasoning rather than waiving it. A stone is a place you
+// are still heard, and teaching is a thing you say. So teaching now reaches
+// wherever a wonder reaches — and it is charged for, in `actions.js`, whenever
+// it is said rather than done. See the note in constants.js for why this needed
+// no change to the lore, and for the second price nobody has to write.
+//
+// `from` is a candidate position, not necessarily the current one: `ai.js` calls
+// this while deciding where to walk. Note what that does to the chooser. With
+// the flag off, the returned set depends entirely on `from`, so an untaught
+// settlement pulls the token toward it. With the flag on, the stone half of the
+// set is the same for every candidate `from` and cancels in the argmax, leaving
+// only the in-person half as a nudge — which is the correct shape, arrived at
+// for free: a doctrine that can teach by dream has much less reason to walk.
 function teachTargetsAt(from, id, who) {
  if (!FG.R2.teaching) return [];
- return ring(from, 1).filter(k => {
+ const near = ring(from, 1);
+ const cand = FG.R2.dreamTeach
+   ? [...new Set([...near, ...stoneReach(who)])]
+   : near;
+ return cand.filter(k => {
   const t = T(k);
   if (!t.set || t.set.own !== who) return false;
   if (t.set.tabu) return false;                  // OP-20 — forbidden for good
@@ -295,9 +346,9 @@ function band(p) { return p < 77 ? ["band", 1] : p < 150 ? ["village", 2] : p < 
 
 Object.assign(FG, {cost, reach, walkStep, region, stoneRange, working, settlements,
  bigCount, hugeCount, civicStrength, taughtCount, carryCap, lostCount, divineLeft,
- civicOpen, divineReach, blessFrac, foundBlock, canFound, blessGain, canSplit,
- stoneBlock, canStone, mountainLine, targets, teachTargets, teachTargetsAt,
- nearestSource, score, band, manifest, manifestMp, wouldSeal});
+ civicOpen, divineReach, stoneReach, atRange, tolled, blessFrac, foundBlock, canFound,
+ blessGain, canSplit, stoneBlock, canStone, mountainLine, targets, teachTargets,
+ teachTargetsAt, nearestSource, score, band, manifest, manifestMp, wouldSeal});
 
 if (typeof module !== "undefined" && module.exports) module.exports = FG;
 })(typeof globalThis !== "undefined" ? globalThis : this);

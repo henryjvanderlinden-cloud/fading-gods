@@ -5,16 +5,30 @@ tuned value, not a principle; nearly all of them are exposed as sliders in the
 build so they can be argued with. Where a rule is a *principle* rather than a
 number, it is marked **[load-bearing]**.
 
-> **A second rule set exists and is not described here.** `FG.R2` in
-> `engine/constants.js` holds the August 2026 batch — OP-19 and OP-20 — twelve
-> rules, all off by default. With them off the engine plays exactly what is
-> written below, which is the point of them being off. Six are built and
-> measured; the numbers are in OP-19 and they are *better than §10*, so this
-> document will be rewritten around them if they survive tuning. Until then it
-> describes the shipped game, and OP-19 describes the candidate.
+> **This document is now behind the game, and by a whole rule set. Read this box
+> before you trust anything below it.**
 >
-> A-16 is the reason this note exists. A document that quietly stops matching
-> the game does not announce it.
+> `FG.R2` in `engine/constants.js` holds the August 2026 batch — OP-19 and
+> OP-20 — and **as of the 1.16 commit the eight built rules in it are on by
+> default.** Rick played the batch across several games and reported it a clear
+> improvement, which is the evidence class this project ranks above the matrix
+> for anything about choices. So the batch stopped being a candidate and became
+> the game, and the numbered sections below stopped describing it.
+>
+> What is still exactly true: `FG.R2all(false)` plays what is written here, and
+> the A/B is asserted in `sim/smoke.js`. What is no longer true, section by
+> section — §4's population thresholds and growth (now logistic, and capped by
+> teaching), §5's wonder trigger (now teaching, not 150), §2's impassable
+> farmland (now walkable at a toll), and §6, which has gained the teachings and
+> the two rules in §11 below. **§10's balance table is the old game's.** The
+> current one is in OP-19.
+>
+> A-16 is the reason this note exists and the reason it is this blunt: a
+> document that quietly stops matching the game does not announce it, and the
+> last time that happened the balance numbers were measured against rules from
+> months earlier. Rewriting the sections below around the batch is now the
+> outstanding debt on this file. Until that is done, **`engine/constants.js` is
+> the authority and this document is the history.**
 
 ---
 
@@ -343,3 +357,116 @@ the same seeds:
 Comfortably above the 31–39% previously recorded at this map size. Whatever else
 is wrong, the two powers are unambiguously playing each other, which A-05 called
 the single most important measured result in the project.
+
+---
+
+## 11. Saying it, rather than doing it
+
+**Added August 2026 as `dreamTeach` and `dreamWorks`, both on by default.** The
+fifth answer to OP-19's *where does teaching happen*, and the four the register
+had before it were all compromises on presence. This one keeps presence and
+prices the alternative.
+
+### The rule
+
+| | Where it may be aimed | What it costs you |
+|---|---|---|
+| **Teaching** — till, kill | Beside you, **or anywhere a working stone reaches** | Nothing in person. **10% of your manifestation, permanently**, at range. |
+| **A work** — clearance, colony, levy | Anywhere, as before | Nothing inside your hearing. **10% of your manifestation, permanently**, beyond it. |
+| **A wonder** | Unchanged — within reach of a working stone, or beside you | Unchanged — nothing |
+
+*Your hearing* is `divineReach`: the country your working stones cover, plus the
+tile you stand on and its ring. *In person* is the narrower test — the tile you
+stand on and its ring, and nothing else. The two are deliberately different, and
+`FG.tolled(id, k, who)` is the single place that knows which applies.
+
+### Why teaching may travel at all
+
+**[load-bearing]** OP-16 already drew the line the game needed and drew it in the
+right place: **creation at a distance, unmaking only in person.** Blessing
+spreads through the stone network; taking someone else's sacred ground requires a
+body standing on it. Teaching is creation, so it belongs on the travelling side,
+and `concept/lore.md` needed no amendment to allow it — a dream goes down the
+same channel the voice already goes down. What the old rule had was not a
+principle but an accident of which functions existed.
+
+### The second price, which nobody had to write
+
+Teaching them to till makes them plough. Ploughing eats blessed ground. A stone
+whose connected blessed region falls under `MINREG` stops working. And a working
+stone is what carried the dream.
+
+**So teaching at range destroys the channel that carried it**, and the more you
+do it the less far you can do it. That falls out of rules that were all already
+here. It is the thesis in one loop and it needs no cap, no counter and no timer —
+which is what keeps it clear of A-10.
+
+### Why the price is paid in the body and not in people
+
+There is one stock called *what is left of you*. OP-14's trespass toll spends it
+at 10%, and this spends it at 10%, so there is one number to reason about rather
+than a tariff. It is permanent, it is never refunded, and **nothing in the game
+puts any of it back.** A wonder you lose is gone; a piece of you goes the same
+way.
+
+A year holds one intervention, so the ceiling from this is 10% a year, and
+another 10% for ending the year in their furrows. Ten years of ruling entirely at
+range and there is nothing left of you.
+
+**And that is the point of it beyond the balance.** OP-14 asks what should happen
+at zero — whether you lose the body and keep playing as a network with no
+location, which would make the administrative-interface ambition in `concept/`
+literal. Until now nothing in the game spent the stock fast enough for anyone to
+arrive at the question. Now the settled doctrines arrive at about half of
+themselves by year forty. See §11's numbers below and OP-14.
+
+### What it costs the settled side, measured
+
+40 games a cell, seeds split between both orders, against Cities.
+
+| Doctrine | Teachings by dream / game | Works out of hearing / game | Body left at year 40 |
+|---|---|---|---|
+| Cities | 0.63 | 0.50 | **0.54** |
+| Mixed | 1.70 | 1.35 | **0.49** |
+| Haunt | 0.00 | 0.00 | 0.94 |
+| Bands | 0.00 | 0.00 | 0.89 |
+
+**The refusers never pay it**, because they never teach and never build works.
+This is the first rule in the game that charges the settled doctrine in *you*
+rather than in people, and it is the arc stated as a cost: early you point at the
+ground, late you issue orders, and the orders use you up.
+
+### Note that `dreamWorks` grants nothing — it only charges
+
+Worth being loud about, because it does not look that way. Clearance, colony and
+levy have **always** reached anywhere on the board for free: `targets()` builds
+them from the settlement outward and has never consulted where the player is
+standing. So this is not a new range. It is a price on the range they already
+had, when it exceeds the country you can be heard in.
+
+### The measurement, and what it cannot see
+
+30 games a cell, seeds split. Win rates against Cities:
+
+| | Cities | Mixed | Haunt | Bands |
+|---|---|---|---|---|
+| the batch + both rules | 43% | 47% | 77% | 67% |
+| without `dreamWorks` | 37% | 47% | 77% | 67% |
+| without `dreamTeach` | 43% | 53% | 77% | 63% |
+| the batch alone | 40% | 53% | 77% | 67% |
+| the old game | 53% | 40% | 17% | 10% |
+
+**Every difference in the top four rows is inside the noise at this sample size**,
+and the batch row reproduces OP-19's leave-one-out table exactly, which is the
+check that matters: these two rules did not disturb anything.
+
+That the win rates do not move is the expected result and not a disappointing
+one. Both rules are about *when to spend a piece of yourself to save a journey* —
+the same class as `taughtLoss` and `audible77`, which OP-19 recorded measuring at
+exactly zero, and for the same reason. **A one-ply greedy chooser does not value
+its own body.** It takes the free target when `free()` offers one and pays the
+toll without noticing when it does not. See OP-01.
+
+What the harness *can* see is the drain, and the drain is real and lands only on
+the doctrines that teach. Whether the drain is a decision or a punishment is a
+question for a person at the board — OP-21.

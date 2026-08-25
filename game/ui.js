@@ -426,6 +426,13 @@ function render() {
  const R = reach(ME), S = score(), walk = Object.keys(R).length - 1;
  const tg = ARM ? new Set(targets(ARM, ME)) : null;
  const isCivic = ARM && CIVIC.some(c => c.id === ARM);
+ // 1.16 / 1.17. Which of the outlined tiles are out past your hearing and will
+ // take a piece of you. Drawn rather than written: a solid outline is a thing
+ // you do, a dashed one is a thing you say. It has to be visible *before* the
+ // tile is chosen, because the toll is permanent and the year is spent on the
+ // tap — the whole point of the mechanic is that it is a decision, and a cost
+ // you only learn about in the chronicle afterwards is not a decision.
+ const toll = ARM ? new Set([...(tg || [])].filter(k => FG.tolled(ARM, k, ME))) : null;
  const threat = G.armies.some(a => a.own === THEM);
 
  // Whose year it is, in that seat's own colour, across the whole width of the
@@ -476,7 +483,8 @@ function render() {
   const go = tg ? tg.has(k) : (R[k] !== undefined && k !== G.p[ME].pos);
   if (!go) scrim += `<path d="${hexPath(x, y)}" fill="#0B0E08" opacity="${tg ? ".34" : ".2"}" pointer-events="none"/>`;
   if (go && tg) over += `<path d="${hexPath(x, y, SZ - u(3))}" fill="none"
-    stroke="${isCivic ? "#F0C060" : "#FFFFFF"}" stroke-width="${u(1.8)}" opacity=".95" pointer-events="none"/>`;
+    stroke="${isCivic ? "#F0C060" : "#FFFFFF"}" stroke-width="${u(1.8)}" opacity=".95"
+    ${toll.has(k) ? `stroke-dasharray="${u(5).toFixed(1)} ${u(4).toFixed(1)}"` : ""} pointer-events="none"/>`;
  });
 
  // settlements — the complex says what stage it is
@@ -694,8 +702,15 @@ function render() {
  // a tablet who has never hovered anything still reads the description once,
  // before the target is chosen and the year is spent.
  const armed = ARM ? [].concat(FG.TEACH, DIVINE, CIVIC).find(s => s.id === ARM) : null;
+ // 1.16 / 1.17. Name the price beside the instruction, and only when some tile
+ // on the board actually carries it — a warning that is always there is read as
+ // decoration within about three years.
+ const dash = ARM && toll.size
+   ? "  ·  A dashed tile is beyond your hearing: " + Math.round(FG.R2TUNE.dreamToll * 100)
+     + "% of you, for good."
+   : "";
  HINT = G.over ? "" : ARM ? (armed ? armed.d + "  ·  " : "")
-    + "Choose an outlined tile, or press the chip again to put it down."
+    + "Choose an outlined tile, or press the chip again to put it down." + dash
   : a ? (pvp() && SEAT === 0 ? "Acted this year. You may still intervene, then hand over."
                              : "Acted this year. You may still intervene, then end the year.")
   : walk === 0 ? "There is nowhere you can walk from here."
@@ -767,14 +782,17 @@ cbl.querySelector("input").onchange = e => { FG.SOFT = e.target.checked; render(
 // restarts from the same seed. Flags that are declared but not yet implemented
 // are shown and marked, rather than hidden — a switch that does nothing is less
 // confusing than a rule nobody can find.
-const R2BUILT = ["logistic", "teaching", "taughtLoss", "audible77", "fade", "exitLane"];
+const R2BUILT = ["logistic", "teaching", "taughtLoss", "audible77", "fade", "exitLane",
+                 "dreamTeach", "dreamWorks"];
 const R2LABEL = {
- logistic:"growth is logistic; terrain sets the ceiling", teaching:"tilling and killing are taught, in person",
+ logistic:"growth is logistic; terrain sets the ceiling", teaching:"tilling and killing are taught",
  taughtLoss:"a wonder goes on teaching, not at 150", audible77:"under seventy-seven, they bless the ground",
  split2:"split reaches two tiles, to your blessing", fade:"you may walk the fields, at 10% of you a year",
  unmake:"taking their blessing returns it to wild", encircle:"a ring of blessing takes a place",
  landGates:"works open on tilled land, not on numbers", pathFrac:"distance is measured by road",
- barren3:"withered ground stays barren three years", exitLane:"the fields never quite close over"
+ barren3:"withered ground stays barren three years", exitLane:"the fields never quite close over",
+ dreamTeach:"you may teach where you are heard, at 10% of you", 
+ dreamWorks:"a work beyond your hearing costs 10% of you"
 };
 const r2w = $("r2"), R2SEED = {v: 1};
 Object.keys(FG.R2).forEach(k => {
@@ -787,8 +805,8 @@ Object.keys(FG.R2).forEach(k => {
 function r2sync() {
  r2w.querySelectorAll("[data-r2]").forEach(i => { i.checked = FG.R2[i.dataset.r2]; });
  const on = R2BUILT.filter(k => FG.R2[k]).length;
- $("r2state").textContent = on === 0 ? "the shipped game — design/rules.md as written"
-  : on === R2BUILT.length ? "the August batch, whole — OP-19 and OP-20"
+ $("r2state").textContent = on === 0 ? "the old game — design/rules.md before the batch"
+  : on === R2BUILT.length ? "the August batch, whole — this is the game"
   : on + " of " + R2BUILT.length + " built rules on";
 }
 // Same seed, so the only difference between two runs is the rules.

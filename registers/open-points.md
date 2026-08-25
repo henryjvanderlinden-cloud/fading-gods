@@ -267,6 +267,32 @@ rather than a gate, and every unlock becomes something you can see.
 **This puts A-13 back on the table.** The works' population costs — 10% / 35% /
 45% — were priced against the ladder that is being removed. Re-measure them.
 
+### `landGates` was never built, and with the batch now on by default that matters
+
+Read from the code, August 2026. This entry says *OP-19 removes both gates*. It
+does not, and it never did: `landGates` is a declaration in `FG.R2` that nothing
+in `engine/` reads. `civicOpen()` still gates on
+`civicStrength = settlements≥150 + settlements≥800` at 5 / 7 / 9, and `targets()`
+still checks per-settlement population at 150 / 200 / 300.
+
+Harmless while the batch was off. Not harmless now, because **`logistic` moved
+both distributions underneath those numbers and nobody re-pointed them:**
+
+- An untaught settlement is asymptotic to `kWild` = 150 and **never reaches it**,
+  so it never counts toward `bigCount`. A pure refuser therefore has
+  `civicStrength` 0 for forty years and can never open a work at all. That is
+  arguably the right outcome and it is certainly not a *decision* anybody took.
+- A taught settlement now tops out at 600–1000 against the old 2600 clamp, so
+  `hugeCount` — settlements past 800 — is nearly unreachable off good plain.
+  The 5 / 7 / 9 ladder was priced when cities routinely passed 800.
+
+So the works are gated behind teaching implicitly, hard, and by accident. This is
+the same shape as the stone brake OP-19 found subtracting from zero: a formula
+that was correct under the old growth model and quietly is not under the new one.
+
+**Settled by:** building `landGates` — which is what this entry has claimed was
+already done since it was written — and re-measuring A-13 against it.
+
 ## OP-06 · high · Does an ascetic strategy ever win?
 
 **Raised from medium.** Re-measured against the game itself, Bands wins 8% against
@@ -617,10 +643,45 @@ Flags are declared in `FG.R2` and do nothing yet.
 | `pathFrac` | See A-18 | |
 | `unmake`, `encircle` | See OP-16, OP-20 | |
 
-### What has to be decided before this can be measured again
+### Answered, August 2026 — and by a fifth candidate none of the four below is
 
-Teaching-in-person is the design intent and it is not in question. *Where* the
-teaching happens is:
+**`dreamTeach`, built and on by default.** Rick's tactic in play is a magical
+enclave sealed behind mountains and water plus an agricultural arm out in the
+open competing with the rival, and it exposed the real shape of this question:
+the two halves of that game cannot be walked between, because the agricultural
+half ploughs itself shut. Every candidate below answers that by weakening
+presence. This one keeps presence and moves it.
+
+**Teaching reaches wherever a wonder reaches** — beside you, or within range of a
+working stone. It is free in person and costs **10% of your manifestation,
+permanently**, at range. The lore did not have to bend for it: OP-16 already
+draws the line at *creation at a distance, unmaking only in person*, and teaching
+is creation. What the old rule had was not a principle but an accident of which
+functions happened to exist.
+
+**The second price is the good part and nobody had to write it.** Teaching them
+to till makes them plough; ploughing eats the blessed ground a stone stands in; a
+stone under `MINREG` stops working; and a working stone is what carried the
+dream. Teaching at range destroys the channel that carried it. No cap, no
+counter, no timer — A-10 is untouched.
+
+Measured: it moves no win rate at 30 games a cell, which is the expected null and
+the same one `taughtLoss` and `audible77` returned, for the same reason — a
+one-ply chooser does not value its own body. What it does move is the drain.
+Cities and Mixed arrive at year forty with **0.54 and 0.49 of themselves**;
+Haunt and Bands never pay it at all, because they never teach. Full numbers in
+`design/rules.md` §11.
+
+**This is the first thing that makes OP-14's zero state reachable**, and that is
+worth as much as the answer to this question. See OP-14.
+
+**Still open, and only a person can close it:** whether the drain reads as a
+decision or as a punishment. That is OP-21's instrument, not the harness's.
+
+### The four candidates this replaces, kept for the record
+
+Teaching-in-person was the design intent and was not in question. *Where* the
+teaching happens was:
 
 - **At founding.** You decide, as you put the settlement down, whether these people
   will till. No journey, no entombment, and the decision stays conscious and
@@ -968,6 +1029,38 @@ exchange is a decision.
 
 **Settled by:** the matrix, plus the three full games OP-03 already asks for.
 Expect the magical side to gain, which is the direction OP-06 wants anyway.
+
+### The sub-question is now reachable, August 2026
+
+*What happens at zero* has been the open half of this entry since it was raised,
+and it has been safe to defer for a plain reason: **nothing in the game spent the
+stock fast enough for anyone to get there.** The trespass toll only bites a
+player who chooses to stand in someone else's fields at year's end, and 194
+stones' worth of measurement says that is rare.
+
+`dreamTeach` and `dreamWorks` change that. Teaching and ordering at range spend
+the same stock at the same rate, and they are things a settled player does
+several times a game rather than by accident. Measured over 40 games: Cities
+finishes with **0.54** of itself and Mixed with **0.49**, against 0.94 and 0.89
+for the two refusing doctrines. A player leaning on the dream harder than the AI
+does — which is the whole reason the rule was asked for — reaches zero well
+inside forty turns.
+
+So the two halves of this entry can now be decided on evidence rather than
+argument:
+
+- **The slope is in and is the shipped behaviour** — three tiles at full, two at
+  two thirds, one at a third, never less than one. It was written that way
+  already; it has simply never been felt before.
+- **What zero *is* remains undecided and is now urgent.** Today it is one
+  movement point forever, which is the punishment reading. The alternative in
+  this entry — you lose the body and keep playing as stones, works and score,
+  a network with no location — is the one that makes the administrative-interface
+  ambition in `concept/` literal. It wants OP-13 built first, or the end state
+  contains nothing to do.
+
+**Settled by:** playing a game that deliberately spends itself down to nothing,
+which is now possible and was not before.
 
 ## OP-15 · medium · Endings as an unscored reading of the final board
 

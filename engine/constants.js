@@ -54,38 +54,90 @@ FG.SOFT = false;
 FG.HANDICAP = 0;
 
 // --- R2: the August 2026 batch ------------------------------------------
-// OP-19 and OP-20, plus the smaller rules settled alongside them. Every one is
-// off by default, and with all of them off this engine plays exactly the game
-// described in design/rules.md — that is the A/B baseline and it is worth
-// keeping true.
+// OP-19 and OP-20, plus the smaller rules settled alongside them.
 //
-// Individually toggleable on purpose. The working method in the README is
-// argue, simulate, then build, and a single master switch over eleven rules
-// cannot tell you which of the eleven moved a number. Turn them on one at a
-// time when measuring, all at once when playing.
+// **The built rules are now on by default.** Rick played the batch across
+// several games in August 2026 and reported it a clear improvement, which is
+// the evidence class this project ranks above the matrix for anything about
+// choices. The batch stops being an experiment and becomes the game.
 //
-//   FG.R2all(true);  node sim/matrix.js 40 40 cities
-//   FG.R2all(false); node sim/matrix.js 40 40 cities     // the same seeds
+// Two consequences, and neither is a detail:
+//
+// 1. `design/rules.md` is now the *old* rules for everything below that is
+//    true. It is being caught up in the same commit; if these two ever
+//    disagree again, this file is what runs and the design doc is wrong.
+// 2. The A/B baseline still exists and is still exact — `FG.R2all(false)`
+//    plays the pre-batch game, and every flag below is still individually
+//    toggleable, which is what leave-one-out needs.
+//
+//   FG.R2all(false); node sim/matrix.js 40 40 cities     // the old game
+//   FG.R2all(true);  node sim/matrix.js 40 40 cities     // the same seeds
 //
 // Set before a run and put back afterwards — like FG.SOFT and FG.CONTEST,
 // these are not reset between games.
+//
+// **The six `false` entries are false because they are unbuilt**, not because
+// they were measured and declined. Nothing in engine/ reads them. They are
+// declarations of intent, kept here so the numbering does not move; turning one
+// on today changes nothing at all. Do not read this block as eight rules that
+// won and six that lost.
 FG.R2 = {
- logistic:   false,  // 1.2   logistic growth; K set by teaching and terrain
- teaching:   false,  // 1.3   tilling and killing, taught per settlement
- taughtLoss: false,  // 1.4   the wonder goes on teaching, not at pop 150
- audible77:  false,  // 1.5   settlements under 77 bless the ground round them
- split2:     false,  // 1.6   split targets your blessing at path distance 2
- fade:       false,  // 1.7   reckoned ground enterable at 10% a year (OP-14)
- unmake:     false,  // 1.8   taking their blessing returns it to wild (OP-16)
- encircle:   false,  // 1.9   a ring of blessing takes a settlement; the taboo
- landGates:  false,  // 1.10  works unlock on tilled land, not on population
- pathFrac:   false,  // 1.11  blessFrac counts path distance (A-18)
- barren3:    false,  // 1.12  withered ground stays barren three years
- exitLane:   false   // 1.15  the fields close slowly, and never seal a place in
+ logistic:   true,   // 1.2   logistic growth; K set by teaching and terrain
+ teaching:   true,   // 1.3   tilling and killing, taught per settlement
+ taughtLoss: true,   // 1.4   the wonder goes on teaching, not at pop 150
+ audible77:  true,   // 1.5   settlements under 77 bless the ground round them
+ split2:     false,  // 1.6   UNBUILT — split targets blessing at path distance 2
+ fade:       true,   // 1.7   reckoned ground enterable at 10% a year (OP-14)
+ unmake:     false,  // 1.8   UNBUILT — taking their blessing returns it to wild
+ encircle:   false,  // 1.9   UNBUILT — a ring of blessing takes a settlement
+ landGates:  false,  // 1.10  UNBUILT — works unlock on tilled land, not on pop
+ pathFrac:   false,  // 1.11  UNBUILT — blessFrac counts path distance (A-18)
+ barren3:    false,  // 1.12  UNBUILT — withered ground stays barren three years
+ exitLane:   true,   // 1.15  the fields close slowly, and never seal a place in
+
+ // OP-19, the fifth answer to *where does teaching happen* — August 2026, and
+ // it is the one the register never considered. The four candidates on the
+ // table were all compromises on presence. This one keeps presence and moves
+ // it: you may teach wherever you can still be heard, which is exactly where a
+ // wonder already reaches — beside you, or within range of a working stone.
+ //
+ // A dream, in other words, travelling down the channel your voice already
+ // travels down. `concept/lore.md` needs no amendment for it; OP-16's
+ // *creation at a distance, unmaking only in person* already draws the line,
+ // and teaching is creation.
+ //
+ // The price is `dreamToll` below, and the second price is free: teaching them
+ // to till makes them plough, ploughing eats the blessed ground a stone stands
+ // in, and a stone below MINREG stops working. **Teaching at range destroys
+ // the channel that carried it.** Nothing had to be written for that; it falls
+ // out of rules that were already here, and it is the whole thesis in one loop.
+ dreamTeach: true,   // 1.16  teach within divineReach; a toll if not in person
+
+ // The same rule for the works, and it is a *nerf*, which is worth being loud
+ // about because it does not look like one. Clearance, colony and levy already
+ // reach anywhere on the board for free — `targets()` builds them from the
+ // settlement outward and never consults where the player is standing. So this
+ // does not grant the works a range they lacked. It charges them for the range
+ // they always had, when it exceeds the country you can still be heard in.
+ //
+ // Late on, you stop performing miracles and start issuing orders, and issuing
+ // orders into country that cannot hear you is what wears you away. That is the
+ // arc, and it is the first thing in the game that makes the settled doctrine
+ // pay a price in *you* rather than in people.
+ dreamWorks: true    // 1.17  a toll on a work aimed outside divineReach
 };
 
 FG.R2all = function (on) {
  Object.keys(FG.R2).forEach(k => { FG.R2[k] = !!on; });
+ return FG.R2;
+};
+
+// The batch as it actually runs: the built rules on, the unbuilt ones off.
+// `FG.R2all(true)` sets the unbuilt flags too, which is harmless today and will
+// stop being harmless the moment one of them is written. Prefer this.
+FG.R2built = function (on) {
+ ["logistic","teaching","taughtLoss","audible77","fade","exitLane",
+  "dreamTeach","dreamWorks"].forEach(k => { FG.R2[k] = !!on; });
  return FG.R2;
 };
 
@@ -102,6 +154,7 @@ FG.R2TUNE = {
  encircle: 2,     // years a settlement must stay ringed before it changes hands
  spread1:  1,     // tiles a settlement ploughs a year in its own first ring
  toll:     0.10,  // of your corporeal being, for ending a year in their fields
+ dreamToll: 0.10, // ...and for saying something in country you are not standing in
  mp:       3      // movement at full manifestation
 };
 

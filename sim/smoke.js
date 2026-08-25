@@ -157,7 +157,11 @@ try {
  const $$ = id => doc.getElementById(id);
  const chips = id => Array.prototype.slice.call($$(id).children);
 
- ok("no teachings until the rule is on", chips("teach").length === 0);
+ // The batch is on by default as of the 1.16 commit, so the teachings are on the
+ // page from the first frame. The assertion that matters is the same one it
+ // always was — the row follows the rule — so it is checked in both directions
+ // here rather than deleted, and the both-directions version is further down.
+ ok("the teachings are there with the batch on", chips("teach").length === 2);
  ok("the works begin locked", chips("civic").every(c => c.classList.contains("off")));
  ok("a locked work says what it needs", /strength/.test(chips("civic")[0].dataset.why),
     chips("civic")[0].dataset.why);
@@ -198,6 +202,71 @@ try {
  $$("restart").click();
  ok("and go away with it",
     chips("teach").length === 0 && $$("ivlteach").style.display === "none");
+
+ // --- 1.16 / 1.17: the toll is shown before it is spent ------------------
+ // The whole mechanic is that it is a decision, and a decision needs the price
+ // visible at the moment of choosing. A dashed outline is how the board says
+ // *this one is said, not done*; if a tidy-up ever drops the dasharray the game
+ // still looks right and quietly starts charging people without warning them.
+ win.FG.R2built(true);
+ $$("restart").click();
+ const GG = win.FG.G, ME = 0;
+ // put a stone in a blessed blob with a settlement out at its edge, and stand
+ // the token somewhere else entirely
+ const c = win.FG.K(4, 4);
+ win.FG.ring(c, 2).forEach(x => { const q = win.FG.T(x);
+  if (!win.FG.impassable(q)) { q.st = "bless"; q.own = ME; q.set = null; } });
+ GG.stones[ME] = [c];
+ const far = win.FG.ring(c, 2).filter(x => x !== c)[0];
+ win.FG.T(far).set = win.FG.newSet(120, ME); win.FG.T(far).st = "wild"; win.FG.T(far).own = null;
+ GG.p[ME].pos = win.FG.K(11, 7);
+ GG.p[ME].cast = false;
+
+ ok("a dream reaches a settlement you are not standing near",
+    win.FG.teachTargets("till", ME).indexOf(far) >= 0);
+ ok("and it is marked as costing something", win.FG.tolled("till", far, ME));
+
+ // The chips were built by the render that ran on restart, before the board was
+ // arranged above, so the teaching chip is still marked dead. Re-render without
+ // restarting by poking the one control that does exactly that and nothing else
+ // — the walls checkbox, left as it was found, so no state moves.
+ $$("sf").checked = false; $$("sf").onchange({target: $$("sf")});
+
+ const teachChip = chips("teach").filter(b => b.dataset.iv === "till")[0];
+ teachChip.click();
+ const svg = $$("map").innerHTML;
+ ok("the tolled tile is outlined dashed", /stroke-dasharray/.test(svg));
+ ok("and the hint names the price before the tile is chosen",
+    /beyond your hearing/.test($$("hint").textContent), $$("hint").textContent);
+
+ const body0 = GG.p[ME].body;
+ win.FG.doIntervene("till", far, ME);
+ ok("teaching by dream costs a tenth of you",
+    Math.abs(body0 - GG.p[ME].body - win.FG.R2TUNE.dreamToll) < 1e-9,
+    body0 + " -> " + GG.p[ME].body);
+
+ // ...and the same thing in person is free, which is the half that makes it a
+ // decision rather than a tax on teaching.
+ win.FG.T(far).set.taught = false;
+ GG.p[ME].pos = far;
+ const body1 = GG.p[ME].body;
+ ok("teaching in person is free", !win.FG.tolled("till", far, ME));
+ win.FG.doIntervene("till", far, ME);
+ ok("and takes nothing", Math.abs(body1 - GG.p[ME].body) < 1e-9);
+
+ // The flag put back exactly restores the older, stricter rule. This is the
+ // A/B baseline the whole register depends on, so it is asserted, not assumed.
+ win.FG.R2.dreamTeach = false;
+ win.FG.T(far).set.taught = false;
+ GG.p[ME].pos = win.FG.K(11, 7);
+ ok("with the flag off, teaching is in person again",
+    win.FG.teachTargets("till", ME).length === 0);
+
+ // Put the batch back where the rest of this section found it. Everything below
+ // was written against the pre-batch rules and still measures them; that is on
+ // purpose, and it is the only place the old game is still exercised end to end.
+ win.FG.R2all(false);
+ $$("restart").click();
 
  // A doctrine that founds, so that wonders are actually lost — a player who only
  // blesses never loses one, and the interesting assertion needs them gone.

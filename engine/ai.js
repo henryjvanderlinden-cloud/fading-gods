@@ -30,6 +30,27 @@ const DOCTRINE = {
  passive:null
 };
 
+// 1.16 / 1.17. Prefer a target that costs no body over one that does, and fall
+// back to the whole list when every target costs.
+//
+// Recorded as an AI change rather than slipped in, because OP-01 says a twelve-
+// line change to this chooser was once worth 35 percentage points — more than
+// any rule in the August batch. This one is deliberately not an improvement in
+// judgement: it does not weigh a piece of the body against a settlement's whole
+// future, which is the decision a player actually makes and which this chooser
+// remains structurally unable to see. It only stops the AI paying a toll it had
+// no reason to pay, when a free target was sitting in the same list. Without it
+// the matrix measures the tariff against an opponent that spends its body at
+// random, which is a measurement of nothing.
+//
+// The real version of this decision is unmeasurable here for the same reason
+// `taughtLoss` and `audible77` measure at exactly zero. See OP-01, and OP-21 —
+// two people at one board is the instrument that reads it.
+const free = (id, tg, who) => {
+ const cheap = tg.filter(k => !FG.tolled(id, k, who));
+ return cheap.length ? cheap : tg;
+};
+
 function aiTurn(who) {
  const doc = FG.G.p[who].doc;
  if (!doc || doc === "passive") return;
@@ -98,7 +119,7 @@ function aiTurn(who) {
    if (id === "till" && FG.rand() > w[id]) continue;   // mixed teaches some, not all
    // not before the place is judged ready — teaching ploughs the blessing that
    // the next founding needs
-   const tg = targets(id, who).filter(k => T(k).set.pop >= (w.tillAt || 0));
+   const tg = free(id, targets(id, who).filter(k => T(k).set.pop >= (w.tillAt || 0)), who);
    if (tg.length) { doIntervene(id, tg[0], who); return; }
   }
  }
@@ -107,7 +128,7 @@ function aiTurn(who) {
  const cv = civicOpen(who);
  for (const id of ["levy", "colony", "clear"]) {
   if (!cv.includes(id)) continue;
-  const tg = targets(id, who);
+  const tg = free(id, targets(id, who), who);
   if (tg.length) {
    let p = tg[0];
    if (id === "levy") p = tg.reduce((a, b) => T(a).set.pop >= T(b).set.pop ? a : b);

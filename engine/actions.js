@@ -49,14 +49,46 @@ function doAct(kind, who) {
 }
 
 // --- interventions ------------------------------------------------------
+
+// 1.16 / 1.17. The toll for saying a thing in country you are not standing in.
+//
+// The same currency as OP-14's trespass toll and deliberately the same rate:
+// there is one stock called *what is left of you*, and everything that spends it
+// spends it at the same price, so the player has one number to reason about
+// rather than a tariff. It is permanent, it is never refunded, and nothing in
+// the game puts any of it back — which is the whole reason it is the right
+// currency for this. A wonder you lose is gone; a piece of you is gone the same
+// way.
+//
+// Charged once per intervention, and a year holds one intervention, so the
+// ceiling is 10% a year from this and another 10% from standing in their
+// furrows. Ten years of ruling entirely by dream and there is nothing left of
+// you at all. What *happens* then is still OP-14's open sub-question — today
+// movement floors at one tile and you keep playing — but until now nothing in
+// the game spent the stock fast enough for anyone to reach the question.
+function payDream(who, kind) {
+ const p = FG.G.p[who];
+ if (p.body === undefined) p.body = 1;
+ const before = FG.manifestMp(who);
+ p.body = Math.max(0, p.body - FG.R2TUNE.dreamToll);
+ if (who !== 0) return;
+ say(kind === "teach"
+   ? "It came to them in a dream, and it cost you something to send it."
+   : "You made yourself heard where you were not standing, and it cost you.", "bad");
+ if (p.body <= 0)  say("There is nothing left of you to spend. You are a voice and a set of places.", "bad");
+ else if (FG.manifestMp(who) < before) say("You do not cover the ground you used to.", "bad");
+}
+
 function doIntervene(id, k, who) {
  const me = who === 0, t = T(k);
 
- // OP-19. Teaching. Nothing is deducted and nothing is spent — the price of
- // tilling is a wonder, and it is charged by lostCount() reading the board.
+ // OP-19. Teaching. No people are deducted — the price of tilling is a wonder,
+ // and it is charged by lostCount() reading the board. 1.16 adds the second
+ // price, and only when the teaching is done at range.
  if (id === "till" || id === "kill") {
   if (!FG.R2.teaching) return false;
   if (!FG.teachTargets(id, who).includes(k)) return false;
+  if (FG.tolled(id, k, who)) payDream(who, "teach");
   if (id === "till") {
    t.set.taught = true;
    say(me ? "You show them the plough, and they take to it. The ground will answer them now."
@@ -113,6 +145,20 @@ function doIntervene(id, k, who) {
   // works — the price is paid by the settlement that orders them
   const src = nearestSource(id, k, who);
   if (!src) return false;
+
+  // 1.17. And a second price, paid by you, when the work is aimed outside the
+  // country you can be heard in. Note the test is divineReach and not atRange:
+  // a work does not need you present — it never did, and `targets()` above has
+  // always built the works from the settlement outward without consulting where
+  // you are standing. What it needs is for the order to arrive. Inside your own
+  // blessing and your stones' range it arrives for nothing. Beyond that you have
+  // to make yourself heard, and that is what wears you away.
+  //
+  // This is the first rule in the game that charges the settled doctrine in
+  // *you* rather than in people, and it is the arc stated as a cost: early you
+  // point at the ground, late you issue orders, and the orders are what use you
+  // up.
+  if (FG.tolled(id, k, who)) payDream(who, "order");
 
   if (id === "clear") {
    src.t.set.pop *= 0.9;
