@@ -18,6 +18,15 @@ const {COLS, ROWS, DIVINE, CIVIC, T, ring, reach, score, targets, region,
 const SZ = 50, W = Math.sqrt(3) * SZ, VS = 1.5 * SZ, U = SZ / 24;
 const BW = W * (COLS + 0.5) + 8 * U, BH = VS * (ROWS - 1) + 2 * SZ + 8 * U;
 let ARM = null;   // the intervention currently armed, awaiting a target
+// OP-23. The hint line is now shared: render() computes what it says by default,
+// and hovering or pressing a chip borrows it to describe that intervention. The
+// descriptions used to sit under every name in a column; there is no room for
+// them in a row and no tooltip that works on a tablet, so they go here instead.
+let HINT = "";
+function showHint(t) {
+ const h = document.getElementById("hint");
+ if (h) h.textContent = t === undefined ? HINT : t;
+}
 let LAND = {key: null, html: ""};   // cached land layer, see render()
 
 // OP-21. The seat whose year this is. In a single-player game it is always 0
@@ -568,36 +577,57 @@ function render() {
   + (FG.R2.fade ? ` · ${Math.round(FG.manifest(ME) * 100)}% of you left` : "")
   + (G.p[ME].cast ? " · intervened" : "");
 
- // OP-19. The teachings — neither wonders nor works, and only present at all
- // when the rule is on. Drawn first, because they are the decision the batch is
- // about and they are done in person rather than called from anywhere.
+ // OP-23. One chip each, in three groups, and nothing is ever removed from the
+ // row: a lost wonder keeps its place struck through and a work that has not
+ // opened keeps its place dim. That is the point of the row rather than a
+ // consequence of it — see the note in index.html.
+ //
+ // Off by class rather than by the disabled attribute, because a disabled
+ // button fires no pointer events and a chip that cannot be used still has to
+ // be able to say why. That is also what makes this work on a tablet with no
+ // tooltips: arming was always two-step, so the description arrives in the step
+ // where the target is chosen, before anything has been spent.
+ const spent = G.p[ME].cast || G.over;
+ const chip = (s, kind, live, n, why, gone) =>
+  `<button class="chip ${kind}${live ? "" : " off"}${gone ? " gone" : ""}${ARM === s.id ? " on" : ""}"`
+  + ` data-iv="${s.id}" data-why="${why.replace(/"/g, "&quot;")}">${s.n}`
+  + (live && n ? `<sup>${n}</sup>` : "") + "</button>";
+ const busy = "You have already intervened this year.";
+
+ // OP-19. The teachings — neither wonders nor works, and only there at all when
+ // the rule is on. First in the row, because they are what the batch is about.
+ $("ivlteach").style.display = FG.R2.teaching ? "" : "none";
  $("teach").innerHTML = !FG.R2.teaching ? "" : FG.TEACH.map(s => {
   const n = targets(s.id, ME).length;
-  return `<li><span class="nm">${s.n}</span><span class="ds">${s.d}</span>
-   <button style="margin-top:5px" class="${ARM === s.id ? "arm" : ""}"
-    ${(G.p[ME].cast || G.over || !n) ? "disabled" : ""} data-iv="${s.id}">
-    ${ARM === s.id ? "choose a settlement" : (n ? "teach · " + n : "none of yours in reach")}</button></li>`;
+  return chip(s, "tch", !spent && !!n, n,
+   spent ? busy : n ? "" : "None of yours is in reach.", false);
  }).join("");
 
  const open = civicOpen(ME);
  $("divine").innerHTML = DIVINE.map((s, i) => {
   const gone = i < lostN, n = gone ? 0 : targets(s.id, ME).length;
-  return `<li class="${gone ? "gone" : ""}"><span class="nm">${s.n}</span><span class="ds">${s.d}</span>
-   ${gone ? "" : `<button style="margin-top:5px" class="${ARM === s.id ? "arm" : ""}"
-    ${(G.p[ME].cast || G.over || !n) ? "disabled" : ""} data-iv="${s.id}">
-    ${ARM === s.id ? "choose a tile" : (n ? "call · " + n : "nothing in reach")}</button>`}</li>`;
+  return chip(s, "div", !gone && !spent && !!n, n,
+   gone ? "Gone, and it does not come back." : spent ? busy : n ? "" : "Nothing in reach.", gone);
  }).join("");
+
  $("civic").innerHTML = CIVIC.map((s, i) => {
   const need = [TUNE.t1.v, TUNE.t2.v, TUNE.t3.v][i], ok = open.includes(s.id);
   const n = ok ? targets(s.id, ME).length : 0;
-  return `<li class="${ok ? "" : "gone"}"><span class="nm">${s.n}</span><span class="ds">${s.d}</span>
-   ${ok ? `<button style="margin-top:5px" class="${ARM === s.id ? "armc" : ""}"
-    ${(G.p[ME].cast || G.over || !n) ? "disabled" : ""} data-iv="${s.id}">
-    ${ARM === s.id ? "choose a tile" : (n ? "do it · " + n : "nothing in range")}</button>`
-   : `<span class="ds" style="color:var(--faint)">needs strength ${need}</span>`}</li>`;
+  return chip(s, "civ", ok && !spent && !!n, n,
+   !ok ? "Not yet — this needs strength " + need + "." : spent ? busy : n ? "" : "Nothing in range.", false);
  }).join("");
+
+ const IV = {};
+ [].concat(FG.TEACH, DIVINE, CIVIC).forEach(s => { IV[s.id] = s; });
  document.querySelectorAll("[data-iv]").forEach(b => {
-  b.onclick = () => { ARM = ARM === b.dataset.iv ? null : b.dataset.iv; render(); };
+  const s = IV[b.dataset.iv], live = !b.classList.contains("off");
+  const say = () => showHint(live ? s.d : (b.dataset.why || s.d));
+  b.onclick = () => {
+   if (!live) { say(); return; }
+   ARM = ARM === b.dataset.iv ? null : b.dataset.iv; render();
+  };
+  b.onmouseenter = say; b.onfocus = say;
+  b.onmouseleave = () => showHint(); b.onblur = () => showHint();
  });
  // Arming an intervention that has exactly one target still needs the tile
  // chosen, so hand-over is checked after the target is taken, not here.
@@ -660,12 +690,18 @@ function render() {
  const hint = $("hint");
  hint.className = "hintline" + (ARM ? " arm" : "");
  const sb = stoneBlock(k, ME), fb = foundBlock(k, ME);
- hint.textContent = G.over ? "" : ARM ? "Choose an outlined tile, or press the button again to put it down."
+ // The armed chip says what it is as well as what to do with it, so a player on
+ // a tablet who has never hovered anything still reads the description once,
+ // before the target is chosen and the year is spent.
+ const armed = ARM ? [].concat(FG.TEACH, DIVINE, CIVIC).find(s => s.id === ARM) : null;
+ HINT = G.over ? "" : ARM ? (armed ? armed.d + "  ·  " : "")
+    + "Choose an outlined tile, or press the chip again to put it down."
   : a ? (pvp() && SEAT === 0 ? "Acted this year. You may still intervene, then hand over."
                              : "Acted this year. You may still intervene, then end the year.")
   : walk === 0 ? "There is nowhere you can walk from here."
   : (fb && fb.indexOf("%") > 0 ? "Cannot found here: " + fb + "."
    : sb && sb.indexOf("connected") > 0 ? "No stone here: " + sb + "." : fb ? "Cannot found here: " + fb + "." : "");
+ showHint();
 }
 
 function finish() {

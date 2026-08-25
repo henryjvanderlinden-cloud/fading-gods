@@ -1146,15 +1146,30 @@ points in landscape**, which is the orientation this is meant to be played in; a
   kept the two-column layout and drew a 792px board — hexes at 31 for art authored
   at 50. Moved to 1280.
 - **Height, not width, is the binding constraint, and it does not fit.** Landscape
-  gives about 745 points of viewport under Safari's chrome. A full-width board at
-  1154 is 650 of them, leaving 95 for a header, a stat bar, a key, two control
-  rows and a hint line, which need about 275. Something has to give, and it is the
-  board: its column is now capped at `(100vh − 250px) × 1.775`, so the controls are
-  always on screen and the hexes shrink instead. On the iPad that lands around 880
-  wide — hex 35 — which is a real loss and the honest trade.
+  gives about 745 points of viewport under Safari's chrome. Measured in a real
+  browser at 1194 × 745: header 81, stat bar 64, key 29, act row 52, chip row 60,
+  hint 26 — **312 points of chrome**, leaving 433 for a board whose aspect is
+  1.775. A board that fits is 769 wide. Hex 30, for art authored at 50.
+
+So the board's column is capped by the height available rather than by the window
+— `min(1272px, max(880px, (100vh − 340px) × 1.775))` — **and the 880 floor is
+there deliberately.** Without it the arithmetic runs away: shrinking the board
+narrows the chip row, which wraps onto more lines, which demands a smaller board.
+Two iterations of that put the board at 719 in a 1154 window, a postage stamp
+inside empty margins, which is worse than a short scroll. The floor stops it.
+
+**What the trade actually is, measured rather than argued.** On an 11-inch iPad in
+landscape the board is **880 wide — hex 35, against 792 and hex 31 before this
+change** — the stat bar, the whole board and the act row are above the fold, and
+the chip row and hint line sit about 60 points below it. On a 1440 × 900 laptop
+and anything larger, everything fits with room to spare. That is better than the
+build had, and it is not what this set out to do, which was everything visible at
+once. A 14 × 9 board at a readable hex size plus two control rows does not fit in
+745 points, and no amount of layout makes it.
 
 **Also settled by playing**, on the device, in landscape. The three candidates if
-hex 35 reads badly are a shorter header, folding the key into `what this is`, and
+hex 35 reads badly are folding the key into `what this is` (29 points), shortening
+the intervention names so the chip row holds one line (up to 60), and
 `design/rules.md` §1's grid — which is marked load-bearing at 14 × 9 and is
 therefore the last thing to touch, not the first.
 
