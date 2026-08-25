@@ -157,10 +157,34 @@ function menhir(x, y, h, w, seed, opt) {
    + ` stroke="${shift(opt.fill, -.42)}" stroke-width="${u(1).toFixed(1)}" fill="none"/>`;
  return s;
 }
-function stoneGroup(x, y, k, who, power) {
- const live = power >= 6, base = live ? (who === 0 ? "#E4DCC0" : "#DCD4C0") : "#7E8079";
+// 1.20. `live` is passed in rather than derived from `power` here, because what a
+// stone needs is now a property of the stone — see `stoneNeed` in rules.js. The
+// interface asking the engine is the fifth rule of this project; this function
+// having its own private copy of the number six is exactly the drift it names.
+function stoneGroup(x, y, k, who, power, live, crs) {
+ const base = live ? (who === 0 ? "#E4DCC0" : "#DCD4C0") : "#7E8079";
  let s = `<ellipse cx="${x}" cy="${y + u(9)}" rx="${u(12)}" ry="${u(3.4)}" fill="#000" opacity=".26"/>`;
+ // The courses the people have put on it: a stepped plinth under the stone, one
+ // low wide slab a course, widest at the bottom. Drawn under everything else so
+ // the stone itself sits on top of what was built up to it, and drawn on a dead
+ // stone as well as a live one — the masonry does not fall down when the country
+ // goes quiet, and a grown stone standing silent in a field is the picture the
+ // rule is for.
+ // Measured by looking at it, which is the only way to measure this: the first
+ // version was near-black and one course was indistinguishable from two. So the
+ // slabs are the stone's own colour a shade down, they step inward by a clear
+ // margin, and each one is tall enough to read at the size a hex actually is.
+ for (let i = 0; i < (crs || 0); i++) {
+  const w = u(15.5 - i * 3.2), hh = u(3.4);
+  s += `<rect x="${(x - w).toFixed(1)}" y="${(y + u(8.6) - i * u(3.2)).toFixed(1)}"
+    width="${(w * 2).toFixed(1)}" height="${hh.toFixed(1)}" rx="${u(0.6).toFixed(1)}"
+    fill="${shift(base, -0.16 - i * 0.05)}" stroke="#000" stroke-width="${u(0.8).toFixed(1)}"/>`;
+ }
  const r = rng(k * 0.017 + 0.3);
+ // Everything above the plinth is lifted by what is under it, so a three-course
+ // stone reads as a taller thing and not as a stone with a box beside it.
+ const lift = u((crs || 0) * 3.2);
+ y -= lift;
  for (let i = 0; i < 3; i++)
   s += menhir(x - u(11) + i * u(11) + (r() - 0.5) * u(3), y + u(8) - (i === 1 ? u(2) : 0),
        u(5 + r() * 2.5), u(3.4), k * 0.31 + i, {fill: shift(base, -0.3)});
@@ -488,6 +512,12 @@ function render() {
  + (FG.R2.fade ? `<div class="c"><div class="l">of you</div><div class="v ${
      FG.manifest(ME) <= 0.35 ? "r" : FG.manifest(ME) < 1 ? "u" : ""
    }">${Math.round(FG.manifest(ME) * 100)}<span style="font-size:13px;color:var(--faint)">%</span></div></div>` : "")
+ // 1.20 / 1.21. A second number about the stones, and it is the other half of the
+ // same object: what is still answering, and what is only relaying now. A player
+ // who has never read OP-13 should be able to watch a stone go from the first
+ // count to the second and work out for themselves what happened to it.
+ + (FG.R2.deadOrders && FG.deadStones(ME).length
+    ? `<div class="c"><div class="l">relays</div><div class="v u">${FG.deadStones(ME).length}</div></div>` : "")
  + `
  <div class="c"><div class="l">can walk to</div><div class="v ${walk <= 5 ? "r" : "m"}">${walk}</div></div>
  <div class="c"><div class="l">blessed</div><div class="v h">${S[ME].h}</div></div>
@@ -544,7 +574,8 @@ function render() {
  // stones — pale while they still answer, leaning and cracked when they do not
  [0, 1].forEach(who => G.stones[who].forEach(sk => {
   const t = T(sk), [x, y] = px(t.c, t.r);
-  over += `<g pointer-events="none">${stoneGroup(x, y, sk, who, region(sk, who).length)}</g>`;
+  over += `<g pointer-events="none">${stoneGroup(x, y, sk, who, region(sk, who).length,
+    FG.stoneWorks(sk, who), FG.R2.stonesGrow ? FG.courses(sk) : 0)}</g>`;
  }));
 
  // marching columns
@@ -629,13 +660,27 @@ function render() {
  });
 
  // the two powers, as figures
+ //
+ // 1.23 / OP-14. And they thin as they are spent. This is half of that rule and
+ // the half that is not arithmetic: the bar has always been able to say *34% of
+ // you* and a number in a corner is not a thing you feel. Both powers, because
+ // both pay the tolls and watching the other one go transparent is how you learn
+ // what the tolls are doing to them.
+ //
+ // Not behind `zeroSpent` — it is a drawing of `fade`'s stock and belongs
+ // wherever that stock exists. The shadow goes first and fastest, because a thing
+ // with no body casts nothing; at the bottom what is left is an outline standing
+ // in a field.
  [0, 1].forEach(w => {
   const t = T(G.p[w].pos), [x, y] = px(t.c, t.r), col = COL[w];
-  over += `<g pointer-events="none">
-   <circle cx="${x}" cy="${y}" r="${u(17)}" fill="none" stroke="#000" stroke-width="${u(3.6)}" opacity=".35"/>
+  const m = FG.R2.fade ? FG.manifest(w) : 1;
+  const op = (0.12 + 0.88 * m).toFixed(2);      // 100% -> 1.00, 10% -> 0.21, 0 -> 0.12
+  const sh = (0.3 * m * m).toFixed(2);          // the shadow goes first
+  over += `<g pointer-events="none" opacity="${op}">
+   <circle cx="${x}" cy="${y}" r="${u(17)}" fill="none" stroke="#000" stroke-width="${u(3.6)}" opacity="${(0.35 * m).toFixed(2)}"/>
    <circle cx="${x}" cy="${y}" r="${u(17)}" fill="none" stroke="${col}" stroke-width="${u(1.9)}"
     stroke-dasharray="${u(5)} ${u(3.4)}" opacity=".95"/>
-   <ellipse cx="${x}" cy="${y + u(9.6)}" rx="${u(7.5)}" ry="${u(2.2)}" fill="#000" opacity=".3"/>
+   <ellipse cx="${x}" cy="${y + u(9.6)}" rx="${u(7.5)}" ry="${u(2.2)}" fill="#000" opacity="${sh}"/>
    ${w === 0 ? figureF(x, y, col) : figureM(x, y, col)}</g>`;
  });
 
@@ -744,12 +789,13 @@ function render() {
  // be able to say why. That is also what makes this work on a tablet with no
  // tooltips: arming was always two-step, so the description arrives in the step
  // where the target is chosen, before anything has been spent.
- const spent = G.p[ME].cast || G.over;
+ const spent = G.p[ME].cast || G.over || FG.spent(ME);
+ const nothingLeft = FG.spent(ME) ? "There is nothing left of you. You may only watch." : null;
  const chip = (s, kind, live, n, why, gone) =>
   `<button class="chip ${kind}${live ? "" : " off"}${gone ? " gone" : ""}${ARM === s.id ? " on" : ""}"`
   + ` data-iv="${s.id}" data-why="${why.replace(/"/g, "&quot;")}">${s.n}`
   + (live && n ? `<sup>${n}</sup>` : "") + "</button>";
- const busy = "You have already intervened this year.";
+ const busy = nothingLeft || "You have already intervened this year.";
 
  // OP-19. The teachings — neither wonders nor works, and only there at all when
  // the rule is on. First in the row, because they are what the batch is about.
@@ -821,10 +867,22 @@ function render() {
    <span><i style="background:${COL[THEM]}"></i>${pvp() ? SEATNAME[THEM] : "them"}</span>
    <span><i style="background:#C9A24A"></i>where you can walk</span>`;
 
+ // 1.20 / 1.21. What each stone is, in its own words. `FG.stoneWorks` rather than
+ // `Pw < 6`, because a grown stone needs less than six and the interface must not
+ // keep a second copy of that number. A stone that has gone quiet now says what it
+ // does instead, which is the whole of OP-13 in four words.
  $("st").innerHTML = G.stones[ME].map((k, i) => {
-  const Pw = region(k, ME).length;
-  return `<li><span class="${Pw < 6 ? "dead" : "b1"}">stone ${i + 1} — ${Pw < 6 ? "gone quiet" : "holds one back"}</span>
-   <span>${Pw} tiles · reach ${Pw < 6 ? 0 : stoneRange(Pw)}</span></li>`;
+  const Pw = region(k, ME).length, live = FG.stoneWorks(k, ME);
+  const c = FG.R2.stonesGrow ? FG.courses(k) : 0;
+  const mound = FG.T(k).kur !== undefined && FG.T(k).kur !== null;
+  const what = live ? "holds one back"
+    : mound ? "a grave now"
+    : FG.R2.deadOrders ? "orders carry from it"
+    : "gone quiet";
+  return `<li><span class="${live ? "b1" : "dead"}">stone ${i + 1} — ${what}</span>
+   <span>${Pw} tiles${c ? " · " + c + " course" + (c > 1 ? "s" : "") : ""} · ${
+     live ? "reach " + stoneRange(Pw) : (FG.R2.deadOrders && !mound) ? "orders " + FG.R2TUNE.orderRange : "reach 0"
+   }</span></li>`;
  }).join("") || '<li style="color:var(--faint);border:none">none raised</li>';
 
  $("sl").innerHTML = G.T.filter(t => t.set).sort((a, b) => b.set.pop - a.set.pop)
@@ -847,7 +905,12 @@ function render() {
  // away. Only the label is written from here now.
  $("logsum").textContent = pvp() ? "what happened · told from the left hand" : "what happened";
 
- const k = G.p[ME].pos, a = G.p[ME].acted || G.over;
+ // 1.23 / OP-14. Nothing left of you: no move, no act, no intervention, for the
+ // rest of the game. `a` is what every button in the action row already reads, so
+ // folding it in here stops all four of them and the pass button with one word.
+ // The chips are stopped by `spent` a few lines down, on the same principle.
+ const gone = FG.spent(ME);
+ const k = G.p[ME].pos, a = G.p[ME].acted || G.over || gone;
  $("bless").disabled = a || !!ARM || !blessGain(k, ME);
  $("stone").disabled = a || !!ARM || !canStone(k, ME);
  $("found").disabled = a || !!ARM || !canFound(k, ME);
@@ -873,7 +936,10 @@ function render() {
  if (FG.R2.herds) {
   // Send is not an act, so it stays live after you have acted — the only button
   // in this row of which that is true, and it is true on purpose.
-  $("drive").disabled = G.over || !!ARM || !!ARMACT;
+  // Send is not an act, so it stays live after you have acted — but 1.23 stops it
+  // like everything else. Steering costs nothing, and there is nobody left to do
+  // the steering.
+  $("drive").disabled = G.over || gone || !!ARM || !!ARMACT;
   $("drive").classList.toggle("armed", !!ARMHERD);
   $("stopherd").disabled = a || !!ARM || !!ARMACT || !!ARMHERD || !FG.canStop(mine);
   $("mound").disabled   = a || !!ARM || !!ARMACT || !!ARMHERD || !FG.canMound(mine);
@@ -905,6 +971,7 @@ function render() {
     ? "Say where they are to go. They walk a tile a year, over fields and through your own country, and not into anyone else's blessing."
   : ARM ? (armed ? armed.d + "  ·  " : "")
     + "Choose an outlined tile, or press the chip again to put it down." + dash
+  : gone ? "There is nothing left of you. The years still turn and the ground still changes hands, and you have no part in it now. End the year."
   : a ? (pvp() && SEAT === 0 ? "Acted this year. You may still intervene, then hand over."
                              : "Acted this year. You may still intervene, then end the year.")
   : walk === 0 ? "There is nowhere you can walk from here."
@@ -982,6 +1049,10 @@ cbl.querySelector("input").onchange = e => { FG.SOFT = e.target.checked; render(
 // button switched it off. The engine owns the list now and the interface asks.
 const R2BUILT = FG.R2BUILT;
 const R2LABEL = {
+ stonesGrow:"a stone grows while the small ones are near it",
+ deadOrders:"a stone that has gone quiet still carries orders",
+ wildFolk:"a founding is as big as the country round it",
+ zeroSpent:"spent to nothing, you may only watch",
  logistic:"growth is logistic; terrain sets the ceiling", teaching:"tilling and killing are taught",
  taughtLoss:"a wonder goes on teaching, not at 150", audible77:"under seventy-seven, they bless the ground",
  split2:"split reaches two tiles, to your blessing", fade:"you may walk the fields, at 10% of you a year",
@@ -1006,7 +1077,7 @@ function r2sync() {
  r2w.querySelectorAll("[data-r2]").forEach(i => { i.checked = FG.R2[i.dataset.r2]; });
  const on = R2BUILT.filter(k => FG.R2[k]).length;
  $("r2state").textContent = on === 0 ? "the old game — design/rules.md before the batch"
-  : on === R2BUILT.length ? "the August batch, whole — this is the game"
+  : on === R2BUILT.length ? "every rule there is — this is the game"
   : on + " of " + R2BUILT.length + " built rules on";
 }
 // Same seed, so the only difference between two runs is the rules.
@@ -1019,7 +1090,10 @@ r2w.querySelectorAll("[data-r2]").forEach(i => {
  i.onchange = () => { FG.R2[i.dataset.r2] = i.checked; r2restart(); };
 });
 $("r2off").onclick = () => { FG.R2all(false); r2restart(); };
-$("r2on").onclick  = () => { FG.R2all(false); R2BUILT.forEach(k => FG.R2[k] = true); r2restart(); };
+// A-16 again. `R2reset` is the thing that says *the game*, and since August 2026
+// the game is every built rule on — so this asks the engine for the set rather
+// than reconstructing it, which is how the interface's copy drifted last time.
+$("r2on").onclick  = () => { FG.R2reset(); r2restart(); };
 r2sync();
 
 ["bless", "stone", "found"].forEach(a => {

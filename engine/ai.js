@@ -70,8 +70,26 @@ const DOCTRINE = {
 // two people at one board is the instrument that reads it.
 const free = (id, tg, who) => {
  const cheap = tg.filter(k => !FG.tolled(id, k, who));
- return cheap.length ? cheap : tg;
+ if (cheap.length) return cheap;
+ // 1.23. And near the bottom of the stock, *decline* rather than fall back.
+ //
+ // Measured before this line existed: seat 1 spent itself to nothing in 27 games
+ // out of 100 and then stood paralysed for the rest of them, which moved every
+ // number in the table and moved them for a reason that has nothing to do with
+ // any rule in this batch.
+ //
+ // Like the fallback above, this is deliberately not an improvement in judgement.
+ // It does not weigh the last tenth of a body against the work it would buy —
+ // that is the decision 1.23 exists to give a player, and this chooser remains
+ // structurally unable to see it. It only stops the AI walking off the end of a
+ // stock it has no concept of, in a year where the alternative was to do nothing
+ // much. A machine that cannot time its own sacrifice should not be allowed to
+ // make one by accident, or the matrix measures the accident. OP-01, OP-21.
+ return FG.manifest(who) <= FG.R2TUNE.dreamToll * RESERVE ? [] : tg;
 };
+// Tolls the chooser keeps back. Two, so it always has one spend left for a year
+// in which something actually matters, and stops before the year that ends it.
+const RESERVE = 2;
 
 // 1.19 / OP-12. Where a chooser sends its herds, and it is the crudest thing
 // that is not nothing: walk at the nearest reckoned tile there is a road to.
@@ -105,6 +123,11 @@ function driveHerds(who) {
 function aiTurn(who) {
  const doc = FG.G.p[who].doc;
  if (!doc || doc === "passive") return;
+ // 1.23 / OP-14. A power with nothing left of it does not take a turn. Note it
+ // does not even drive its herds: steering costs no act and no toll, but it is
+ // still a thing said to somebody, and there is nobody left to say it. The rival
+ // fades on exactly the terms the player does.
+ if (FG.spent(who)) return;
  const w = DOCTRINE[doc] || DOCTRINE.mixed;
  driveHerds(who);
 

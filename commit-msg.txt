@@ -1,115 +1,150 @@
-The third leg, built and left switched off
+Four rules, and every flag on
 
-`FG.R2.herds`, 1.19. OP-12 has wanted a third leg since before the current
-design and never had one. It has one now: a people never shown the plough may
-be taught to keep herds instead, and then they stop standing still.
+The batch Rick asked for after reading the open points register: stones that
+grow, dead stones that carry orders, the wild folk as a founding population, and
+an answer to what zero manifestation is. All four ship on, and so does everything
+else that is built — `herds` and `barren3` come off the bench with them.
 
-    farmland beats blessing   the ratchet — furrows erase the quiet beside them
-    herds beat farmland       they overrun it and graze it back to thorn
-    blessing beats herds      a rival power's blessing is closed country to them
+**`built` and `on` are the same set again**, which they have not been since 1.12
+and 1.19 shipped switched off. Eighteen built rules, eighteen on. `pathFrac` is
+the only flag that is false and that is because nothing reads it.
 
-**It ships off.** That is as much the point of the commit as the rule is. This is
-the largest engine change since armies, going in on top of a batch that has been
-played exactly once, and this project's own evidence hierarchy puts a person above
-the matrix for anything about choices. So it is built, tested, drawn — and dark
-until somebody sits in front of it. The batch of 1.6 / 1.8 / 1.9 is still exactly
-the thing that was measured and played.
+## 1.20 · stonesGrow · a stone grows while it is heard
 
-Three decisions, all taken before a line was written, all Rick's, all archived:
+Closes *stones grow* in `ideas.md` as **A-27**. A stone gains a course, one a
+year and three at most, while an untaught settlement under seventy-seven or a
+herd stands in its reach. The entry's own design question was never the bonus but
+*who does the adding*, because a stone that grows on an age counter is a timer
+and A-10 would be raised against it correctly.
 
-- **A-24 — no wonder, and no points.** `lostCount` counts settlements taught to
-  till and a herd is not a settlement, so nothing is taken from you: they were
-  never shown the plough, they still hear you, nothing about you has gone quieter.
-  And nothing is given either — a herd holds no ground and `score()` never sees
-  it. They deny; they do not accumulate. Neither half works alone. Let them score
-  and the central trade can simply be declined; charge a wonder and herding is a
-  strictly worse plough that nobody ever takes.
-- **A-25 — grazed ground goes to wild, and stays barren three years.** Not to you:
-  the herd unmakes and the god still has to walk out and make. And with A-14's
-  lifetime budget already in place, grazed ground is lost twice — once when the
-  furrows go, and again when re-ploughing spends a tile of a settlement's thirty
-  that it had already spent. The second cost is invisible and permanent.
-- **A-26 — the other power's blessing is closed country.** They move the way their
-  god does rather than the way an army does, because a people who were never
-  taught the plough can still hear, and what a people can hear they can be shut
-  out of. *Theirs* only — blessing impassable to herds would wall your own herds
-  in with your own quiet, which is the self-walling problem OP-19 already strained
-  to breaking.
+What a course buys is the **working threshold**: six connected blessed tiles down
+to three. An old stone remembers a larger country than it now stands in, so
+severing a blessed region hurts an ancient stone less than a new one.
 
-What it costs to send a people out, and none of it had to be written: the three
-points the place was worth, everything it would have grown into, and most of the
-people — `kHerd` is the Seventy-Seven, and a village that has been standing a
-while is above it and sheds the surplus. Going nomadic costs you most of a town.
+Three things fall out and all three are why it is this shape. Teach that band to
+till and the stone stops — not by a rule but because a taught people are counting
+the fields, and it stands arrested and visibly unfinished for the rest of the
+game. Farmland still wins: a stone under the plough has no blessed region at all
+and three courses do not save it, so OP-16's 92% is untouched. And it may not
+feed the wonder brake, so `lostCount` reads `workingStrict` — the plain six —
+while every other caller reads the augmented test, with the reason written
+between the two functions.
 
-**Herding is not a door out of the central dilemma, it is a detour.** A herd that
-stops comes back untaught. You may walk around the fork for twenty years and you
-arrive at the same fork, with fewer people and nothing scored in between. That is
-the answer to the one objection OP-12 has never been able to answer, and it is why
-the rule survives at all.
+A herd counts as audible and builds the stone, which the entry did not anticipate
+and which is the answer to *a herd with nothing left to graze has no behaviour*.
 
-**Kurgans came with it.** A herd on farmland over a stone of its own god that has
-already stopped working may raise a mound: a fifth of them, and the year. The
-ground stays reckoned — a mound in a field — and the stone counts as *standing*
-without ever working, blessing, or feeding the wonder brake. Working stones carry
-presence, dead stones carry orders, buried stones carry memory. OP-16 measured
-that 92% of stones end under farmland and that it is irreversible; this does not
-reverse it, it makes it mean something. A refuser cannot have their shrines back
-as engines, and can have them back as graves.
+## 1.21 · deadOrders · a stone that has gone quiet still carries orders
 
-`moundCount` gates nothing and scores nothing, deliberately. It is for OP-15's
-*Forgotten*, which is unwritten — so that entry is now the blocker on half of a
-built rule, and if the endings never arrive the mounds are decoration.
+Closes **OP-13** as **A-28**, at Rick's range of two. Working stones carry
+presence, dead stones carry orders: a work aimed within two tiles of a silent
+stone of yours arrives free of 1.17's toll.
 
-**1.12 `barren3` is half-built alongside, and stays off.** Barren ground exists in
-the engine and grazing writes it; the flag now governs only whether *Wither* does
-too. One writer per rule, one reader for both. It is a separate question and it
-moves four numbers on its own — do not turn it on with 1.19.
+It changes `tolled` and nothing else. The works keep the reach they always had —
+`targets()` still builds them from the settlement outward. What is extended is
+the country an *order* arrives in. Creation still travels through living stones
+alone: a dead stone relays no wonder and teaches nobody.
 
-**A played game found the bug, in the way things get found here.** Year 32 of seed
-7: *a herd is standing on a settlement*. The greedy chooser had dropped a colony
-onto a camp, because `foundBlock` had never heard of herds. Found, colony and
-split all had to refuse a camp; so did Drown and Raise mountains; and
-`mountainLine` needed its own guard, because that loop keeps a private copy of the
-exclusions and only the aimed-at tile was ever checked. Fourth instance of the
-standing lesson: the legality test and the thing that mutates the board are
-written twice in this engine, and they drift.
+A kurgan is excluded. *Buried stones carry memory* is OP-13's own third line, so
+raising a mound closes the relay for good — which gives the mound a cost, and
+therefore a decision, which is the thing OP-15 has never been able to give it.
 
-**Built-and-off broke something the harness was leaning on.** `FG.R2built(true)`
-used to mean both *everything built* and *the game*; it does not any more.
-`FG.R2reset()` is the game, and `sim/smoke.js` now freezes a fingerprint of that
-as well as of the pre-batch baseline — the old one only ever asserted that a new
-rule could not reach `R2all(false)`, which is a claim about a game nobody plays.
+## 1.22 · wildFolk · a founding is as big as the country round it
 
-Measured, 80 games a cell against Cities, the build's own turn order:
+Closes **OP-18** as **A-29**. Twenty to forty people, by how much of the eighteen
+tiles two rings out is blessed ground of yours. Rock, water and the edge of the
+map count in the denominator and never in the numerator, so a coastal founding
+starts smaller than one in the middle of a country.
 
-|                          | cities | mixed | haunt | bands | storm |
-|--------------------------|--------|-------|-------|-------|-------|
-| the game as it ships     |   34%  |  36%  |  54%  |  29%  |  63%  |
-| + herds                  |   34%  |  36%  |  54%  |  29%  |  61%  |
-| + barren3 (Wither only)  |   39%  |  44%  |  50%  |  26%  |  66%  |
+Found only. No pool, nothing to spend, read once and never again — which is what
+keeps `concept/concept.md`'s *no economy to manage* true, and which is the
+objection that chose this version over the register's.
 
-The first row reproduces §10 exactly. The second row is the finding: **the rule
-moves nothing.** Four doctrines identical to the digit; storm wins 63% without it
-and 61% with it. Over 300 games across every doctrine pairing, the chooser taught
-herding 1.65 times a game, grazed 2.3 tiles, spent more than half of every
-herd-year standing still, settled a herd once, and raised zero kurgans.
+## 1.23 · zeroSpent · spent to nothing, you may only watch
 
-That is the expected result and not a disappointment. A one-ply chooser cannot
-decide that a place is worth more walking than standing, will not drive a people
-four years across the board to reach a city's fields, and never rings anything on
-purpose. OP-19 recorded `taughtLoss` and `audible77` measuring at exactly zero for
-the same reason. **OP-21 is the instrument for this, and it exists.**
+Closes the last open half of **OP-14** as **A-30**. There is no floor. At nothing
+left you cannot move, act, teach, order or intervene. The year still turns, the
+score still accrues, the stones still bless, your people still plough and march
+and graze — and you watch it. The game does not end; your part in it does.
 
-The interface: a third teaching chip, only in the row when the rule is on, saying
-*nobody has broken ground anywhere yet* rather than *none of yours is in reach*;
-three action buttons that appear when they apply, because nine buttons wrap the
-row onto a second line and the four labelled rows are the layout — board measured
-at 1038px in every state, unchanged. Herds drawn as a horned token with a loosely
-dotted line to where they are going; barren ground as a scatter of dashes; kurgans
-as a low barrow with kerb stones, redrawn once after looking at it, because the
-first version was a hump and a hump was already taken twice over.
+The register's own alternative was *lose the body and keep playing as a network*,
+and Rick's is the harder version: a network with no location is still a player
+taking turns, and this is not. It is the title said out loud.
 
-`sim/smoke.js` at 11,884 checks, all passing, with a constructed-board section for
-every rule in 1.19 and both frozen fingerprints.
+Both powers thin toward transparency as their manifestation falls, wherever
+`fade` is on. At a tenth you are a phantom standing in a field, and so is the
+other one. That drawing is half the rule.
 
-Nobody has played it. That is the whole of what is open. OP-12.
+## One change to the chooser, recorded rather than slipped in
+
+`free()` in `ai.js` now declines a tolled target near the bottom of the stock
+instead of falling back to it, keeping two tolls in reserve. Before it, seat 1
+spent itself to nothing in 27 games out of 100 and stood paralysed for the rest
+of them, moving every number below for a reason unrelated to any rule here. It is
+not an improvement in judgement — it does not weigh the last tenth of a body
+against the work it would buy, which is precisely the decision 1.23 exists to
+hand a player. OP-01, and it is the second time this year the chooser has been
+the largest term in a measurement.
+
+## Measured
+
+Five doctrines against Cities, 80 games a cell, the build's own turn order.
+
+| | cities | mixed | haunt | bands | storm |
+|---|---|---|---|---|---|
+| **the game as it ships** | **39%** | **45%** | **55%** | **41%** | **68%** |
+| less 1.20 stones grow | 39% | 43% | 54% | 43% | 66% |
+| less 1.21 dead orders | 38% | 36% | 59% | 40% | 74% |
+| less 1.22 wild folk | 38% | 43% | 54% | 30% | 64% |
+| less 1.23 zero spent | 38% | 43% | 55% | 39% | 69% |
+| less 1.19 herds | 39% | 45% | 55% | 41% | 68% |
+| less 1.12 barren3 | 38% | 45% | 53% | 43% | 69% |
+| the batch before this one | 40% | 38% | 55% | 28% | 69% |
+| the pre-batch game | 55% | 38% | 11% | 10% | 55% |
+
+**Bands: 10% in the pre-batch game, 28% after the August batch, 41% now.** OP-06
+asked for *a magical victory should be possible, and hard*. That is the sentence.
+
+Two rules do the work and neither is the one that was expected to. **`wildFolk`
+is worth eleven points to Bands** and was proposed as mainly cosmetic; it is
+A-09's *make blessing worth more* arriving thematically rather than as a tuned
+constant. **`deadOrders` is worth nine to Mixed** and costs Haunt four — a
+settled-side rule landing on the settled side, which is the first time anything
+in this project has managed that on purpose.
+
+`stonesGrow` and `zeroSpent` measure at nothing, and both nulls have one cause:
+each is about a decision a one-ply chooser cannot make. `taughtLoss` and
+`audible77` measured at exactly zero for the same reason and shipped anyway.
+OP-01 is why. OP-21 is the instrument.
+
+225 foundings: min 24, median 31, max 40, mean 31.1 — the mean is what the flat
+constant always was, so nothing has been handed out, and *where* now decides how
+it starts. 242 stones, mean 1.35 courses, three reached. A power spends itself to
+nothing in 17 of 60 games, mean year 33, never before year 24.
+
+`sim/smoke.js` at **11,924 checks**, all passing, with a constructed-board block
+for all four rules and both fingerprints re-frozen. The pre-batch baseline did
+not move, which is the check that says nothing leaked. `sim/sweep.js` is new and
+produces the table above.
+
+## Registers
+
+- **A-27 / A-28 / A-29 / A-30** in `open-points-archive.md`, with the evidence.
+- **OP-13, OP-14 and OP-18 moved out** of `open-points.md`, with a redirect table
+  at the top so the cross-references in the rest of the file still land.
+- **OP-16 updated** — silencing a rival's stone now hands them a relay, and that
+  is the first thing a played game should be watched for.
+- `ideas.md` — *stones grow* struck through and annotated with what was built,
+  what was not, and where the entry guessed wrong.
+- `design/rules.md` — **§17**, and the header box now says eighteen rules on.
+  §§1–10 are still the outstanding debt.
+
+## What has not been done
+
+Nobody has played any of this. The four questions that need a person: does the
+last tenth of yourself feel like something you spend or something you lose; is a
+network of dead stones a decision or a chore; does a stone with three courses on
+it read as a thing the people built; and does being handed a relay by an attacker
+who took your holy place feel like the joke it looks like on paper.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_015Qd6HeDzrVmGEvr6K5s2jB

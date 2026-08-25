@@ -591,3 +591,232 @@ is what makes herding a detour rather than a door: you may walk around the centr
 fork for twenty years and you arrive at the same fork. See A-24.
 
 **Settled by:** Rick, on the design, August 2026. Built the same day.
+
+## A-27 · Who adds a course to a stone, and what does a course buy? — **settled: the audible add it, and it buys the working threshold**
+
+Closes the *stones grow* entry in `ideas.md`, which had been sitting there since
+the beginning with its own design question written into it. **The bonus was never
+the question. Who does the adding was**, because a stone that grows on an age
+counter is a timer and A-10 would be raised against it correctly.
+
+**The answer is the audible.** A stone gains a course while an untaught settlement
+under seventy-seven, or a herd, stands within its reach — the same people 1.5
+already calls audible, read through one predicate rather than two copies of it.
+One course a year, three at most.
+
+**And a course buys the working threshold, not reach.** Reach is capped at 3 and a
+fourth tile of it would be worth nothing. Each course takes one off the six
+connected blessed tiles a stone needs to still answer, down to three: an old stone
+remembers a larger country than it now stands in, so severing a blessed region
+hurts an ancient stone less than a new one, and defensive geometry gains a history.
+
+Three things fall out of this shape and all three are why it is the shape:
+
+- **The thesis fits inside one object.** Teach that band to till and the stone
+  stops growing — not by a rule, but because a taught people are counting the
+  fields and not listening. It is arrested where it stood, visibly unfinished, for
+  the rest of the game. You can see it from across the board.
+- **It does not reverse OP-16's 92%.** A stone under farmland stands in no blessed
+  ground at all, so its region is zero and three courses do not save it. The shrine
+  ploughed under stays ploughed under, which is the thesis and not a defect. What
+  the courses answer is *severance*, which is the case the idea was written about.
+- **It may not feed the wonder brake, and does not.** `lost = taught −
+  workingStones` is already recorded in OP-19 as broken for a refuser, and stronger
+  stones would make it worse. `lostCount` reads `workingStrict` — the plain six —
+  and every other caller reads the augmented test. The two functions sit next to
+  each other in `rules.js` with the reason between them.
+
+**Evidence, and it is a null with a reason.** Leave-one-out over 80 games a cell
+against Cities: 39 / 43 / 54 / 43 / 66 without it against 39 / 45 / 55 / 41 / 68
+with. It moves nothing. Over 242 stones the chooser grew a mean of **1.35 courses**
+and reached three, so the rule runs — but the threshold it lowers was the deciding
+factor in **0** of those games at year forty, and a region of the right size (the
+stone's tile still blessed, three to five tiles connected) occurs in about **2.5%
+of stone-years**.
+
+That is the same null `taughtLoss` and `audible77` measured, for the same reason
+and recorded the same way. **Severing a region is a player's move.** You walk into
+their country and unmake a tile to cut it, and the one-ply chooser has no concept
+of doing that on purpose. OP-01 is why the number is zero; OP-21 is the instrument
+that would read it.
+
+**What that means for the entry.** The rule ships because it is legible, cheap and
+thematically load-bearing, and its measured balance effect is nil — which is a
+thing to know rather than a thing to fix. If a played game finds the courses never
+matter either, the honest disposition is to keep the drawing and cut the threshold.
+
+**Settled by:** Rick, on the design, August 2026. Built, measured and shipped the
+same day. See `engine/constants.js` 1.20.
+
+## A-28 · Do dead stones carry orders? — **settled: yes, at range two, and only the works**
+
+Closes **OP-13**, which had been open since the beginning and had been weakened
+twice by the August batch without ever being answered.
+
+**Working stones carry presence, dead stones carry orders.** A stone of yours below
+the working threshold stops blessing and used to do nothing whatever. It now stops
+being a place where you are *heard* and becomes a place from which you are
+*obeyed*: a work aimed within two tiles of one arrives for nothing, where 1.17
+would otherwise have charged a tenth of you for it.
+
+**Range two, flat, and not `stoneRange`.** That formula reads the blessed region a
+stone stands in and a dead stone has none to read. Two is the ring a settlement's
+own fields reach into, so a relay covers the place it is relaying to.
+
+**It is a change to `tolled` and to nothing else, which is the discipline.** It does
+not extend the reach of the works — `targets()` has always built those from the
+settlement outward and still does. It extends the country an *order* arrives in.
+Creation still travels through living stones alone: a dead stone relays no wonder
+and teaches nobody, which is the sentence kept exact.
+
+Two things settled alongside it:
+
+- **A kurgan is not a relay.** *Buried stones carry memory* is OP-13's own third
+  line and a different disposition, so raising a mound over a dead stone closes the
+  order network for good. That gives the mound a cost, and therefore a decision,
+  which is the thing OP-15 has so far been unable to give it. If OP-15's endings
+  are never written, this is now the only reason a mound exists.
+- **The OP-13 objection stands and is now the interesting part.** Four stones
+  raised early and allowed to die under farmland is a permanent command network for
+  a few early acts. What holds it honest is the stone cap: the same four slots a
+  magical player wants standing and answering. Your stones can be shrines or they
+  can be relays, and paving one over converts it irreversibly in one direction
+  only. That is the trade, and it is a good one.
+
+**Evidence — this is the rule in the batch that moves the most.** Leave-one-out,
+80 games a cell against Cities, without it against with:
+
+| | cities | mixed | haunt | bands | storm |
+|---|---|---|---|---|---|
+| the game as it ships | 39% | 45% | 55% | 41% | 68% |
+| less 1.21 dead orders | 38% | **36%** | **59%** | 40% | **74%** |
+
+**Mixed loses nine points without it and Haunt gains four.** It is a settled-side
+rule and it lands exactly on the settled side, which is the first time anything in
+this project has done that on purpose.
+
+**And it acquired a second job the register never had for it.** OP-13 said the end
+state at zero manifestation would contain nothing to do without this rule. A-30
+closed that reading — at zero you do nothing at all — so the dependency is gone and
+something better replaced it: orders are what use you up, so a network of dead
+stones is what lets you go on ruling without spending yourself. **When you run out
+stops being something that happens to you and becomes something you steer.**
+
+**Settled by:** Rick, on the design, August 2026, including the range. Built,
+measured and shipped the same day. See `engine/constants.js` 1.21.
+
+## A-29 · Do the wild folk carry a number? — **settled: yes, at the founding and nowhere else**
+
+Closes **OP-18**, and it is the smallest of the versions the register put on the
+table, chosen deliberately.
+
+**A settlement is founded with between twenty and forty people, by how much of the
+eighteen tiles two rings out is blessed ground of yours.** Rock, water and the edge
+of the map are counted in the denominator and never in the numerator, so a coastal
+founding starts smaller than one in the middle of a country, and a valley mouth
+smaller than a plain. Found only — a colony is a work of the settled and keeps its
+forty, a splinter is half its parent, and a herd that stops is whatever the grass
+left of it.
+
+**The objection that shaped it.** `concept/concept.md` says *no economy to manage*,
+and OP-18 recorded that a visible population pool on wild ground is an economy the
+player would immediately farm. So there is no pool. The number is read once, at the
+moment they stop moving, and never again; nothing accumulates and nothing drains.
+What is left is *situation* rather than a resource, which is the whole of what was
+wanted: §3's 85% requirement stops being an arbitrary gate and becomes the
+statement that the people were already there.
+
+**Evidence — and it is the largest balance mover in the batch, against expectation.**
+Rick's own reading when it was proposed was that it is *mainly cosmetic*. It is not:
+
+| | cities | mixed | haunt | bands | storm |
+|---|---|---|---|---|---|
+| the game as it ships | 39% | 45% | 55% | **41%** | 68% |
+| less 1.22 wild folk | 38% | 43% | 54% | **30%** | 64% |
+
+**Bands loses eleven points without it, and Storm four.** That is A-09's lever —
+*make blessing worth more* — landing on exactly the doctrines OP-06 has been
+failing on for the whole project, and landing there in a form that is thematic
+rather than a tuned constant.
+
+Measured over 225 foundings across five doctrines: **minimum 24, median 31, maximum
+40, mean 31.1.** The mean founding is what the flat constant always was, so nothing
+has been handed out. What changed is that *where* you found now decides how it
+starts, and it decides it by a number the player can read off the board without
+being told.
+
+**The caution in `concept/lore.md` is respected and should stay watched.** This must
+not be allowed to settle OP-06 by fiat. Bands at 41% against Cities is *a magical
+victory is possible, and hard*, which is the stated goal; if a later change pushes
+it past Cities the model has stopped being a competition.
+
+**Settled by:** Rick, on the design, August 2026 — including the bounds and the
+discount for rock and water. Built, measured and shipped the same day. See
+`engine/constants.js` 1.22.
+
+## A-30 · What is zero manifestation? — **settled: you may only watch**
+
+Closes the last open half of **OP-14**, which has been the register's oldest
+deferred sub-question and which the August batch finally made reachable.
+
+**There is no floor.** At nothing left you cannot move, act, teach, order or
+intervene. The year still turns, the score still accrues, the stones still bless,
+and your people still plough and march and graze — and you watch it. The game does
+not end. Your part in it does.
+
+**What was rejected, and why the rejected version was the register's own.** OP-14
+proposed *lose the body and keep playing as stones, works and score* — a network
+with no location, which would have made the administrative-interface ambition in
+`concept/` literal. It was the better idea for about a year and it is the softer
+one. A network with no location is still a player taking turns. This is not. It is
+the title said out loud: everything you did to be remembered is what stopped you
+being heard, and the last of it goes out while the valley carries on without you.
+
+**The old behaviour was the punishment reading and the register said so.** One
+movement point forever is a god shuffling a tile a year for the rest of the game,
+and no part of that is a decision.
+
+**It is a decision because you can see it coming, and that is the whole design.**
+The stock is on the bar in whole percent. The slope is felt at two thirds and again
+at a third. Every spend is chosen — a dream sent, an order carried out of hearing,
+a year ended standing in their furrows — and nothing puts any of it back. What the
+rule buys is that the last tenth is worth spending: **you can time the sacrifice of
+yourself**, and decide what to have bought with the going.
+
+**The drawing is half the rule.** Both powers thin toward transparency as their
+manifestation falls, wherever `fade` is on. At a tenth you are a phantom standing
+in a field, and so is the other one — watching what the tolls are doing to *them*
+is how the cost becomes legible before you have paid it yourself. A number in the
+corner of a bar is not a thing anybody feels.
+
+**Evidence.** Measured over 60 games across five doctrines: seat 0 spends itself to
+nothing in **5**, seat 1 in **12**, at a mean of **year 33** and never before year
+24. So it is a last-quarter event and not a mid-game collapse, which was the thing
+worth checking before shipping it.
+
+**It forced one change to the chooser, recorded here rather than slipped in.**
+Before it, seat 1 spent itself to nothing in 27 games out of 100 and then stood
+paralysed for the rest of them, which moved every number in the table for a reason
+that has nothing to do with any rule in this batch. `free()` in `ai.js` now
+*declines* a tolled target near the bottom of the stock instead of falling back to
+it, keeping two tolls in reserve. Like the fallback it extends, this is deliberately
+not an improvement in judgement — it does not weigh the last tenth of a body
+against the work it would buy, which is precisely the decision this rule exists to
+give a player. It only stops a machine that cannot time its own sacrifice from
+making one by accident, so that the matrix measures the rule rather than the
+accident. **OP-01, again, and it is the second time this year the chooser has been
+the largest term in a measurement.**
+
+| | cities | mixed | haunt | bands | storm |
+|---|---|---|---|---|---|
+| the game as it ships | 39% | 45% | 55% | 41% | 68% |
+| less 1.23 zero spent | 38% | 43% | 55% | 39% | 69% |
+
+**Small, and expected to be.** A one-ply chooser cannot value its own body, so what
+this rule takes from it is a few late turns it was spending badly anyway. The real
+measurement is a person deciding to spend the last of themselves on something, and
+the instrument for that is OP-21 and a played game.
+
+**Settled by:** Rick, August 2026, on the design and on the reading. *It's not for
+nothing called Fading Gods.* Built, measured and shipped the same day. See
+`engine/constants.js` 1.23.

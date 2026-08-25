@@ -53,6 +53,10 @@ function blessSay(r, me, quick) {
 // `opt` is an optional target for the acts that have one. Only `split` reads
 // it, and only since 1.6 gave a splinter more than one place to go.
 function doAct(kind, who, opt) {
+ // 1.23 / OP-14. There is nothing left of this power, so there is nothing it can
+ // do. Refused here rather than only in the interface, because the AI is a caller
+ // too and a rule that only the buttons obey is not a rule. See constants.js.
+ if (FG.spent(who)) return false;
  const k = FG.G.p[who].pos, t = T(k), me = who === 0;
  if (kind === "bless") {
   if (!FG.blessGain(k, who)) return false;
@@ -60,11 +64,18 @@ function doAct(kind, who, opt) {
  } else if (kind === "stone") {
   if (!canStone(k, who)) return false;
   FG.G.stones[who].push(k);
+  t.crs = 0;   // 1.20 — a stone is raised unfinished, and the people build it
+
   say(me ? "A stone comes up out of the ground. Nobody set it there." : "A stone rises on their side.", me ? "omen" : "riv");
  } else if (kind === "found") {
   if (!canFound(k, who)) return false;
-  t.set = FG.newSet(30, who); t.st = "wild"; t.own = null;
-  say(me ? "Thirty of them stay. They will not stay thirty." : "They put down a settlement.", me ? "good" : "riv");
+  // 1.22 / OP-18. How many of them stay is read off the country, not fixed. See
+  // `foundPop` in rules.js, and note the sentence has to be written from the
+  // number now — *thirty of them stay* was true for as long as it was a constant.
+  const n = FG.foundPop(k, who);
+  t.set = FG.newSet(n, who); t.st = "wild"; t.own = null;
+  say(me ? n + " of them stop walking. They will not stay " + n + "."
+         : "They put down a settlement.", me ? "good" : "riv");
  } else if (kind === "split") {
   // 1.6. The candidates come from the engine rather than being rebuilt here,
   // which is how the old version came to be unreachable: the legality test and
@@ -147,11 +158,15 @@ function payDream(who, kind) {
  say(kind === "teach"
    ? "It came to them in a dream, and it cost you something to send it."
    : "You made yourself heard where you were not standing, and it cost you.", "bad");
- if (p.body <= 0)  say("There is nothing left of you to spend. You are a voice and a set of places.", "bad");
+ if (FG.spent(who))
+  say("There is nothing left of you. You will see the rest of it and you will not touch any of it.", "big");
+ else if (p.body <= 0)
+  say("There is nothing left of you to spend. You are a voice and a set of places.", "bad");
  else if (FG.manifestMp(who) < before) say("You do not cover the ground you used to.", "bad");
 }
 
 function doIntervene(id, k, who) {
+ if (FG.spent(who)) return false;   // 1.23 — see doAct
  const me = who === 0, t = T(k);
 
  // OP-19. Teaching. No people are deducted — the price of tilling is a wonder,

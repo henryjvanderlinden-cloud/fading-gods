@@ -202,7 +202,7 @@ same property is a separate and smaller question.)*
 **Stones that can be thrown down** — the rival spending a work to destroy one of
 yours, rather than merely starving it.
 
-**Stones grow, and the people are the ones who add to them** — a stone gains a
+**Stones grow, and the people are the ones who add to them** — ~~a stone gains a
 course every few generations, the way a settlement gains roofs, so an old stone is
 a larger thing than a new one. The bonus is not the design question. **Who does
 the adding is**, and answering it is what keeps this out of `rejected.md`: a stone
@@ -228,7 +228,22 @@ already recorded in OP-19 as broken for a refuser, where the working stones
 subtract from zero, and stronger stones make that worse rather than better.
 
 Closes a loop with the pastoralists above: **a stone grows while it is heard, and
-becomes a kurgan once it has been forgotten and then raised again.**
+becomes a kurgan once it has been forgotten and then raised again.**~~
+
+***Built, August 2026 — `FG.R2.stonesGrow`, 1.20, and it ships on. See A-27.*** The
+entry went in as written, including the part about the wonder brake, which is why
+`lostCount` reads `workingStrict` and everything else reads `working`. Two things
+this entry did not anticipate: **a herd counts as audible and builds the stone**,
+which is the answer to *a herd with nothing left to graze has no behaviour*; and
+the threshold the courses lower turns out to be reachable in only about 2.5% of
+stone-years against a machine that never severs a region on purpose, so the rule
+measures at nothing. That is OP-01's null and not a defect, but it is written down.
+
+Two pieces of this entry are **not** built and are still ideas. *Stones that can be
+thrown down* is above and remains unmeasured, though OP-16 notes clearance already
+does it by accident. And the sentence about a stone that has been *forgotten and
+then raised again* — a kurgan that goes back to being a stone — is not in the
+engine and would need OP-15's endings to mean anything.
 
 **A wonder that restores a lost wonder**, once, at enormous cost. The bargain of
 the late game. *(Answered by **OP-20**, and better than it was asked. It is not a

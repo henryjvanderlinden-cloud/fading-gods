@@ -9,11 +9,18 @@ number, it is marked **[load-bearing]**.
 > before you trust anything below it.**
 >
 > `FG.R2` in `engine/constants.js` holds the August 2026 batch — OP-19 and
-> OP-20 — and **as of the 1.16 commit the eight built rules in it are on by
-> default.** Rick played the batch across several games and reported it a clear
-> improvement, which is the evidence class this project ranks above the matrix
-> for anything about choices. So the batch stopped being a candidate and became
-> the game, and the numbered sections below stopped describing it.
+> OP-20 and everything settled alongside them — and **as of 25 August 2026 every
+> built rule in it is on by default. There are eighteen of them.** Rick played
+> the batch across several games and reported it a clear improvement, which is
+> the evidence class this project ranks above the matrix for anything about
+> choices. So the batch stopped being a candidate and became the game, and the
+> numbered sections below stopped describing it.
+>
+> **`built` and `on` are the same set again**, which they had not been since
+> 1.12 and 1.19 shipped switched off. `FG.R2reset()`, `FG.R2built(true)` and the
+> *Everything, as it ships* button in the terms panel now all mean the same
+> thing. The only flag that is off is `pathFrac`, and that is because nothing in
+> `engine/` reads it.
 >
 > What is still exactly true: `FG.R2all(false)` plays what is written here, and
 > the A/B is asserted in `sim/smoke.js`. What is no longer true, section by
@@ -21,7 +28,7 @@ number, it is marked **[load-bearing]**.
 > teaching), §5's wonder trigger (now teaching, not 150), §2's impassable
 > farmland (now walkable at a toll), and §6, which has gained the teachings and
 > the two rules in §11 below. **§10's balance table is the old game's.** The
-> current one is in OP-19.
+> current one is in §17, which is the only place it now lives.
 >
 > A-16 is the reason this note exists and the reason it is this blunt: a
 > document that quietly stops matching the game does not announce it, and the
@@ -640,14 +647,15 @@ which makes taking one a three-stage project across several years.
 
 ## 16. The third leg — herds, and what they leave behind
 
-**Built August 2026 as `FG.R2.herds`, and it ships OFF.** See OP-12, and note the
-flag's state before reading any of this as the game: it is built, engine/ reads it
-everywhere, and it is off because nobody has played it. The three rules before it
-were turned on by a person reporting them better; this one has had nobody.
+**Built August 2026 as `FG.R2.herds`. It shipped off for one day and is now ON**
+— see OP-12, and see §17, which is the commit that turned it on along with
+everything else. It was off because nobody had played it; it is on because Rick
+asked for every rule to be running by default, which is a different and better
+reason than a measurement, and the measurement was a flat null anyway.
 
-`FG.R2.barren3` was half-built alongside it and also ships off. Barren ground now
-exists in the engine and grazing writes it; the flag governs only whether *Wither*
-writes it too.
+`FG.R2.barren3` was half-built alongside it and is **also on now**. Barren ground
+exists in the engine and grazing writes it whatever this flag says; the flag
+governs only whether *Wither* writes it too, and it does.
 
 ### Teaching them to herd
 
@@ -791,3 +799,153 @@ reason. OP-21 is the instrument for this, and it exists.
 
 `barren3` is a different matter — it moves four numbers and it is not this rule.
 It is off, unmeasured beyond that row, and it is its own question.
+
+---
+
+## 17. Stones that grow, orders that carry, and the bottom of the stock
+
+**Built 25 August 2026, four rules in one commit, and all four ship on** — as does
+everything else in `FG.R2` that is built. This is the section that describes the
+game as it currently is; §§1–10 are the pre-batch rules and §§11–16 are the
+batches before this one.
+
+### 17.1 A stone grows while it is heard — `stonesGrow`, 1.20
+
+A stone gains a **course** — one a year, three at most — while an untaught
+settlement under seventy-seven, or a herd, stands within its reach. The same
+people §11's *audible* rule reads, through one predicate, because two copies of
+*few enough and untaught enough* is how these come apart.
+
+**What a course buys is the working threshold, not reach.** A stone needs six
+connected blessed tiles to still answer; each course takes one off that, down to
+three. An old stone remembers a larger country than it now stands in, so severing
+a blessed region hurts an ancient stone less than a new one.
+
+Three consequences, and they are why it is this shape rather than another:
+
+- **Teach that band to till and the stone stops.** Nothing enforces it. A taught
+  people are counting the fields, not listening, so the stone is arrested where it
+  stood and stays visibly unfinished for the rest of the game. The thesis fits
+  inside one object you can see from across the board.
+- **Farmland still wins.** A stone under the plough stands in no blessed ground, so
+  its region is zero and three courses do not save it. OP-16's 92% is untouched,
+  which is correct: the shrine ploughed under is the thesis.
+- **It may not feed the wonder brake, and does not.** `lostCount` reads
+  `workingStrict` — the plain six — while every other caller reads the augmented
+  test. The two functions sit next to each other in `rules.js` with the reason
+  written between them. **[load-bearing]**
+
+The courses are drawn: a stepped plinth under the stone, one slab a course, and
+the stone rides up on what has been built to it.
+
+### 17.2 A stone that has gone quiet still carries orders — `deadOrders`, 1.21
+
+**Working stones carry presence, dead stones carry orders.** A stone of yours below
+the working threshold used to do nothing at all. A **work** — clearance, colony,
+levy — aimed within **two tiles** of one now arrives free of §11's toll.
+
+It is a change to one predicate and nothing else. It does **not** extend the reach
+of the works themselves; `targets()` still builds those from the settlement
+outward. It extends the country an *order* arrives in. Creation still travels
+through living stones alone: a dead stone relays no wonder and teaches nobody.
+**[load-bearing]** — that sentence is the rule, and widening it to teaching would
+make the whole of §11 free.
+
+A **kurgan is not a relay.** Raising a mound over a dead stone closes the order
+network for good, which is the only cost a mound has ever had.
+
+The reason to want it is what severance now does. Cutting a blessed region used
+only to subtract. It now *converts* you, from a god into an administration.
+
+### 17.3 The wild folk found the place — `wildFolk`, 1.22
+
+A founding is **20 to 40 people**, by how much of the eighteen tiles two rings out
+is blessed ground of yours. Rock, water and the edge of the map count in the
+denominator and never in the numerator, so a coastal founding starts smaller than
+one in the middle of a country.
+
+**Found only.** A colony keeps its forty, a splinter is half its parent, and a herd
+that stops is whatever the grass left of it. Those are people who came from
+somewhere; this rule is about the ones who were always here.
+
+There is **no pool and nothing to spend.** The number is read once, at the moment
+they stop moving, and never again — which is what keeps `concept/concept.md`'s *no
+economy to manage* true. §3's 85% requirement stops being an arbitrary gate and
+becomes the statement that the people were already there.
+
+### 17.4 Spent to nothing, you may only watch — `zeroSpent`, 1.23
+
+**There is no floor.** At nothing left of your manifestation you cannot move, act,
+teach, order or intervene. The year still turns, the score still accrues, the
+stones still bless, and your people still plough and march and graze. **The game
+does not end. Your part in it does.** **[load-bearing]**
+
+§11's slope is unchanged above that: three tiles at full, two at two thirds, one
+at a third. What has gone is the floor of one, which was the punishment reading.
+
+**Both powers thin toward transparency** as their manifestation falls, wherever
+`fade` is on. At a tenth you are a phantom standing in a field, and so is the other
+one. That drawing is half the rule — a percentage in the corner of a bar is not a
+thing anybody feels.
+
+It is a decision because it is visible before it is spent, and because nothing puts
+any of it back: **you can time the sacrifice of yourself.**
+
+### 17.5 One change to the chooser, recorded rather than slipped in
+
+`free()` in `ai.js` now **declines** a tolled target near the bottom of the stock
+rather than falling back to it, keeping two tolls in reserve.
+
+Before it, seat 1 spent itself to nothing in **27 games out of 100** and stood
+paralysed for the rest of them, which moved every number in the table below for a
+reason that has nothing to do with any rule in this batch. Like the fallback it
+extends, it is deliberately not an improvement in judgement: it does not weigh the
+last tenth of a body against the work it would buy, which is exactly the decision
+17.4 exists to hand a player. See OP-01, which this does nothing to fix.
+
+### 17.6 Measured
+
+Five doctrines against Cities, 80 games a cell, the build's own turn order.
+
+| | cities | mixed | haunt | bands | storm |
+|---|---|---|---|---|---|
+| **the game as it ships** | **39%** | **45%** | **55%** | **41%** | **68%** |
+| less 1.20 stones grow | 39% | 43% | 54% | 43% | 66% |
+| less 1.21 dead orders | 38% | 36% | 59% | 40% | 74% |
+| less 1.22 wild folk | 38% | 43% | 54% | 30% | 64% |
+| less 1.23 zero spent | 38% | 43% | 55% | 39% | 69% |
+| less 1.19 herds | 39% | 45% | 55% | 41% | 68% |
+| less 1.12 barren3 | 38% | 45% | 53% | 43% | 69% |
+| the batch before this one | 40% | 38% | 55% | 28% | 69% |
+| the pre-batch game | 55% | 38% | 11% | 10% | 55% |
+
+**Read the bottom two rows first.** Bands has gone from **10%** in the game
+`design/rules.md` §§1–10 describes, to 28% after the August batch, to **41%** now.
+OP-06 asked for *a magical victory should be possible, and hard*, and 41% against
+the strongest settled doctrine is that sentence.
+
+Two rules do the work and neither is the one that was expected to:
+
+- **`wildFolk` is worth eleven points to Bands** and four to Storm. It was proposed
+  as *mainly cosmetic*. It is A-09's *make blessing worth more*, arriving in a
+  thematic form rather than as a tuned constant.
+- **`deadOrders` is worth nine points to Mixed** and costs Haunt four. It is a
+  settled-side rule landing precisely on the settled side, which is the first time
+  anything in this project has managed that on purpose.
+
+**`stonesGrow` and `zeroSpent` measure at nothing, and both nulls have the same
+cause.** Both are about a decision a one-ply chooser cannot make — severing a
+region on purpose, and choosing when to spend the last of yourself. `taughtLoss`
+and `audible77` measured at exactly zero for the same reason and shipped anyway.
+OP-01 is why; OP-21 is the instrument.
+
+Supporting measurements, over 60 games across five doctrines: **225 foundings, min
+24, median 31, max 40, mean 31.1** — the mean founding is what the flat constant
+always was, so nothing has been handed out, and *where* now decides how it starts.
+**242 stones raised, mean 1.35 courses, three reached.** A power spends itself to
+nothing in **17 of 60 games, at a mean of year 33, never before year 24** — a
+last-quarter event and not a mid-game collapse.
+
+`sim/smoke.js` at **11,924 checks**, all passing, including a constructed-board
+block for all four rules and both A/B fingerprints re-frozen. `sim/sweep.js` is
+new and produces the table above.

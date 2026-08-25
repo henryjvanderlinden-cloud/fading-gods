@@ -25,8 +25,24 @@ function cost(t, who) {
 // less than one — you are not stranded, only slowed. Whether it should instead do
 // nothing at all until zero is the sub-question OP-14 still holds open.
 const manifest = who => (FG.G.p[who].body === undefined ? 1 : FG.G.p[who].body);
+
+// 1.23 / OP-14. Is there anything left of this power at all?
+//
+// The epsilon is not fussiness. `body` is decremented by 0.1 ten times and comes
+// out of that at -2e-17 before the clamp, so a strict `<= 0` would be a coin
+// toss on the last spend. Everything that asks *may this power still do
+// anything* asks here, and there is exactly one such question in the game.
+const spent = who => !!FG.R2.zeroSpent && FG.R2.fade && manifest(who) <= 1e-9;
+
+// OP-14. What is left of you, and what it buys. The slope rather than the cliff:
+// three tiles at full manifestation, two at two thirds, one at a third — and,
+// since 1.23, none at all at nothing. The floor of one was the punishment
+// reading: a god shuffling a tile a year forever is not making a decision. Now
+// the last movement point goes the way the rest of them went.
 const manifestMp = who =>
- FG.R2.fade ? Math.max(1, Math.round(FG.R2TUNE.mp * manifest(who))) : FG.R2TUNE.mp;
+ !FG.R2.fade ? FG.R2TUNE.mp
+ : spent(who) ? 0
+ : Math.max(1, Math.round(FG.R2TUNE.mp * manifest(who)));
 
 // OP-19. A tile may not be ploughed if it is the last way out of a settlement.
 // The fields close, but they never quite close over — without this, founding a
@@ -48,8 +64,15 @@ function wouldSeal(x) {
 }
 
 // Every tile the player can reach this year, keyed by movement spent.
+//
+// 1.23. Clamped to what is left of the power as well as to what is left of the
+// year. `p.mp` is the year's allowance counting down as you walk and is set from
+// `manifestMp` when the year turns — so without this clamp a power that spends
+// its last tenth *mid-year*, on a dream or an order, would keep walking on an
+// allowance issued when there was still something of it. The buttons stop in the
+// same instant; the board has to stop with them.
 function reach(who) {
- const from = FG.G.p[who].pos, mp = FG.G.p[who].mp, d = {};
+ const from = FG.G.p[who].pos, mp = Math.min(FG.G.p[who].mp, FG.manifestMp(who)), d = {};
  d[from] = 0;
  const q = [[from, 0]];
  while (q.length) {
@@ -164,7 +187,65 @@ function region(k, who) {
 }
 
 const stoneRange = P => Math.min(1 + Math.floor(P / 10), 3);
-const working = who => FG.G.stones[who].filter(k => region(k, who).length >= 6);
+
+// The number a stone needs and cannot be silenced above. Six connected blessed
+// tiles, written once, because until 1.20 it was written out as the literal `6`
+// in five places — rules.js twice, tick.js twice, and the interface — and the
+// fifth rule of this project is that a test written twice drifts.
+const STONEWORK = 6;
+
+// 1.20. How much of a stone has been built. Stored on the tile the stone stands
+// on rather than in a parallel array, because `FG.G.stones[who]` is a list of
+// tile keys and a stone is never taken off it — so the tile *is* the stone's
+// identity, and state stays JSON-serialisable with nothing new in it.
+const courses = k => Math.min(T(k).crs || 0, FG.R2TUNE.courses);
+
+// 1.20. What this particular stone needs, which is the six less what it has been
+// built up to. Never below three: a stone that answered on one tile would be a
+// stone that farmland could not silence, and farmland silencing stones is the
+// thesis rather than a defect.
+function stoneNeed(k) {
+ if (!FG.R2.stonesGrow) return STONEWORK;
+ return Math.max(STONEWORK - FG.R2TUNE.courses,
+                 STONEWORK - courses(k) * FG.R2TUNE.course);
+}
+
+// Does this stone still answer? One predicate, read by stoneTick, stoneReach,
+// the chronicle's warning, the stone list in the interface and 1.21's test of
+// what a *dead* stone is. See STONEWORK above for why that is worth a function.
+const stoneWorks = (k, who) => region(k, who).length >= stoneNeed(k);
+
+const working = who => FG.G.stones[who].filter(k => stoneWorks(k, who));
+
+// 1.20, and the one caller that must not see the courses.
+//
+// `lostCount` subtracts working stones from taught settlements, and OP-19 already
+// records that formula as broken for a refuser — the working stones subtract from
+// zero and the max() eats them. Letting 1.20 keep more stones working would make
+// that worse rather than better, and *the wonder brake is the one thing growth
+// must not feed* is written into the idea this rule comes from.
+//
+// So the brake reads the plain six and everything else reads the augmented test.
+// The two functions are next to each other, and this comment is the reason they
+// are not one.
+const workingStrict = who => FG.G.stones[who].filter(k => region(k, who).length >= STONEWORK);
+
+// 1.21. The stones of yours that have stopped answering — and are therefore the
+// places you are obeyed from rather than heard in. A kurgan is not one of them:
+// a mound is memory, and raising one closes the relay for good. See constants.js.
+const deadStones = who => FG.G.stones[who].filter(k =>
+  !stoneWorks(k, who) && (T(k).kur === undefined || T(k).kur === null));
+
+// 1.21. The country an *order* arrives in, as against the country you are heard
+// in. Everything divineReach covers, plus a flat ring round each silent stone.
+// Only `tolled` reads this, and only for the works: nothing else in the game may
+// travel down a dead stone.
+function orderReach(who) {
+ const s = divineReach(who);
+ if (!FG.R2.deadOrders) return s;
+ deadStones(who).forEach(k => ring(k, FG.R2TUNE.orderRange).forEach(x => s.add(x)));
+ return s;
+}
 
 // --- settlements --------------------------------------------------------
 const settlements = who => FG.G.T.map((t, k) => ({t, k})).filter(o => o.t.set && o.t.set.own === who);
@@ -174,6 +255,19 @@ const civicStrength = who => bigCount(who) + hugeCount(who);
 
 // OP-19. Settlements of yours that have been taught to till.
 const taughtCount = who => settlements(who).filter(o => o.t.set.taught).length;
+
+// 1.5, and from 1.20 read in two places rather than one. *The audible* — a people
+// few enough and untaught enough that there is nothing between them and you but
+// air. They bless the ground round them each year (tick.js), and they are who
+// adds a course to a stone (1.20).
+//
+// Written out here because 1.20 needed exactly this test and the alternative was
+// a second copy of it in the growth loop. `audibleHerd` is the same sentence for
+// a people who are walking: a herd is the Seventy-Seven made mobile and was given
+// that ceiling on purpose, so it is audible by construction and stays audible
+// until it stops.
+const audible = t => !!t.set && !t.set.taught && t.set.pop < 77;
+const audibleHerd = h => !!h && h.n < FG.R2TUNE.kHerd;
 
 // OP-19. How many people this settlement's ground will carry.
 //
@@ -198,8 +292,10 @@ function carryCap(t) {
 // place (OP-20) drops the count and hands the wonder back with no bookkeeping,
 // and taking a taught city by levy raises it — you did not teach them, but they
 // are yours now, and they are loud.
+// 1.20. `workingStrict`, not `working` — the courses a stone has gained are the
+// one thing that may not reach this line. See the note beside the two functions.
 const lostCount = who =>
- Math.max(0, (FG.R2.taughtLoss ? taughtCount(who) : bigCount(who)) - working(who).length);
+ Math.max(0, (FG.R2.taughtLoss ? taughtCount(who) : bigCount(who)) - workingStrict(who).length);
 function divineLeft(who) { return DIVINE.slice(Math.min(lostCount(who), DIVINE.length)); }
 
 // 1.18. What opens a work.
@@ -289,7 +385,10 @@ const atRange = (k, who) => !ring(FG.G.p[who].pos, 1).includes(k);
 // that has ever taken a piece of you.
 function tolled(id, k, who) {
  if (FG.TEACH.some(s => s.id === id)) return !!FG.R2.dreamTeach && atRange(k, who);
- if (FG.CIVIC.some(s => s.id === id)) return !!FG.R2.dreamWorks && !divineReach(who).has(k);
+ // 1.21. `orderReach` rather than `divineReach`, and that substitution is the
+ // whole of the dead-stone rule. Presence is unchanged above; only the carrying
+ // of an order down a stone that no longer answers is new.
+ if (FG.CIVIC.some(s => s.id === id)) return !!FG.R2.dreamWorks && !orderReach(who).has(k);
  return false;
 }
 
@@ -332,6 +431,30 @@ function foundBlock(k, who, free, ignoreHerd) {
  return null;
 }
 const canFound = (k, who, free, ignoreHerd) => !foundBlock(k, who, free, ignoreHerd);
+
+// 1.22 / OP-18. How many of them stay.
+//
+// The people were already here. How many were already *here* is how much of the
+// country round this tile you had made quiet, so the number is read off the
+// second ring at the moment they stop moving, and never again.
+//
+// The denominator is `foundRing` — a full second ring, eighteen tiles — and not
+// the tiles that happen to exist. That is deliberate and it is the whole of the
+// coastal discount: water, rock and the edge of the map cannot be blessed, so
+// they cannot be counted, so a place hemmed in by them founds smaller. A tile on
+// the shore of a lake is a worse place to stop than the middle of a plain, and
+// nobody has to be told that.
+//
+// Note the centre is excluded. The tile they are standing on stops being blessed
+// the moment they stand on it — every founding in this game sets `st` to wild —
+// so counting it would be counting the thing the founding spends.
+function foundPop(k, who) {
+ if (!FG.R2.wildFolk) return 30;
+ const mine = ring(k, 2).filter(x =>
+   x !== k && T(x).st === "bless" && T(x).own === who).length;
+ const f = Math.min(1, mine / FG.R2TUNE.foundRing);
+ return Math.round(FG.R2TUNE.foundLow + (FG.R2TUNE.foundHigh - FG.R2TUNE.foundLow) * f);
+}
 
 // How much ground a Bless here would actually take. The FG.CONTEST branch is a
 // rejected A-17 candidate, kept behind its toggle: under it, ground the other
@@ -608,7 +731,10 @@ Object.assign(FG, {cost, reach, walkStep, pathWithin, region, stoneRange, workin
  blessGain, canSplit, splitTargets, encircledBy, stoneBlock, canStone, mountainLine,
  targets, teachTargets, teachTargetsAt, nearestSource, score, band, manifest,
  manifestMp, wouldSeal,
- herdBlocked, herdStep, herdsOf, herdAt, ploughed, barren, canStop, canMound, moundCount});
+ herdBlocked, herdStep, herdsOf, herdAt, ploughed, barren, canStop, canMound, moundCount,
+ // 1.20 / 1.21 / 1.22 / 1.23
+ STONEWORK, courses, stoneNeed, stoneWorks, workingStrict, deadStones, orderReach,
+ audible, audibleHerd, foundPop, spent});
 
 if (typeof module !== "undefined" && module.exports) module.exports = FG;
 })(typeof globalThis !== "undefined" ? globalThis : this);

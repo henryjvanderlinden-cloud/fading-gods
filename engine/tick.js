@@ -7,12 +7,52 @@ const FG = root.FG = root.FG || {};
 const {NB, ring, T, say, impassable, DIVINE, CIVIC,
        region, reach, stoneRange, lostCount, civicOpen, score, walkStep} = FG;
 
+// 1.20 / OP-16. The people build the stone.
+//
+// A course goes on while somebody who can still hear you is standing in the
+// stone's reach: an untaught band under the Seventy-Seven, or a herd, which is
+// that band walking. Read through `FG.audible` rather than re-tested here, so
+// this and 1.5 cannot come apart.
+//
+// Run before `stoneTick`, which matters in one small way and is worth stating: a
+// course added this year lowers the threshold this year, so a stone the ploughing
+// has just cut down to five tiles is saved by the band beside it in the same tick
+// rather than a year later. The people get there first. That is the right order
+// for a rule about who is doing the building.
+//
+// Nothing here ever removes a course. What you can lose is the country, and the
+// courses are what let the stone survive losing it — that is the whole bonus. A
+// course that decayed would be A-10's timer wearing a different coat.
+function growTick() {
+ if (!FG.R2.stonesGrow) return;
+ [0, 1].forEach(who => FG.G.stones[who].forEach(sk => {
+  if (T(sk).crs === undefined) T(sk).crs = 0;
+  if (T(sk).crs >= FG.R2TUNE.courses) return;
+  // A stone that is not answering is not being added to. The people build what
+  // they can still hear; a stone under someone's furrows is a rock in a field and
+  // gets no help from the band over the hill.
+  if (!FG.stoneWorks(sk, who)) return;
+  const near = ring(sk, stoneRange(region(sk, who).length));
+  const heard = near.some(x => FG.audible(T(x)) && T(x).set.own === who)
+    || (FG.R2.herds && FG.G.herds.some(h => h.own === who && near.includes(h.at) && FG.audibleHerd(h)));
+  if (!heard) return;
+  T(sk).crs++;
+  if (who === 0)
+   say(T(sk).crs >= FG.R2TUNE.courses
+     ? "They have put the last course on the stone. It is as much of a thing as it will ever be, and it remembers more country than it stands in."
+     : "They have added a course to the stone. Nobody asked them to.", "good");
+ }));
+}
+
 // Working stones bless one wild tile a year without costing an action. The
 // only compounding thing the magical side owns.
 function stoneTick() {
  [0, 1].forEach(who => FG.G.stones[who].forEach(sk => {
   const P = region(sk, who).length;
-  if (P < 6) return;
+  // 1.20. `stoneWorks` rather than `P < 6`, because what a stone needs is now a
+  // property of the stone. The literal six lived in five places before that rule
+  // and this is one of them.
+  if (!FG.stoneWorks(sk, who)) return;
   const cand = ring(sk, stoneRange(P)).filter(x => { const q = T(x);
    return !impassable(q) && !q.set && q.st === "wild"; });
   if (cand.length) { T(cand[0]).st = "bless"; T(cand[0]).own = who; }
@@ -238,6 +278,7 @@ function worldTick(snap) {
  resolveContested();
  moveColumns();
  herdTick();      // 1.19 — before stoneTick, so grazed ground can be blessed back
+ growTick();      // 1.20 — before stoneTick, so a course saves a stone the same year
  stoneTick();
  // Before growth, so a place that changes hands this year declines at its new
  // ceiling this year rather than getting one more season of the old one.
@@ -282,8 +323,11 @@ function worldTick(snap) {
  // stone does, and for the same reason: they are few, the country is quiet, and
  // there is nothing between them and you but air. Untaught only — a people who
  // have been shown the plough are counting the fields, not listening.
+ // 1.20 moved this test into `FG.audible`, because the growth loop needed exactly
+ // it and a second copy of *few enough and untaught enough* is how these come
+ // apart. The behaviour is unchanged, to the digit.
  if (FG.R2.audible77) FG.G.T.forEach((t, k) => {
-  if (!t.set || t.set.taught || t.set.pop >= 77) return;
+  if (!FG.audible(t)) return;
   const cand = ring(k, 1).filter(x => { const q = T(x);
    return !impassable(q) && !q.set && q.st === "wild"; });
   if (cand.length) { T(cand[0]).st = "bless"; T(cand[0]).own = t.set.own; }
@@ -348,7 +392,7 @@ function worldTick(snap) {
  });
  if (lost) say(lost + " tile" + (lost > 1 ? "s of your blessing go" : " of your blessing goes") + " out. It has been surveyed.", "bad");
 
- const q = FG.G.stones[0].filter(k => region(k, 0).length < 6).length;
+ const q = FG.G.stones[0].filter(k => !FG.stoneWorks(k, 0)).length;   // 1.20
  if (q > FG.G.warned) { FG.G.warned = q; say("A stone stands in ground that no longer answers. It is only a stone now.", "bad"); }
 
  const lostAfter = lostCount(0);
@@ -378,7 +422,11 @@ function worldTick(snap) {
   p.body = Math.max(0, p.body - FG.R2TUNE.toll);
   if (who !== 0) return;
   say("You spent the year standing in their furrows, and there is less of you than there was.", "bad");
-  if (FG.manifestMp(0) < before)
+  // 1.23. The bottom of the stock, said once and plainly. Below this line the
+  // player has no move, no act and no intervention for the rest of the game, and
+  // that has to arrive as a sentence rather than as a row of dead buttons.
+  if (FG.spent(0)) say("There is nothing left of you. You will see the rest of it and you will not touch any of it.", "big");
+  else if (FG.manifestMp(0) < before)
    say("You do not cover the ground you used to.", "bad");
  });
 
@@ -407,7 +455,7 @@ function endYear() {
  return worldTick(snap);
 }
 
-Object.assign(FG, {stoneTick, moveColumns, herdTick, snapshot, worldTick, endYear,
+Object.assign(FG, {stoneTick, growTick, moveColumns, herdTick, snapshot, worldTick, endYear,
  resolveContested, encircleTick, exodus});
 
 if (typeof module !== "undefined" && module.exports) module.exports = FG;

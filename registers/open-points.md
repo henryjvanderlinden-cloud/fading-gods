@@ -5,6 +5,15 @@ Live register. Things genuinely unresolved. When one is settled, move it to
 
 Format: `OP-nn` · severity · the question · why it matters · how it would be settled.
 
+**Settled and moved out, August 2026** — the rest of this file still points at
+these by number, so the numbers are kept here rather than left dangling:
+
+| was | question | answer |
+|---|---|---|
+| OP-13 | do dead stones carry orders? | **A-28** — yes, at range two, works only |
+| OP-14 | walking on reckoned ground, and what zero is | **A-19 / A-30** — adopted; at zero you may only watch |
+| OP-18 | do the wild folk carry a number? | **A-29** — at the founding, and nowhere else |
+
 ---
 
 ## OP-21 · highest · Two players at one board
@@ -1234,152 +1243,6 @@ is that.
   row, and that row moves four numbers — cities 34→39, mixed 36→44, haunt 54→50,
   bands 29→26. It is off. It is not this rule and must not be turned on with it.
 
-## OP-13 · high · Do dead stones carry orders?
-
-A stone below power 6 currently stops blessing and does nothing. The proposal is
-that it stops being a place where you are heard and becomes a place from which you
-are obeyed: **working stones carry presence, dead stones carry orders.** Wonders
-and interventions target through live stones, as now. Works — clearance, colony,
-levy — may target a settlement within reach of a dead one.
-
-The reach rule needs its own value. The live formula is `1 + floor(power / 10)`,
-and a dead stone has no power to speak of.
-
-Two consequences are the actual reason to want this, rather than the range:
-
-- Severing a blessed region currently only halves your stones. Under this rule it
-  also converts you from a god into an administration, so the attack pushes you
-  somewhere instead of merely subtracting.
-- It is a second answer to OP-03. Works become *reachable* rather than *earlier*,
-  which leaves the strength ladder and the population costs of A-13 untouched.
-
-Absorbs **temple as life support** from `ideas.md`. The relay station is a stone
-that already exists.
-
-**Settled by:** implementing and re-running the matrix. Watch the Cities doctrine
-specifically. Four stones raised early and allowed to die under farmland is a
-permanent command network for the price of a few early acts, and if that is
-correct for every doctrine then it is not a decision, it is a chore with a
-narrative attached.
-
-**Two things in the August 2026 batch move this, in opposite directions.** OP-19
-gives settlements under seventy-seven a passive blessing of their own, so a stone
-is **no longer the only compounding thing the magical side owns** — which weakens
-the argument for stones needing a second job. But OP-14's adoption means works no
-longer need a dead stone to be *reachable*, since you can now walk to anything at a
-price. Both halves of the "second answer to OP-03" claim above are therefore
-weaker than when it was written. What survives untouched is the good part: severing
-a blessed region converting you from a god into an administration.
-
-**A third August 2026 idea rounds the pair out and costs this entry nothing.**
-Working stones carry presence, dead stones carry orders, **buried stones carry
-memory** — the kurgans in `ideas.md`. A kurgan reaches nowhere and targets nothing,
-so it does not compete with the conduit proposal above; it is a disposition for the
-92% this open point cannot otherwise reach, since a stone under farmland can be
-neither walked to nor blessed back.
-
-## OP-14 · high · Can you walk on reckoned ground if it ages you? — **adopted, August 2026, and now load-bearing for OP-19**
-
-**Adopted in principle.** What is left open is the sub-question below — cliff or
-slope, and what happens at zero — not whether the rule goes in.
-
-It stopped being optional when teaching became a per-settlement decision made in
-person (OP-19). Teaching requires presence; a mature settlement is ringed by its
-own reckoned ground; so without this rule a settlement can only ever be taught in
-its first few years, before it ploughs itself shut. That may be a defensible
-window, but it is a large and unintended consequence of an unrelated rule, and
-pricing the walls removes it.
-
-It also completes a movement model rather than adding a third exception: **three
-tiles a year through your own blessing, one through wild ground, and reckoned
-ground enterable at 10% of your manifestation a year.** Fast at home, slow abroad,
-costly inside theirs.
-
----
-
-Reckoned ground becomes passable. Ending a year on it costs 10% of your
-manifestation, permanently, so ten tile-years of trespass across a forty-year game
-is the whole allowance.
-
-This is **not** the attention problem settled in A-03. Attention refreshed every
-turn and had to be spent, so every choice was a denial. This is a permanent stock
-that may never be touched at all. A decision, not triage.
-
-The load-bearing part is what happens at zero. If the game ends there, it is a
-punishment. If you **lose the body and keep playing** — stones still bless, works
-still issue, score still accrues — you finish the game as a network with no
-location, which makes the administrative-interface ambition in `concept/` literal
-rather than atmospheric. This wants OP-13 built first, or the end state contains
-nothing to do.
-
-Sub-question: does manifestation degrade before zero — three movement points
-falling to two, to one? A cliff at ten years is invisible until it is not. A slope
-is felt every year and may be a death spiral.
-
-Note this contradicts the **[load-bearing]** impassability rule in `design/rules.md`
-§2, which is what currently makes a wall a wall. It prices the walls instead of
-removing them, which is the same move already made in A-10: a timer is weather, an
-exchange is a decision.
-
-**Settled by:** the matrix, plus the three full games OP-03 already asks for.
-Expect the magical side to gain, which is the direction OP-06 wants anyway.
-
-### The sub-question is now reachable, August 2026
-
-*What happens at zero* has been the open half of this entry since it was raised,
-and it has been safe to defer for a plain reason: **nothing in the game spent the
-stock fast enough for anyone to get there.** The trespass toll only bites a
-player who chooses to stand in someone else's fields at year's end, and 194
-stones' worth of measurement says that is rare.
-
-`dreamTeach` and `dreamWorks` change that. Teaching and ordering at range spend
-the same stock at the same rate, and they are things a settled player does
-several times a game rather than by accident. Measured over 40 games: Cities
-finishes with **0.54** of itself and Mixed with **0.49**, against 0.94 and 0.89
-for the two refusing doctrines. A player leaning on the dream harder than the AI
-does — which is the whole reason the rule was asked for — reaches zero well
-inside forty turns.
-
-So the two halves of this entry can now be decided on evidence rather than
-argument:
-
-- **The slope is in and is the shipped behaviour** — three tiles at full, two at
-  two thirds, one at a third, never less than one. It was written that way
-  already; it has simply never been felt before.
-- **What zero *is* remains undecided and is now urgent.** Today it is one
-  movement point forever, which is the punishment reading. The alternative in
-  this entry — you lose the body and keep playing as stones, works and score,
-  a network with no location — is the one that makes the administrative-interface
-  ambition in `concept/` literal. It wants OP-13 built first, or the end state
-  contains nothing to do.
-
-**Settled by:** playing a game that deliberately spends itself down to nothing,
-which is now possible and was not before.
-
-### Played, 25 August 2026 — and the felt half of this question is answered
-
-**A player finished year forty at 10% of himself: one movement point, four tiles
-reachable, still playing through three stones.** Nobody had ever been near the
-bottom of this stock before; the trespass toll alone does not get you there.
-
-**It reads as a decision, not as a punishment.** That was the open question and
-it needed a person, and the report was unambiguous: *"it felt like real decisions
-and considerations had to be made."* A punishment does not produce that sentence.
-
-**And it got there by a route nobody designed.** Both powers spent themselves
-down keeping levies moving — `dreamWorks` charges for an order issued out of
-hearing, and in a close endgame both sides kept paying. What came out is a war
-fought by the people and paid for by the gods, which the harness could not have
-found: the one-ply chooser pays that toll without knowing it is paying, so the
-matrix records the drain and cannot record what it feels like to choose it.
-
-**What is now decided:** the slope is right, and the drain is worth what it
-costs. **What is still open is only the mechanical half** — what zero *is*. This
-game ended at 10% rather than 0%, so nobody has yet stood at the bottom. Today
-zero means one movement point forever. The alternative in this entry — lose the
-body, keep playing as stones and works — remains unbuilt and still wants OP-13
-first.
-
 ## OP-15 · medium · Endings as an unscored reading of the final board
 
 Score stays one number. An **ending** is a description of the final state,
@@ -1436,53 +1299,6 @@ people can raise a mound over a paved stone (`ideas.md`), the ending becomes
 something a player can act against late in the game, and **A stone in a field**
 becomes literal rather than figurative. Both still read from state already tracked,
 so the test at the head of this entry is not weakened.
-
-## OP-18 · medium · Do the wild folk exist in the rules, or only in the fiction?
-
-`concept/lore.md` says the powers put people into the blessed country: few, wild,
-living in forest and hill, able to hear because the country is quiet.
-
-**Most of this needs no new mechanic, because the rules already say it.** §3
-requires 85% blessed country within two tiles before you may Found, and calls the
-blessing requirement load-bearing: *all expansion begins with blessing*. That gate
-has always been arbitrary-looking. Under the lore it is not a gate at all — it is
-the statement that people are already there, and a settlement is those people
-deciding to stop moving. The cheapest possible change is **zero rules and a
-drawing**: put wild folk on blessed tiles and §3 explains itself.
-
-What is genuinely open is whether they should carry a number.
-
-**The proposal.** A settlement is founded with a population drawn from the wild
-folk in range rather than a flat 30. Where you blessed, and how long ago, decides
-how strong the founding is.
-
-Why it is worth measuring rather than dismissing:
-
-- It gives blessing a **second output**, and OP-06 is the standing evidence that
-  blessing needs one. Bands wins 8% and Haunt 22% with seeds split. A-09 already
-  identified "make blessing worth more" as the lever that actually moves this, and
-  this is that lever in a form that is thematic rather than a tuned constant.
-- It is **additive and generative**, which is the direction every playtest has
-  pushed toward and every subtractive mechanic has failed in.
-- It makes *where and when* you bless matter, which currently it barely does —
-  blessing is close to fungible once you have enough of it.
-
-Why it might be wrong:
-
-- `concept/concept.md` says **no economy to manage**. A visible population pool on
-  wild ground is an economy, and the moment it has a number the player will farm
-  it. The version that survives this objection is one where the player never sees
-  a count and never spends it — it is only read at the moment of founding.
-- It may make founding *automatic* rather than chosen: bless, wait, settle,
-  repeat. If the wild folk simply accumulate, the decision drains out of it.
-
-**Settled by:** implementing the founding-population version behind a tune flag
-and re-running the matrix, watching Bands and Haunt specifically. If it does not
-move OP-06, it is decoration and should stay in the fiction and the artwork only.
-
-**Do not let this settle OP-06 by fiat.** See the caution at the end of
-`concept/lore.md`: the powers believe the settled path is the next thing, and the
-rules must not agree with them, or the competition becomes ceremonial.
 
 ## OP-23 · medium · The interface is a laboratory with a game in it
 
@@ -1778,10 +1594,21 @@ Two things to watch when it goes in:
   repeat — both spending every act on one hex while blessing is worth ~21 points
   a year elsewhere. Probably self-limiting, and arguably just a siege, but the
   harness should count tiles that change hands more than three times.
-- **OP-13.** If dead stones become conduits, silencing a rival's stone *hands
-  them a conduit*. That is a funny interaction and possibly a good one — it is
-  the same push toward administration OP-13 already describes — but it means
-  these two should be decided together rather than in sequence.
+- **OP-13 — settled, August 2026, as A-28, and this interaction is now live.**
+  Dead stones carry orders, so silencing a rival's stone *hands them a relay*.
+  It is the same push toward administration OP-13 always described, and it is now
+  a thing that can actually happen on a board: an attacker who besieges a holy
+  place and wins converts it from a shrine into a command post for the defender.
+  Nothing has measured whether that is funny or annoying. **It is the first thing
+  a played game should be watched for**, and OP-21 is the instrument.
+
+**And a third thing about stones arrived with the same batch (A-27).** A stone now
+gains a course while the audible stand in its reach, and the course lowers the
+working threshold. That does *not* touch the 92% — a stone under farmland stands in
+no blessed ground and three courses do not save it — but it means the question this
+entry displaces has a second half now: **what a grown stone is worth is decided by
+whoever paves it over**, and clearance aimed at a stone is still undocumented and
+still unmeasured.
 
 ### The question this displaces
 

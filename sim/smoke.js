@@ -381,6 +381,219 @@ console.log("\nthe third leg");
  console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
 }
 
+// ------------------------------------------- 1.20 / 1.21 / 1.22 / 1.23, August 2026
+// Four rules, on constructed boards, for the reason the last two batches were
+// checked this way: three of them turn on a predicate the rest of the engine
+// reads, and the fourth takes a whole seat out of the game. The register's fifth
+// rule is that the legality test and the thing that actually mutates the board
+// are written twice in this engine and they drift, so both halves are asserted
+// here rather than the one that is easier to reach.
+console.log("\nstones that grow, orders that carry, and the bottom of the stock");
+{
+ const before = fail;
+ const {K, NB, T, ring} = FG;
+
+ function blank() {
+  FG.resetTune(); FG.R2reset();
+  FG.createGame({you: null, them: "passive", seed: 1});
+  FG.G.T.forEach(t => { t.t = "plain"; t.f = 1; t.st = "wild"; t.own = null; t.set = null;
+                        t.bar = 0; t.kur = null; t.crs = 0; });
+  FG.G.stones = [[], []]; FG.G.armies = []; FG.G.refugees = []; FG.G.herds = []; FG.G.log = [];
+  FG.G.p[0].pos = K(4, 4); FG.G.p[1].pos = K(12, 4);
+ }
+ const settle = (c, r, who, pop, taught) => {
+  const t = T(K(c, r));
+  t.set = FG.newSet(pop, who); t.set.taught = !!taught; t.st = "wild"; t.own = null; return t;
+ };
+ // n connected blessed tiles for `who`, grown outward from k by flood fill, so a
+ // region can be built to an exact size and the working threshold tested on it.
+ const blob = (k, who, n) => {
+  const seen = new Set(), q = [k];
+  while (q.length && seen.size < n) {
+   const x = q.shift();
+   if (seen.has(x) || FG.impassable(T(x)) || T(x).set) continue;
+   seen.add(x); T(x).st = "bless"; T(x).own = who;
+   NB[x].forEach(y => q.push(y));
+  }
+  return seen.size;
+ };
+
+ // --- 1.20: who adds a course, and what a course is worth -----------------
+ blank();
+ const sk = K(4, 4);
+ blob(sk, 0, 10);
+ FG.G.stones[0].push(sk);
+ ok("a stone is raised unfinished", FG.courses(sk) === 0);
+
+ // Nobody in reach: nothing happens, however many years pass. This is the check
+ // that says the rule is not a timer — A-10 would be raised against it correctly
+ // if it were, and *who does the adding* is the whole reason it is not in
+ // rejected.md.
+ for (let i = 0; i < 5; i++) FG.growTick();
+ ok("a stone with nobody near it never grows", FG.courses(sk) === 0, "got " + FG.courses(sk));
+
+ // A taught settlement in reach is not audible and does not build. This is the
+ // thesis inside one object: teach that band to till and the stone stops.
+ const tt = settle(5, 4, 0, 40, true);
+ for (let i = 0; i < 5; i++) FG.growTick();
+ ok("a taught settlement does not add a course", FG.courses(sk) === 0, "got " + FG.courses(sk));
+
+ // Untaught and under the Seventy-Seven: it builds, one course a year, to the cap.
+ tt.set.taught = false;
+ FG.growTick();
+ ok("an audible band adds a course", FG.courses(sk) === 1, "got " + FG.courses(sk));
+ for (let i = 0; i < 10; i++) FG.growTick();
+ ok("and stops at the cap", FG.courses(sk) === FG.R2TUNE.courses, "got " + FG.courses(sk));
+
+ // Over the Seventy-Seven it stops, without anything being taught at all — the
+ // same line 1.5 reads, which is why they share `FG.audible`.
+ blank(); blob(sk, 0, 10); FG.G.stones[0].push(sk);
+ settle(5, 4, 0, 120, false);
+ for (let i = 0; i < 4; i++) FG.growTick();
+ ok("past seventy-seven they stop building", FG.courses(sk) === 0, "got " + FG.courses(sk));
+
+ // A herd is the audible band walking, and builds like one. This is the answer to
+ // *a herd with nothing left to graze has no behaviour*, and it is the reason the
+ // rule reads herds at all.
+ blank(); blob(sk, 0, 10); FG.G.stones[0].push(sk);
+ FG.G.herds.push({at: K(5, 4), to: K(5, 4), n: 60, own: 0, kill: false, held: 0});
+ FG.growTick();
+ ok("a herd in reach builds the stone", FG.courses(sk) === 1, "got " + FG.courses(sk));
+
+ // What a course buys: the working threshold, and nothing else.
+ blank(); FG.G.stones[0].push(sk);
+ blob(sk, 0, 4);
+ ok("four tiles is not enough for a new stone", !FG.stoneWorks(sk, 0));
+ T(sk).crs = 2;
+ ok("but is enough for one with two courses", FG.stoneWorks(sk, 0));
+ T(sk).crs = 3;
+ blob(sk, 0, 0);
+ ok("three courses never goes below three tiles", FG.stoneNeed(sk) === 3, "got " + FG.stoneNeed(sk));
+
+ // And the thing it must not buy. `lost = taught - workingStones`, and a stone
+ // kept working by its courses may not subtract there. Two settlements taught, one
+ // stone standing on four tiles with two courses: the augmented count says it
+ // works, the brake must not.
+ blank();
+ FG.G.stones[0].push(sk); blob(sk, 0, 4); T(sk).crs = 2;
+ settle(8, 2, 0, 200, true); settle(10, 6, 0, 200, true);
+ ok("the courses keep the stone working", FG.working(0).length === 1);
+ ok("and the wonder brake cannot see them",
+    FG.workingStrict(0).length === 0 && FG.lostCount(0) === 2, "lost " + FG.lostCount(0));
+
+ // A stone under farmland is not saved by anything, which is OP-16's 92% and is
+ // the thesis rather than a defect. Its own tile is not blessed, so its region is
+ // empty, so three courses leave it silent.
+ T(sk).st = "reck"; T(sk).own = 1;
+ ok("farmland silences a grown stone all the same", !FG.stoneWorks(sk, 0));
+
+ // --- 1.21: a stone that has gone quiet still carries orders --------------
+ blank();
+ // A silent stone of yours, far from anything, with a settlement big enough to
+ // order a clearance beside it and the token nowhere near either.
+ const dk = K(9, 4);
+ FG.G.stones[0].push(dk);
+ ok("a stone standing in nothing is not working", !FG.stoneWorks(dk, 0));
+ ok("and is therefore a relay", FG.deadStones(0).length === 1);
+ const src = settle(9, 5, 0, 400, true);
+ FG.G.p[0].pos = K(1, 1);
+ const tgt = ring(K(9, 5), 2).filter(x => x !== dk && !T(x).set && !FG.impassable(T(x)))[0];
+ ok("a work aimed by a relay costs nothing", !FG.tolled("clear", tgt, 0));
+ FG.R2.deadOrders = false;
+ ok("and costs a piece of you without the rule", FG.tolled("clear", tgt, 0));
+ FG.R2.deadOrders = true;
+
+ // Only the works. A dead stone relays no wonder and teaches nobody: presence is
+ // still presence, and that sentence is the whole rule.
+ ok("a relay does not carry a teaching", FG.tolled("till", K(9, 5), 0));
+ ok("and does not extend where a wonder may be aimed", !FG.divineReach(0).has(tgt));
+
+ // A mound closes the relay for good, which is what gives raising one a cost.
+ T(dk).kur = 0;
+ ok("a kurgan is memory and not a command post", FG.deadStones(0).length === 0);
+ ok("so the order is charged again", FG.tolled("clear", tgt, 0));
+
+ // --- 1.22: the wild folk found the place --------------------------------
+ blank();
+ const fk = K(6, 4);
+ // Nothing blessed round it: the floor. (Founding is illegal here, which does not
+ // matter — this is the population rule and not the legality one.)
+ ok("a founding with nothing round it is the floor",
+    FG.foundPop(fk, 0) === FG.R2TUNE.foundLow, "got " + FG.foundPop(fk, 0));
+ // The whole second ring blessed: the ceiling.
+ ring(fk, 2).forEach(x => { if (x !== fk) { T(x).st = "bless"; T(x).own = 0; } });
+ ok("and one in the middle of a country is the ceiling",
+    FG.foundPop(fk, 0) === FG.R2TUNE.foundHigh, "got " + FG.foundPop(fk, 0));
+ ok("their blessing is not yours", FG.foundPop(fk, 1) === FG.R2TUNE.foundLow);
+
+ // The coastal discount, which is the whole reason the denominator is a full ring
+ // rather than the tiles that happen to exist. Drown half the second ring and the
+ // founding must come down, because water cannot be blessed and is still counted.
+ const r2 = ring(fk, 2).filter(x => x !== fk);
+ const full = FG.foundPop(fk, 0);
+ r2.slice(0, Math.floor(r2.length / 2)).forEach(x => { T(x).t = "water"; T(x).st = "wild"; T(x).own = null; });
+ ok("water in the ring founds a smaller place", FG.foundPop(fk, 0) < full,
+    full + " -> " + FG.foundPop(fk, 0));
+ ok("and never below the floor", FG.foundPop(fk, 0) >= FG.R2TUNE.foundLow);
+
+ // The act writes what the rule says, which is the half that drifts.
+ blank();
+ ring(fk, 2).forEach(x => { if (x !== fk) { T(x).st = "bless"; T(x).own = 0; } });
+ T(fk).st = "bless"; T(fk).own = 0;
+ FG.G.p[0].pos = fk;
+ const want = FG.foundPop(fk, 0);
+ ok("found is legal here", FG.canFound(fk, 0), FG.foundBlock(fk, 0));
+ FG.doAct("found", 0);
+ ok("and the settlement is the size the country said",
+    T(fk).set && T(fk).set.pop === want, T(fk).set ? T(fk).set.pop + " vs " + want : "no settlement");
+
+ // A colony is a work of the settled and keeps its forty; a splinter is half its
+ // parent. Only Found reads the wild folk.
+ ok("the rule does not reach a colony", FG.newSet(40, 0).pop === 40);
+
+ // --- 1.23: the bottom of the stock ---------------------------------------
+ blank();
+ FG.G.p[0].pos = K(4, 4);
+ T(K(4, 4)).st = "bless"; T(K(4, 4)).own = 0;
+ NB[K(4, 4)].forEach(x => { T(x).st = "wild"; T(x).own = null; });
+ ok("a whole god has three tiles of movement", FG.manifestMp(0) === 3);
+ FG.G.p[0].body = 0.5;
+ ok("two thirds gone is two", FG.manifestMp(0) === 2, "got " + FG.manifestMp(0));
+ FG.G.p[0].body = 0.2;
+ ok("a fifth left is one", FG.manifestMp(0) === 1, "got " + FG.manifestMp(0));
+ FG.G.p[0].body = 0;
+ ok("and nothing left is none", FG.manifestMp(0) === 0, "got " + FG.manifestMp(0));
+ ok("there is nowhere to walk", Object.keys(FG.reach(0)).length === 1);
+ ok("no act is possible", FG.doAct("bless", 0) === false);
+ ok("and no intervention either", FG.doIntervene("quicken", K(4, 4), 0) === false);
+
+ // The floating point, which is not fussiness: `body` is decremented by a tenth
+ // ten times and comes out of that at -2e-17 before the clamp. A strict `<= 0`
+ // would be a coin toss on the last spend of a forty-year game.
+ FG.G.p[0].body = 1;
+ for (let i = 0; i < 10; i++) FG.G.p[0].body = Math.max(0, FG.G.p[0].body - FG.R2TUNE.dreamToll);
+ ok("ten tolls is exactly nothing left", FG.spent(0), "body " + FG.G.p[0].body);
+
+ // The year still turns. This is the half that makes it a rule about a god rather
+ // than a game over: the world goes on, and the score with it.
+ blank();
+ FG.G.p[0].body = 0;
+ settle(4, 4, 0, 60, false);
+ const s0 = FG.score()[0].tot;
+ FG.aiTurn(0);                     // a doctrine with nothing left takes no turn
+ FG.worldTick(FG.snapshot());
+ ok("the year still turns with nothing left of you", FG.G.turn === 2);
+ ok("and the score still moves", FG.score()[0].tot >= s0);
+
+ // And the rival fades on the same terms.
+ blank();
+ FG.G.p[1].body = 0;
+ ok("the other one can be spent too", FG.spent(1) && FG.manifestMp(1) === 0);
+
+ FG.R2reset(); FG.resetTune();
+ console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
+}
+
 // ------------------------------------------------- the A/B baseline, exact
 // The one thing that must never move. FG.R2all(false) plays the pre-batch game,
 // and a rule added to the batch must not be able to reach it.
@@ -408,7 +621,13 @@ console.log("\nthe baseline is still exact");
  // pre-batch game — which is a claim about `R2all(false)`, and 1.12 and 1.19
  // ship off, so a rule of theirs that leaked would leak into the game people
  // actually play and this file would not have noticed. `R2reset()` is the game.
- const NOW = ["30:79", "75:144", "114:126", "120:123", "42:165", "120:66", "93:62", "93:135"];
+ //
+ // Re-frozen 25 August 2026, when 1.20-1.23 went in and `herds` and `barren3`
+ // came on. Seeds 1, 2, 3 and 4 did not move, which is worth noticing rather
+ // than passing over: four of eight games are unchanged to the point, so the
+ // batch is not a wash over the whole board — it changes the games where its
+ // rules actually come up.
+ const NOW = ["21:117", "75:144", "114:126", "120:123", "42:165", "177:34", "84:77", "147:50"];
  FG.R2reset();
  for (let s = 0; s < NOW.length; s++)
   ok("the shipped game is unchanged, seed " + s, play("bands", "cities", s) === NOW[s],
@@ -489,7 +708,13 @@ try {
  // page from the first frame. The assertion that matters is the same one it
  // always was — the row follows the rule — so it is checked in both directions
  // here rather than deleted, and the both-directions version is further down.
- ok("the teachings are there with the batch on", chips("teach").length === 2);
+ //
+ // **Three, since August 2026.** `herds` ships on now, so the third teaching is
+ // in the row from the first frame like the other two. This number moving is the
+ // correct failure for that change to have caused, and it is worth leaving the
+ // arithmetic visible: it is `FG.TEACH` less the ones whose rule is off.
+ ok("the teachings are there with the batch on", chips("teach").length === 3,
+    "got " + chips("teach").length);
  ok("the works begin locked", chips("civic").every(c => c.classList.contains("off")));
  // 1.18. The works now open on teachings, so the locked reason has to say so —
  // and it is read from FG.civicNeed(), so this check fails if the interface and
@@ -540,12 +765,18 @@ try {
  // three teachings with one permanently dark, which advertises a rule that is
  // not running, and not three dead buttons in the action row, which teaches a
  // player that the row has dead things in it.
- win.FG.R2reset();
+ // `R2reset` used to be enough to get herding switched off, because the rule
+ // shipped off. It ships on now, so the flag has to be cleared by name — and that
+ // is the point of writing it this way rather than adjusting the expected number:
+ // the check is *the row follows the rule*, in both directions, whichever
+ // direction the shipped default happens to point.
+ win.FG.R2reset(); win.FG.R2.herds = false;
  $$("restart").click();
- ok("herding is not in the row when its rule is off", chips("teach").length === 2);
+ ok("herding is not in the row when its rule is off", chips("teach").length === 2,
+    "got " + chips("teach").length);
  ok("and neither are its buttons", $$("drive").style.display === "none"
     && $$("stopherd").style.display === "none" && $$("mound").style.display === "none");
- win.FG.R2reset(); win.FG.R2.herds = true;
+ win.FG.R2reset();
  $$("restart").click();
  ok("with the rule on there are three teachings", chips("teach").length === 3);
  // Nobody has ploughed in year one, so the chip must be dark — and it must give
@@ -572,9 +803,10 @@ try {
     shown() === "drive,stopherd,mound", shown());
  ok("Mound is dark with no stone under the ground", $$("mound").disabled);
 
- win.FG.R2reset();
+ win.FG.R2reset(); win.FG.R2.herds = false;
  $$("restart").click();
  ok("and all three go away with the rule", shown() === "", shown());
+ win.FG.R2reset();
 
  // --- 1.16 / 1.17: the toll is shown before it is spent ------------------
  // The whole mechanic is that it is a decision, and a decision needs the price

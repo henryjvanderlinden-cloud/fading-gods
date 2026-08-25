@@ -159,7 +159,7 @@ FG.R2 = {
  // herd grazing leaves ground barren whatever this says, because that is part of
  // the herd rule and lives behind `herds`. One writer per rule; one reader for
  // both. Turning this on changes Wither and nothing else.
- barren3:    false,  // 1.12  Wither also leaves the ground barren for three years
+ barren3:    true,   // 1.12  Wither also leaves the ground barren for three years
  exitLane:   true,   // 1.15  the fields close slowly, and never seal a place in
 
  // OP-19, the fifth answer to *where does teaching happen* — August 2026, and
@@ -192,6 +192,139 @@ FG.R2 = {
  // arc, and it is the first thing in the game that makes the settled doctrine
  // pay a price in *you* rather than in people.
  dreamWorks: true,   // 1.17  a toll on a work aimed outside divineReach
+
+  // 1.20 / OP-16, and *stones grow* in ideas.md. **A stone gains a course while
+ // a settlement under seventy-seven stands within its reach.**
+ //
+ // The bonus is not the design question and never was. *Who does the adding* is,
+ // and answering it is what keeps this out of `rejected.md`: a stone that grows
+ // on an age counter is a timer, and A-10 would be raised against it correctly. A
+ // stone that grows because there are people near it who still hear you is a
+ // stock you built and can lose.
+ //
+ // So a course is added by the audible — the untaught band under the
+ // Seventy-Seven, and the herd, which is that band walking. 1.5 already decides
+ // who that is; this reads the same predicate rather than writing a second copy
+ // of it, which is the drift this project keeps finding.
+ //
+ // **What a course buys is not reach.** Reach is capped at 3 and a fourth tile of
+ // it would be worth nothing. It buys the *working* threshold: each course takes
+ // one off the six connected blessed tiles a stone needs to still answer, down to
+ // three. An old stone remembers a larger country than it now stands in, so
+ // severing a blessed region hurts an ancient stone less than a new one, and
+ // defensive geometry gains a history it did not have.
+ //
+ // It does not reverse OP-16's 92%. A stone under farmland stands in no blessed
+ // ground at all, so its region is zero and three courses do not save it. What
+ // the courses answer is severance, which is the case the idea was written about.
+ //
+ // **It must not feed the wonder brake, and does not.** `lost = taught -
+ // workingStones` is already recorded in OP-19 as broken for a refuser, where the
+ // working stones subtract from zero, and stronger stones would make that worse
+ // rather than better. `lostCount` therefore reads `workingStrict` — the plain
+ // six — and every other caller reads the augmented test. Two functions, one line
+ // of difference, and the difference is written out in rules.js.
+ //
+ // The reason to want it is that the thesis fits inside one object: **teach that
+ // band to till and the stone stops growing.** Nothing enforces that. It falls out
+ // of a taught settlement no longer being audible, and the stone is left arrested
+ // where it stood, visibly unfinished, for the rest of the game.
+ stonesGrow: true,   // 1.20  a stone grows while the audible stand in its reach
+
+ // 1.21 / OP-13. **Working stones carry presence, dead stones carry orders.**
+ //
+ // A stone below the working threshold stops blessing and today does nothing
+ // whatever. Under this it stops being a place where you are *heard* and becomes
+ // a place from which you are *obeyed*: a work aimed within `orderRange` of one of
+ // your silent stones arrives for nothing, where 1.17 would otherwise charge for
+ // it.
+ //
+ // Note what this is not. It does not extend the reach of the works themselves —
+ // `targets()` has always built those from the settlement outward and still does.
+ // It extends the country an order arrives in, which is 1.17's test and only
+ // 1.17's test. Creation still travels through living stones alone: a dead stone
+ // relays no wonder and teaches nobody. That is the sentence, kept exact.
+ //
+ // **The reason to want it is not the range, it is what severance does.** Cutting
+ // a blessed region in half currently only subtracts: it halves your stones and
+ // stops there. Under this rule it also *converts* you, from a god into an
+ // administration, so the attack pushes you somewhere instead of merely taking
+ // something away.
+ //
+ // With 1.23 in the same batch it gains a second job the register never had for
+ // it. Orders are the thing that uses you up, so a network of dead stones is what
+ // lets you go on ruling without spending yourself, and **when you run out becomes
+ // something you steer rather than something that happens to you.**
+ //
+ // OP-13's own warning stands and should be watched: four stones raised early and
+ // left to die under farmland is a permanent command network for the price of a
+ // few early acts. What is meant to hold it honest is the stone cap — the same
+ // four slots a magical player wants standing and answering — and that paving one
+ // over cannot be undone in either direction.
+ //
+ // A kurgan is excluded. *Buried stones carry memory* is OP-13's third line and a
+ // different disposition, so raising a mound over a dead stone closes the relay
+ // for good. That gives the mound a cost and therefore a decision, which is the
+ // thing OP-15 has so far been unable to give it.
+ deadOrders: true,   // 1.21  a silent stone of yours relays a work, free, at 2
+
+ // 1.22 / OP-18. **The wild folk found the place, and where you blessed decides
+ // how many of them there are.**
+ //
+ // Section 3 has always required 85% blessed country within two tiles before you
+ // may Found, and has always called that load-bearing without saying quite what it
+ // was. Under `concept/lore.md` it is not a gate at all: the people are already
+ // out there, few and wild and able to hear because the country is quiet, and a
+ // settlement is those people deciding to stop moving.
+ //
+ // So a founding stops being a flat thirty and is read off the country instead —
+ // `foundLow` to `foundHigh`, by how much of the eighteen tiles two rings out is
+ // blessed ground of yours. Rock, water and the edge of the map are in the
+ // denominator and never in the numerator, so a coastal founding starts smaller
+ // than one in the middle of a country and a valley mouth smaller than a plain.
+ //
+ // **This is the small version of OP-18 on purpose.** The register's proposal was
+ // a population *pool* on wild ground, and `concept/concept.md` forbids that: the
+ // moment it has a visible number the player farms it. Here there is no pool and
+ // nothing to spend. The number is read once, at the moment of founding, and
+ // never again — nothing accumulates and nothing drains.
+ //
+ // Found only. A colony is a work of the settled and keeps its forty, a splinter
+ // is half its parent, and a herd that stops is whatever the grass left of it.
+ // Those are people who came from somewhere. This rule is about the ones who were
+ // always here.
+ wildFolk:   true,   // 1.22  a founding is as big as the country round it
+
+ // 1.23 / OP-14. **What zero is** — the open half of OP-14 since it was raised,
+ // and the last question in the batch that needed a person to settle it.
+ //
+ // Today zero means one movement point forever, which the register calls the
+ // punishment reading and which is right: you shuffle a tile a year for the rest
+ // of the game and no part of it is a decision.
+ //
+ // The rule is that **there is no floor.** At nothing left you cannot move, act,
+ // teach, order or intervene. The year still turns, the score still accrues, the
+ // stones still bless, and your people still plough and march and graze — and you
+ // watch it. The game does not end. Your part in it does.
+ //
+ // The register's alternative was *lose the body and keep playing as a network*,
+ // and this is the harder and better version of that thought. A network with no
+ // location is still a player taking turns. This is not. It is the title: the
+ // whole of what you did to be remembered is what stopped you being heard, and the
+ // last of it goes out while the valley carries on without you.
+ //
+ // **It is a decision because you can see it coming.** The stock is on the bar in
+ // whole percent, the slope is felt at two thirds and again at a third, and every
+ // spend is chosen — a dream sent, an order carried out of hearing, a year ended
+ // standing in their furrows. Nothing takes it by surprise and nothing puts any of
+ // it back. What the rule buys is that the last of it is worth spending: you can
+ // decide *when* to have nothing left, and what to have bought with the going.
+ //
+ // The drawing is half of it and is deliberately not behind this flag. Both powers
+ // thin toward transparency as their manifestation falls, wherever `fade` is on,
+ // so what the number says is also a thing on the board. At a tenth you are a
+ // phantom standing in a field.
+ zeroSpent:  true,   // 1.23  at nothing left, you may only watch
 
  // 1.19 / OP-12. **The third leg.** A people never taught the plough may be
  // taught to keep herds instead, and then they stop standing still.
@@ -240,7 +373,7 @@ FG.R2 = {
  // of stones end under farmland and that it is irreversible. This does not
  // reverse it. It makes it mean something, which is the better answer: a refuser
  // cannot have their shrines back as engines, and can have them back as graves.
- herds:      false   // 1.19  a people taught to herd, who then stop standing still
+ herds:      true,   // 1.19  a people taught to herd, who then stop standing still
 };
 
 FG.R2all = function (on) {
@@ -282,7 +415,8 @@ FG.R2built = function (on) {
 // thing in the build is invisible in it.
 FG.R2BUILT = ["logistic", "teaching", "taughtLoss", "audible77", "fade", "exitLane",
               "dreamTeach", "dreamWorks", "taughtGates",
-              "split2", "unmake", "encircle", "barren3", "herds"];
+              "split2", "unmake", "encircle", "barren3", "herds",
+              "stonesGrow", "deadOrders", "wildFolk", "zeroSpent"];
 
 // The caps in FG.R2. Separate from FG.TUNE because TUNE is the slider panel and
 // these are not sliders yet — if they earn their way into the build they move.
@@ -307,7 +441,27 @@ FG.R2TUNE = {
  mound:    0.20,  // of the herd, to raise a kurgan over a stone in a field
  toll:     0.10,  // of your corporeal being, for ending a year in their fields
  dreamToll: 0.10, // ...and for saying something in country you are not standing in
- mp:       3      // movement at full manifestation
+ mp:       3,     // movement at full manifestation
+ // 1.20. What a stone can become, and what each course of it is worth. Three
+ // rather than a larger number because the whole of the bonus is spent against a
+ // threshold of six: at `courses` = 3 the stone answers on three connected tiles
+ // instead of six, which is half a region, and half a region is as far as this
+ // should ever go. `course` is what one of them takes off that six.
+ courses:  3,     // most courses a stone may gain
+ course:   1,     // connected tiles a course takes off the working threshold
+ // 1.21. How far an order carries from a stone that has stopped answering. Flat,
+ // and not `stoneRange`: that formula reads the blessed region a stone stands in
+ // and a dead stone has none to read. Two, which is the ring a settlement's own
+ // fields reach into, so a relay covers the place it is relaying to.
+ orderRange: 2,
+ // 1.22. What the country is worth at the moment people stop moving. The span is
+ // narrow on purpose — this is situation, not an economy, and a founding that can
+ // double is a resource to be farmed.
+ foundLow:  20,   // a founding with nothing blessed round it
+ foundHigh: 40,   // a founding in the middle of a blessed country
+ foundRing: 18    // tiles in a full second ring — rock, water and the map edge
+                  // are counted here and never in the numerator, which is the
+                  // whole of the coastal discount
 };
 
 // A-17, first candidate fix — rejected. Ground both powers take in the same
