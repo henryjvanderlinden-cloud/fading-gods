@@ -147,8 +147,16 @@ than flavour. A stance column is wanted:
 | **Wilderness** — Cernunnos, Potnia Theron, Tapio, Mielikki | 4 | **Refusers.** Keep them few and keep them listening. |
 | **Early Civilization & Rivers** — Ningirsu, Nodens | 2 | **Convinced.** Irrigation, survey, the city as the point. |
 | **Fertility & Earth** — Asherah, Dumuzi, Mokosh, Pachamama, Epona, Snake Goddess | 6 | **The hinge, and the largest group.** Agriculture is both the blessing and the trap, and they are the only ones who cannot answer the question without contradicting themselves. |
-| **Storm & Sky** — Taranis, Baal Hadad, Ukko, Chaac | 4 | Indifferent to the question, decisive about weather. Their objection is to being *asked*. |
+| **Storm & Sky** — Taranis, Baal Hadad, Ukko, Chaac | 4 | **The third answer.** Not yes and not no: *let them keep animals and keep moving.* Herders' gods. The objection was never to settling; it was to being asked to hold still. |
 | **Underworld & Hidden Powers** — Veles, Velnias | 2 | Think it is a mistake, and would rather it proceeded anyway so they can be there for the end of it. |
+
+**The third answer was a blank until August 2026.** Storm & Sky were written as
+indifferent because nobody had a position for them, and indifference is not a
+theology. Pastoralism is the position. The refusers want the people kept few, the
+convinced want them counted, and these want them **moving** — the only one of the
+three that says the land should not be held at all, and the only one that leaves
+graves rather than archives. See the pastoralists in `registers/ideas.md`, and
+OP-12.
 
 **This gives the doctrines in `design/rules.md` §9 a reason to exist.** They are
 currently mechanical labels — *cities*, *bands*, *mixed*, *passive*. Under this

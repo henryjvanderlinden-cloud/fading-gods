@@ -1,24 +1,47 @@
-The seat control goes in the header, and the page says what the game is
+A third leg, stones that grow, and a turn that is a generation
 
-Found by opening the build. The two-player switch was in the sidebar below
-"on the road", the intervention list, the chart and "your stones", so on a
-narrow window it sat below the whole board and the first person to look for
-it could not find it. A control that changes what a year *is* should not be
-below the fold, so the other seat and its two toggles move to the top right,
-beside the title.
+Three ideas, none of them measured, all of them registered rather than built.
 
-The title was still "the levy marches", which was the name of the build that
-introduced marching armies and has been the name of the whole game ever since
-by accident. It is Fading Gods, subtitled prototype.
+The pastoralists are the third leg OP-12 has been missing since the beginning,
+and they cost less than they look: a third entry in FG.TEACH beside till and
+kill, inheriting everything OP-19 already built for teaching. Taught only to a
+people who never learned the plough, and only once somebody somewhere has
+ploughed - a condition rather than a clock, so A-10 stays intact. They hold no
+ground and score nothing while they roam. What they do is graze reckoned ground
+back, which is Wither the furrows performed by mortals instead of by you.
 
-The blurb underneath was about levies for the same reason - it described the
-one feature that build had added rather than the game. Replaced with the
-epigraph, a paragraph on what the game is, and a paragraph on how a year is
-spent: three moves, one act, one intervention. Somebody opening this for the
-first time now learns the ratchet - blessed ground, reckoned ground, and that
-your own farmland walls you out - before they are asked to make a decision
-about it.
+Two things go in with them. The loop's third row - what stops a host, the
+question wandering hosts never answered - is the other power's blessing only,
+because blessing impassable to herds walls your own herds in with your own
+blessing. And the kurgans, which are the better half of the idea: a mound raised
+over a stone that has already gone under farmland, with no reach, no blessing
+and nothing targeting through it, counting only as a monument standing. OP-16
+measured that 92% of stones end that way and that it cannot be reversed. Kurgans
+do not reverse it. They make it mean something, which is a better answer than the
+one that register went looking for.
 
-No rules changed. smoke.js still passes 11,758 checks, including the two-seat
-game played through the build's own buttons, and picking a doctrine back out
-of the dropdown returns to a single-player game correctly.
+Recorded with its failure mode, because it is a real one: herding is a third door
+out of the central dilemma, and if a player can expand without ever teaching the
+plough then the trade the whole game is built on can simply be declined.
+
+Stones that grow go into ideas.md with the argument that keeps them out of
+rejected.md. A stone growing on an age counter is a timer and A-10 kills it. A
+stone that grows because there are people near it who still hear you is a stock
+you built and can lose - so the course goes on while a settlement under
+seventy-seven stands in reach, and stops the year you teach that band to till.
+
+OP-22 asks whether turns are years or generations. Mostly a label, and the parts
+that are not are gains: the demography stops being nonsense, and it is the unit
+the other two ideas are denominated in. The one real cost is marching, and the
+only question in the entry is what a levy becomes at twenty-five years a tile.
+
+OP-12 goes from low to medium and is blocked on OP-19 - a third leg laid on an
+untuned second leg is the trap OP-19 already names. OP-01 records the AI as
+deliberately deferred: an instrument built against a rule set that is still
+moving would have to be built again. Storm & Sky stop being indifferent in
+lore.md and take the third answer, which is the position pastoralism actually is.
+
+No rules changed. Nothing in engine/, game/ or sim/ was touched.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BmcC97TZ38RejXMSsFmLp9

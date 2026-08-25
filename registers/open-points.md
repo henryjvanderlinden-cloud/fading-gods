@@ -176,6 +176,17 @@ later, which is most of what this game is about — is currently unmeasurable.
 Settling this does not just re-rank the doctrines. It decides whether several rules
 in the build have a reason to exist.
 
+### Deliberately deferred, August 2026
+
+Not because it stopped mattering — the two measurements above stand and are the
+sharpest things in the register. Because **an AI is an instrument built against a
+rule set, and the rule set is still moving.** OP-19 and OP-20 are measured and
+untuned, and OP-12 now has a third leg waiting behind them. A chooser written
+against `FG.R2` half-finished would have to be written again.
+
+OP-21 already supplies the instrument that reads choice-shaped rules, and it reads
+them today. Revisit when `FG.R2` is tuned and closed.
+
 ## OP-03 · high · Does being walled in feel like an ending or like confiscation?
 
 At forty turns with hard walls, late-game reachable area falls to single digits and
@@ -304,6 +315,15 @@ still at 8% with an opponent that can plan two moves, the honest options are to
 accept that the viable magical line is *few settlements and many stones* and
 rename the doctrine, or to make blessing worth more, which A-09 shows is the lever
 that actually moves this.
+
+**A third position on the question arrives August 2026, and it is not a
+rebalance.** The pastoralists (`ideas.md`, live entry OP-12) are neither refusal
+nor conviction but *let them keep animals and keep moving* — which gives Storm &
+Sky the stance `concept/lore.md` never had for them, and gives the dropdown a
+fourth theology rather than a fourth set of weights. Whether the line is *viable*
+is OP-12's problem. Whether the argument is better for having a third side in it
+is this one's, and it is: a two-sided argument the numbers have already decided is
+a verdict, and a three-sided one is harder to deliver by fiat.
 
 ## OP-19 · high · The settlement model: does teaching make the magical line real?
 
@@ -764,6 +784,43 @@ matter. Currently forty, somewhat against the earlier instinct for brevity.
 
 **Settled by:** playing both. The knob is in the build.
 
+## OP-22 · low · Years or generations?
+
+**Raised August 2026.** Forty turns are currently counted in years. The proposal is
+to count them in **generations**, which puts the game at roughly a thousand years
+end to end. Mostly a label — and the parts that are not a label are gains.
+
+**It makes the demography honest.** Twenty-two per cent growth a *year* is nonsense
+that survives only because nobody reads it as demography. `r` = 0.32 a generation
+against `K` at Dunbar is a real population model, and OP-19's logistic curve was
+written at generational scale without anyone saying so. A settlement clearing three
+tiles a generation is a clearance; three tiles a year is a lawn. Six wonders lost
+over forty years is a busy fortnight; over a thousand years it is a civilisation.
+
+**And it is the unit the other two August ideas are denominated in.** *Every
+generation the people add to the stones* only parses if a turn is a generation, and
+a herd covering one tile a turn is a migration at generational scale and a confused
+army at annual scale. See `ideas.md`.
+
+**The one real cost is marching.** §7 moves armies and refugee columns one tile a
+year. One tile a *generation* is twenty-five years to cross a hex — absurd as an
+army, and fine as a war, a feud, or a migration. Refugee columns improve: *the
+column comes in at last* already reads like something that took decades. The levy
+wants renaming. OP-20's two-turn encirclement becomes a fifty-year siege, which is
+arguably better — a god starving a city over two lifetimes is the right register —
+but it should be chosen rather than discovered.
+
+**Cheapest implementation, and probably also the best: leave `G.year` alone in the
+engine and change only the label.** Show the turn as the generation count with an
+era beside it — *the twelfth generation · year 300* — which buys the scale for
+free, keeps all eighty-nine code sites and every chronicle line untouched, and
+avoids false precision about how long a generation was. `concept/concept.md`'s
+*over forty years* wants a pass, and so does the interface ambition at the end of
+it, which reads better at this scale than it did at the old one.
+
+**Settled by:** deciding what a levy is. That is the only question in it. The rest
+is text.
+
 ## OP-09 · low · Contiguity scoring is shelved, not decided
 
 Tested: shifts ~15 points toward the magical side, because blessing forms one blob
@@ -794,13 +851,29 @@ happening.
 **Settled by:** checking whether the log line lands. If not, the fix is to name the
 consequence explicitly at the moment of evacuation, not afterwards.
 
-## OP-12 · low · The third leg was never built
+## OP-12 · medium · The third leg was never built
 
 The rock-paper-scissors design called for wandering hosts — mobile, holding no
 ground, beating cities and losing to blessed ground. It was designed and never
 implemented. The game currently has two legs, not three.
 
-**Settled by:** deciding whether the two-way tension is enough. It may be.
+**A candidate arrived August 2026, and it is far better motivated than this
+entry.** The **pastoralists** in `ideas.md` are the same mechanic reached from
+history rather than from the diagram: a third entry in `FG.TEACH` beside *till* and
+*kill*, teachable only to a people who never learned the plough, and only once
+somebody somewhere has ploughed. The objection this entry never answered — what
+stops a host — is answered there twice, and it brings a second mechanic with it in
+the **kurgans**, which give OP-16's paved stones a disposition other than
+attrition.
+
+**Raised from low to medium on that account, and blocked on OP-19.** `FG.R2` is
+measured and explicitly not tuned down — Haunt at 77–80% against a target of
+*possible, and hard*. A third leg laid on an untuned second leg is the trap OP-19
+already names: tuning an unfinished rule set means tuning it twice. The order is
+tune the batch, close it, then measure this.
+
+**Settled by:** as before — deciding whether two legs are enough. The difference is
+that there is now something concrete to say no to.
 
 ## OP-13 · high · Do dead stones carry orders?
 
@@ -838,6 +911,13 @@ longer need a dead stone to be *reachable*, since you can now walk to anything a
 price. Both halves of the "second answer to OP-03" claim above are therefore
 weaker than when it was written. What survives untouched is the good part: severing
 a blessed region converting you from a god into an administration.
+
+**A third August 2026 idea rounds the pair out and costs this entry nothing.**
+Working stones carry presence, dead stones carry orders, **buried stones carry
+memory** — the kurgans in `ideas.md`. A kurgan reaches nowhere and targets nothing,
+so it does not compete with the conduit proposal above; it is a disposition for the
+92% this open point cannot otherwise reach, since a stone under farmland can be
+neither walked to nor blessed back.
 
 ## OP-14 · high · Can you walk on reckoned ground if it ages you? — **adopted, August 2026, and now load-bearing for OP-19**
 
@@ -921,6 +1001,15 @@ OP-09.
 
 **Settled by:** writing all of them and reading the endings of forty simulated
 games. If one fires in 80% of them, the set is wrong.
+
+**Kurgans give *Forgotten* something to be escaped by**, August 2026. As drafted
+it reads *too few stones standing at the end, whatever the score*, and under
+OP-16's numbers that is very nearly a measure of how much farmland the rival built
+— which makes it closer to a second scoreboard than to a reading. If a herding
+people can raise a mound over a paved stone (`ideas.md`), the ending becomes
+something a player can act against late in the game, and **A stone in a field**
+becomes literal rather than figurative. Both still read from state already tracked,
+so the test at the head of this entry is not weakened.
 
 ## OP-18 · medium · Do the wild folk exist in the rules, or only in the fiction?
 
@@ -1117,3 +1206,16 @@ last wonder lost, so whoever teaches fewest settlements keeps it longest.
 
 The flip-flopping watch above still applies, and the harness item stands: count
 tiles that change hands more than three times.
+
+### A third disposition for a paved stone, August 2026
+
+Neither silencing nor restoration. A **kurgan** — a herding people raising a burial
+mound over a stone that has already gone under farmland — leaves the ground
+reckoned and the stone dead, and makes it count as a monument *standing*. See the
+pastoralists in `ideas.md`, and OP-12.
+
+It does not touch the Bless/Quicken split scheduled above, which is about the 1%.
+It is an answer to the question this register said was the real one and then did
+not answer: **what the other 92% are for.** They are not a loss to be reversed.
+They are what the people build on top of once they have stopped hearing you, which
+is the thesis with a mound over it.

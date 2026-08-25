@@ -17,6 +17,11 @@ blessed ground (it stops movement), and are beaten by nothing else. Would score 
 holding large sweeps of open country cheaply and losing it instantly. Absorbs the
 prophet/hermit idea entirely — a host *is* a band carrying your presence.
 
+*(Superseded August 2026 by **the pastoralists**, below — the same mechanic
+reached from history rather than from the diagram. Kept for the shape of the loop.
+The objection this entry never answered — what stops a host — is answered there,
+twice.)*
+
 **Prophets and manifestation** — see pressure where you have ears, route someone
 from quiet country across loud country, prayer resumes, you manifest and intervene
 directly, and the intervention becomes an epic carved on a wall. Ten to fifteen
@@ -46,6 +51,100 @@ here that OP-13 does not cover is the purity code read as engineering.)*
 **The standing stones at turn one belong to a previous cycle's failed player** —
 generated from a synthetic prior campaign. Costs nothing; the most beautiful object
 in the game becomes a warning.
+
+## The pastoralists
+
+**Raised August 2026, and it is not a new system.** It is a third entry in
+`FG.TEACH` beside *till* and *kill*. OP-19 has already built teaching as a
+per-settlement decision, made in person, spending the year's intervention, and
+this inherits all of it — a colony is born tilling, a splinter is born untaught,
+and a people are only ever taught one thing about how to live.
+
+**A settlement never taught to till may be taught to herd, and then it stops
+standing still.** It becomes a people with a population, moving over the board the
+way an army moves in §7. It holds no ground and scores nothing while it roams.
+What it does instead is graze: it overruns reckoned ground and turns it to
+pasture, which is *Wither the furrows* performed by mortals rather than by you.
+That is the arc running in its usual direction — late on, your people do your
+miracles for you, and do them without asking.
+
+**Availability is a condition, not a clock.** You may teach herding only once
+ground has been tilled somewhere on the board. Not a turn number: `rejected.md`
+cut the reverse tech tree because a timer is weather. This is also historically
+right — herding is a secondary product of farming and not a stage before it — and
+it makes pastoralism *a response to agriculture* rather than a phase of it. It
+self-balances, because a valley nobody ploughed has no herders in it. Late-game
+without a clock, and A-10 stays intact.
+
+**The loop, stated so it can be argued with:**
+
+| | beats | how |
+|---|---|---|
+| Farmland | blessing | the §1 ratchet — reckoned ground erases the blessing beside it |
+| Herds | farmland | they overrun it and graze it back |
+| Blessing | herds | a rival power's blessing is closed country to them |
+
+The third row is the one that has to be got right, and the obvious version of it
+is wrong. Blessing impassable to herds walls your own herds in with your own
+blessing, which is the §2 self-walling problem OP-19 already strained to breaking.
+**The other power's blessing only.** Mortals ignore the god's walls — §7 is
+explicit that the player's movement rules do not apply to them — and herders being
+the exception *because they can still hear* is a rule with a reason rather than an
+exception with a patch. A second candidate, better if it measures: **a herd ringed
+by blessing has nowhere to graze and must settle again.** That reuses OP-20's
+encirclement machinery whole and gives *forbid* a sibling verb.
+
+**What pasture leaves behind is the whole balance question**, and it is not the
+duration. It is what the tile becomes once the herd has moved on. Back to
+farmland, and overrunning is tempo denial — a few generations of lost score, and
+the third leg is weak. Back to **wild**, and pastoralism permanently unmakes the
+ratchet, and the third leg is real. The second, routed through `barren3`, which
+already exists as a flag and already carries the invisible permanent cost this
+project likes: re-ploughing re-spends the settlement's thirty-tile lifetime budget
+(A-14). Grazed ground is not merely lost, it is lost twice.
+
+**Kurgans.** A herd passing over a stone that has gone under farmland raises it
+into a burial mound. No reach, no blessing, nothing targets through it, and **it
+does not un-reckon the tile it stands on** — a mound in a field. What it does is
+count as a monument *standing*.
+
+OP-16 measured that 92% of stones end under farmland and that this is
+irreversible, because reckoned ground cannot be walked to and so cannot be blessed
+back. Kurgans do not reverse it. They make it mean something, which is the better
+answer. It is a third disposition for a dead stone alongside OP-13's: working
+stones carry presence, dead stones carry orders, **buried stones carry memory.**
+The consequence worth building for is in OP-15 — a kurgan can pull a player out of
+**Forgotten**, and it makes **A stone in a field** literal. A refuser who cannot
+have their shrines back as engines can have them back as graves.
+
+*Do not let a kurgan clear its own tile.* If raising one un-reckons the ground,
+herding becomes a permanent tile-conversion engine with a monument bolted on, and
+the mechanic is about score rather than about memory.
+
+**It fills the hole in the roster.** `concept/lore.md` gives every archetype a
+stance except one: Storm & Sky were recorded as indifferent, which is a way of
+saying nobody had a third answer for them. Those are the herders' gods.
+Pastoralism is the third answer to *was settling the right thing to allow* — not
+yes, not no, but **let them keep animals and keep moving.** The dropdown gains a
+fourth theology rather than a fourth set of weights. See OP-06.
+
+**What it costs.** A roaming settlement is a mobile entity carrying a population,
+which is the largest engine change since armies. §7's marching machinery is the
+right foundation and this is still not a free flag like the rest of `FG.R2`.
+
+**And the one way it goes wrong: it is a third door out of the central dilemma.**
+If herding lets a player expand without ever teaching the plough, the trade the
+whole game is built on can simply be declined. The version that survives is the
+one where **herds score nothing while they roam** — they deny ground, they never
+accumulate it. If a herding line can win on points without converting anyone into
+the kind of people who could remember it, `concept/concept.md`'s one sentence has
+stopped being load-bearing, and the mechanic is wrong however well it plays.
+
+**Measured by a person, not by the harness.** Every rule here is about a choice —
+when to send a people roaming, whether to graze a city or take it — which is the
+class OP-19 recorded `taughtLoss` and `audible77` measuring at exactly zero
+against a one-ply chooser. OP-21 is built. Two people at one board is the
+instrument for this, and it exists today. Live entry: OP-12.
 
 ## Cult, memory, distortion
 
@@ -90,6 +189,34 @@ same property is a separate and smaller question.)*
 
 **Stones that can be thrown down** — the rival spending a work to destroy one of
 yours, rather than merely starving it.
+
+**Stones grow, and the people are the ones who add to them** — a stone gains a
+course every few generations, the way a settlement gains roofs, so an old stone is
+a larger thing than a new one. The bonus is not the design question. **Who does
+the adding is**, and answering it is what keeps this out of `rejected.md`: a stone
+that grows on an age counter is a timer, and A-10 will be raised against it
+correctly. A stone that grows *because there are people near it who still hear
+you* is a stock you built and can lose.
+
+So: **a stone gains a course while a settlement under seventy-seven stands within
+its reach.** That gives the audible Seventy-Seven (OP-19 §1.5) a second job beyond
+passive blessing; it gives blessing the second output A-09 and OP-18 both say it
+needs, without the visible population pool `concept/concept.md` forbids; it makes
+*where* you put a stone a decision, which OP-16 says it currently is not; and it
+puts the thesis inside a single object — **teach that band to till and the stone
+stops growing**, arrested at three courses and visibly unfinished for the
+remaining thirty generations.
+
+The bonus worth having is not reach, which is capped at 3 already. It is that **an
+old stone stays *working* below the power-6 threshold**: it remembers a larger
+country than it now stands in. Severing a blessed region then hurts an ancient
+stone less than a new one, which gives defensive geometry a history. What growth
+must **not** feed is the wonder brake — `lost = max(0, taught − workingStones)` is
+already recorded in OP-19 as broken for a refuser, where the working stones
+subtract from zero, and stronger stones make that worse rather than better.
+
+Closes a loop with the pastoralists above: **a stone grows while it is heard, and
+becomes a kurgan once it has been forgotten and then raised again.**
 
 **A wonder that restores a lost wonder**, once, at enormous cost. The bargain of
 the late game. *(Answered by **OP-20**, and better than it was asked. It is not a
