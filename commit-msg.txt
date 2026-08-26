@@ -1,66 +1,53 @@
-No rule changed, and the opponent stopped falling over
+A-32: what the settled side is for
 
-Game 6 reported the rival spending itself to nothing and going inert for
-the last stretch of the game. It had walked into its own fields and
-stayed there.
+Game 7, the first played from the agricultural side, and the first game
+of any kind to end where the README says a game ends: six taught, no
+working stone, every wonder struck through, ten percent of a body left
+and no blessed tile on the board. 71 to 66, with two of their levies two
+years out.
 
-1.7 charges a tenth of your manifestation for ending a year on reckoned
-ground. It has never asked who ploughed it — the constant's comment says
-"their fields" and the chronicle says "their furrows", and both were
-wrong about the code. Rick's ruling keeps the code and corrects the
-comments: gods have no place on tilled lands, it destroys them.
+Rick's reading of it, which is the entry: the main mechanic is not
+gaining points with agriculture, because you can't. It is interdiction,
+and in that it is very effective. Agriculture destroys your own divine
+realm and lets you destroy theirs faster.
 
-So the rule is untouched. What changed is the chooser, which had no
-concept of a body at all. free() guarded the dream toll; nothing guarded
-the standing one.
+Nothing changed in the engine. This is a name for something that has
+been running since 1.1, and tick.js already carried the sentence above
+the loop that does it — "the one-way ratchet: farmland does not
+out-score blessing, it erases it."
 
-Three guards in engine/ai.js, each found by measuring the one before it,
-and none of them an improvement in judgement:
+Four lines make it true:
 
-  furrow / off      the best act that does not leave the token in a
-                    furrow, and only if every candidate does, the best
-                    act there is. The nothing-to-do fallback picks clean
-                    ground too.
-  notUnderfoot      a Clearance ploughs the six tiles round the one it is
-                    aimed at, and 49 of the 51 tolls that survived the
-                    first guard were a god putting the plough through its
-                    own feet.
-  stepOff           the act and the order happen where you stand and then
-                    you walk on. reach() again, with the movement the act
-                    did not spend, to the nearest clean tile. A god that
-                    used the whole year getting there stays in what it
-                    ordered.
+  a furrow scores 2 and blessing scores 3
+  a furrow wipes every blessed tile touching it, to nobody
+  you cannot bless farmland, ever — blessEffect returns null on reck
+  ploughing is free, automatic, 3 tiles a year, 30 for a settlement's
+    life; blessing costs an act and a walk, one tile at a time
 
-200 games a row, before and after — rival reached zero:
+Measured, 200 paired seeds against Cities, each doctrine compared with
+itself on the same seeds against Passive:
 
-  bands v cities    21%   ->  6%
-  haunt v cities    15%   ->  2.5%
-  mixed v cities    32%   ->  7.5%
-  cities v cities   38%   -> 10.5%
-  storm v cities    21.5% ->  5%
+                 builds alone   loses   takes   ends at
+  cities              153        -74     -69      79
+  mixed               165        -86     -58      79
+  haunt               253       -151     -55     102
+  bands               252       -157     -44      95
 
-What is left is the rule and it is the better half: of a hundred games of
-mixed against cities, 71 of the tolls are now the fields growing out
-under the token during the world tick. The plough comes to the god. A
-player has exactly that exposure and can see it a year ahead.
+Against the same opponent, agriculture takes half again as much and
+loses half as much. It simply cannot build. Bands makes 252 and keeps
+95 — it loses 62% of everything it ever holds.
 
-And it re-bases §17.6. The sweep table was reading an opponent that falls
-over. At 300 games a cell, wildFolk's eleven points to Bands measure at
--3.7 and deadOrders' nine to Mixed at +2.0, both inside the noise; the
-Bands arc is 13% -> 38% -> 34%, not 10% -> 28% -> 41%. The August batch
-moved Bands. The batch after it did not. Nothing is un-shipped — OP-19's
-reasoning for taughtLoss and audible77 covers these too — but §17.6 is
-superseded by the new §18 and no figure in it should be quoted again
-without re-running it.
+Blessing erased by the ratchet, 120 games: 8 to 15 tiles a game in a
+magical-against-settled game, 35 a side when both powers plough.
 
-Third time OP-01 has been the largest term in a measurement, and the
-largest of the three. It carries a fourth entry.
+Also recorded: deadOrders was load-bearing in this game and it is the
+first time it has been. Two silent stones, range 2, and with no working
+stone they were the only reach left. A-31 measured 1.21 at +2.0 and
+called it noise; that is correct and beside the point, because Cities
+raises 0.8 stones a game and rarely has a corpse to speak through. He
+had two. OP-01's null, not the rule's.
 
-smoke at 11,924 checks, all passing. R2all(false) did not move on a
-single seed, which is the check that matters: the guards read
-FG.R2.fade, off in the pre-batch game, so they cannot reach the baseline
-by construction rather than by luck. R2reset() moved on four of eight,
-and every seed that moved moved the same way.
-
-A-31 in the archive. Playtests 4, 5 and 6 are written up in the project
-doc, and they are what raised this.
+Two things it opens, neither acted on: the score does not show a settled
+player how they are doing — the number that matters to that doctrine is
+the opponent's blessing going out, and the interface never names it. And
+population still feeds nothing but the ploughing budget.

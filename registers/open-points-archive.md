@@ -934,3 +934,91 @@ eight seeds and **every one moved the same way** — 117→126, 34→60, 77→94
 **Settled by:** Rick, 25 August 2026, on the ruling that decides it — *gods have no
 place on tilled lands, it destroys them.* The rule is untouched; the chooser
 changed. See `engine/ai.js`, and `design/rules.md` §18.
+
+---
+
+## A-32 · What is the settled side actually for? — **settled: denial, and the code already said so**
+
+**Raised by game 7**, the first game anyone has played from the settled side, and
+by Rick's reading of it: *the main mechanic is not gaining points with agriculture,
+because you can't. It is the interdiction of the opponent, and in this it is very
+effective. Agriculture destroys your own divine realm, but it lets you destroy the
+other's faster.*
+
+That is correct, it is the design working as written, and the sentence is already
+in `tick.js` above the loop that does it: **the one-way ratchet — farmland does
+not out-score blessing, it erases it.** What was missing was that nobody had said
+it out loud as *the settled doctrine's whole theory of victory*.
+
+### The four lines that make it true
+
+| | blessing | farmland |
+|---|---|---|
+| worth, a tile | **3** | **2** |
+| how it spreads | one act, in person, one tile — plus one free tile a year from a working stone | **by itself**, up to 3 tiles a year, 30 per settlement for life, no act and no toll |
+| what it may be laid on | **wild ground only** (`blessEffect` returns null on `reck`) — or, in person, unmade off the rival | anything that is not already your own furrow, **including their blessing and their furrows** |
+| what takes it away | any furrow within one tile, automatically, to **nobody** | a wonder, or a herd, one tile at a time |
+
+So a furrow is the worst-scoring ground in the game and it annihilates the best.
+One tile worth two points can wipe six tiles worth eighteen, and the eighteen go to
+neither power. **And it is irreversible: you cannot bless farmland.** Ground that
+has been ploughed leaves the divine economy for good.
+
+The magical side has a denial tool of its own — `unmake`, three points off them
+for an act and a walk — but it is an act, in person, one tile at a time.
+Ploughing is free, automatic, and happens while you are elsewhere.
+
+### Measured
+
+200 paired seeds, each doctrine as seat 0 against Cities, compared with the same
+doctrine on the same seeds against Passive — so "builds alone" is that
+doctrine's ceiling with nobody in the way.
+
+| doctrine | builds alone | loses to the rival | takes off the rival | ends at |
+|---|---|---|---|---|
+| **cities** | **153** | −74 | **−69** | 79 |
+| mixed | 165 | −86 | −58 | 79 |
+| haunt | 253 | −151 | −55 | 102 |
+| bands | 252 | −157 | −44 | 95 |
+
+**Against the same opponent, agriculture takes half again as much and loses half as
+much. It simply cannot build.** Bands makes 252 and keeps 95 — it loses 62%
+of everything it ever holds. Cities makes 153 and keeps 79, losing 48%. The
+settled side is a low ceiling, high denial, low vulnerability; the magical side is
+the exact mirror.
+
+Blessing erased per game by the ratchet, 120 games: **8 to 15 tiles** in a
+magical-against-settled game, and **35 a side** when both powers plough.
+
+### Why this is the lore rather than a balance problem
+
+`concept/concept.md` says a mechanic that does not sit on *you can only be
+remembered by the thing that deafens you* belongs in `ideas.md`. This one sits on
+it from the other end. **A god of farmers is not building a smaller realm. It is
+making the category smaller for everybody**, and it wins because the other power
+had more to lose. That is the one sentence read as a weapon rather than as a fate,
+and it is the first time the settled side has had a reason to exist that is not
+"the doctrine you play if you want the numbers to go up".
+
+### What it opens
+
+- **The score does not show a settled player how they are doing.** Cities' 4,700
+  people in game 7 were worth 27 points; the win came from the rival's absence. The
+  interesting number for that doctrine is *the opponent's blessing*, and the
+  interface never names it. A "what went out this year" line, or the ratchet count,
+  would make the strategy legible while it is being played rather than at the end.
+  See OP-23.
+- **Population still feeds nothing.** A city of 827 scores what one blessed tile
+  scores. For a doctrine whose whole engine is population —— driving the
+  ploughing budget —— that is defensible, and it should be written down as a
+  decision rather than left as an accident of `score()`.
+- **OP-06 has a mirror and it is now answered too.** *Does an ascetic strategy ever
+  win* has been yes since A-19. *Does the settled strategy have anything to do
+  besides grow* now also has an answer, and it is a different answer: **it wins by
+  subtraction.**
+
+**Settled by:** Rick, 25 August 2026, from game 7 and stated as a reading rather
+than as a request. Measured the same day and it holds. Nothing changed in the
+engine — this is a name for something that was already running. See
+`engine/tick.js` (the ratchet), `engine/constants.js` `blessEffect`, and the
+playtests doc, game 7.
