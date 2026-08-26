@@ -1,22 +1,44 @@
-An idea, not a requirement: a line for what went out
+OP-24: the herds should leave your hand
 
-registers/ideas.md, under interface and presentation. A-32 named the
-settled side a denial engine, and game 7 is the shape of it: 4,700
-people, 71 points, and a win that came out of the rival's absence.
-Nothing on the interface says so while it is happening. The chips count
-what you hold; a player whose whole strategy is what the other one
-stopped holding has no number at all until year forty.
+Rick's, and raised as the point of the game rather than as a balance
+idea: setting things in motion that you can no longer personally
+control. Four parts — they walk themselves at the nearest adversarial
+furrows, they absorb people from a settlement they stand beside, they
+split above some size, and the ground they lay waste stays waste about
+three years. The fourth is already built; wither is 3, and A-14 means
+grazed ground is lost twice.
 
-The engine already computes it and already speaks half of it. growTick
-counts the blessing the ratchet erases each year and says so for seat
-0's losses only. The same loop knows how many of theirs went out under
-your furrows and never mentions it.
+Three arguments for it are written down. It is the design value as a
+mechanic. It is the answer to A-32 that the magical side does not have —
+a band that walks into their fields by itself is the mirror of the
+plough, and the only proposal so far that gives blessing a passive
+denial engine without giving it points. And it is the one rule in the
+build that gets MORE measurable by becoming autonomous: A-24/25/26
+measured herds at a flat null because a one-ply chooser cannot drive
+them, and taking the driving away makes both seats play them correctly.
 
-Three sizes are written down, with the objection: a chronicle line for
-their side of the ratchet (one say(), no new state), a fourth series on
-the graph, or a chip. The chip is the one that is probably wrong, since
-it turns the quietest thing in the design into a progress bar, which is
-the wrong end of the one sentence. OP-15 and OP-23 both point the same
-way. Start at the chronicle line and probably stop there.
+What it takes away is named rather than discovered. 1.19 promises that a
+herd is always audible, in exchange for scoring nothing. Autonomy
+withdraws exactly that, and the compensation has to be replaced or the
+sentence struck on purpose. The sharper question is what handle the
+player keeps at all: steering, stopping, and the kurgan. If all three
+go, teaching herding becomes a one-way act, which is the version worth
+building first.
 
-Nothing is committed to and nothing is measured. It is the dump.
+Four collisions found by reading first:
+
+  audibleHerd is n < 77, so ANY absorption silences the band and it
+  stops feeding stone courses under 1.20. Two rules from one batch
+  cancel on contact.
+
+  the logistic eats the absorption. Starting at 77 and taking +5/+10/
+  +20/+40 a year, a band settles at 90/101/118/144 and NEVER reaches
+  two Seventy-Sevens. A split threshold of 154 can never fire.
+
+  splitting has a precedent and it is not split2, which sends half a
+  settlement to blessed ground a roving band has none of.
+
+  movement is already written. driveHerds is exactly it. Part one is
+  mostly deleting the player's steering, not writing pathfinding.
+
+OP-12 now points here for the part of it this supersedes.

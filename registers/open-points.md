@@ -1012,6 +1012,132 @@ Silence is not achieved; loudness is moved.
   OP-17's fill colour now has to say *forbidden*, and today it is a thin inner
   ring and the settlement list saying so.
 
+## OP-24 · high · The herds should leave your hand
+
+**Raised by Rick, 25 August 2026, and raised as the point of the game rather than
+as a balance idea:** *I want the pastoralists to move independently. This is the
+whole point of the game, setting things in motion that you can no longer
+personally control.*
+
+Four parts, and they are not one change:
+
+1. **They walk themselves.** Aimed at the nearest reckoned ground of the
+   adversary, and rampaging from there.
+2. **They absorb.** Standing beside a settlement of the adversary, they take some
+   of its people every year — joining the band willingly or otherwise.
+3. **They split.** Above some size a band becomes two bands, and now there are two
+   of them roving.
+4. **The ground they lay waste stays waste about three years.** *Already built* —
+   `herdTick` writes `t.bar = turn + wither` and `wither` is 3. A-14 adds the part
+   nobody asked for: a tile refused by `barren` is **not spent** from the
+   settlement's lifetime ploughing budget, so it is spent again when the ground
+   comes back. Grazed ground is lost twice, and the second time invisibly.
+
+### Why it matters, and it matters three ways
+
+**It is the design value stated as a mechanic.** Irrevocability, and a cost that
+arrives from a decision made years earlier by somebody who is no longer listening.
+Nothing else in the build is like this: every other thing a god does is aimed. See
+A-19 and A-30 — both times the harder reading was the one taken.
+
+**It is the answer to A-32 that the magical side does not currently have.**
+Agriculture wins by subtraction: 69 points taken off the rival against Bands' 44,
+because a furrow erases blessing automatically and for free while blessing must be
+walked to and laid down one tile at a time. The refuser's only interdiction is
+`unmake` — three points, one act, in person. **A band that walks into their
+fields by itself is the mirror of the plough**, and it is the only proposal so far
+that gives the magical side a passive denial engine without giving it points.
+
+**And it is the one rule in the build that gets *more* measurable by becoming
+autonomous.** A-24 / A-25 / A-26 measured herds at a flat null and said why: a
+one-ply chooser cannot drive them, will not send one four years across the board,
+and grazes nothing it did not happen to be standing beside. Take the driving away
+and **both seats play herds identically and correctly**, and the harness can
+finally report what the rule is worth. That is the opposite of OP-01's usual
+direction and it is the strongest practical argument for building this.
+
+### What it takes away, and this has to be decided rather than discovered
+
+`constants.js` 1.19 makes one promise in exchange for a herd scoring nothing:
+**"a herd is always audible. Steering one costs no act, no intervention, and no
+toll, wherever it is. You never lose touch with the people who never stopped
+listening."** Autonomy withdraws exactly that. It may well be the better game, but
+it cannot be slipped in — the compensation has to be replaced, or the sentence
+has to be struck on purpose.
+
+The sharper form: **what handle, if any, does the player keep?** Today there are
+three — steering (free), stopping (an act, in person, `canStop`), and raising a
+kurgan (an act, a fifth of the band). If steering goes and the other two stay, this
+is not out of your hands; it is a leash with more slack. If all three go,
+**teaching herding becomes a one-way act** and the mechanic says what Rick says it
+should say. That is the version worth building first, because the softer one can
+always be recovered from it.
+
+### Four collisions, found by reading before proposing
+
+**Absorption fights the Seventy-Seven, and the Seventy-Seven wins.** `audibleHerd`
+is `h.n < kHerd` — literally `n < 77`. **Any absorption at all silences the band
+immediately**, and a silent band stops adding courses to stones under 1.20. Two
+rules from the same batch cancel each other on contact.
+
+**And the logistic eats the absorption, so the split never fires.** A herd above
+its ceiling sheds at up to 28 per cent a year. Starting at 77 and absorbing every
+year, against the numbers the build actually carries:
+
+| taken a year | settles at | reaches two Seventy-Sevens (154) |
+|---|---|---|
+| +5 | ~90 | **never** |
+| +10 | ~101 | **never** |
+| +20 | ~118 | **never** |
+| +40 | ~144 | **never** |
+
+So the split threshold cannot be "two bands' worth" unless absorbed people bypass
+the logistic, or `kHerd` rises, or `audibleHerd` stops reading the ceiling. Pick
+one deliberately. Note also that a herd above its ceiling **evaporates** people,
+while the settled side's equivalent (`exodus`, OP-20) puts them on the road —
+which is the better rule, and the herd never got it.
+
+**Splitting has a precedent and it is not the settlement one.** `split2` sends half
+a settlement to *blessed ground you already hold*, which is exactly what a roving
+band has none of. The nearer precedent is the sentence already in `actions.js` —
+*"They keep the Seventy-Seven. Half go over the rise."* Half, and the new band
+inherits `kill`, is the obvious reading. Exponential unless capped: two becomes
+four becomes eight, and forty years is a great many doublings.
+
+**Movement is already written.** `driveHerds` in `ai.js` is precisely *walk at the
+nearest reckoned tile there is a road to*, and `herdStep` already honours the rule
+that the other power's blessing is closed country to them. So part 1 is mostly
+**deleting the player's steering and pointing both seats at the function that
+exists**, not writing pathfinding. Two things it does not answer: what a band does
+when there is no adversarial farmland anywhere on the board (today it stops if
+`canStop` allows and stands in the open if it does not), and whether *rampage*
+means anything more than the one tile a year `herdTick` already converts. If it
+means more — a ring, or a tile plus a bite of the settlement beside it — say
+so, because the existing comment refuses a ring by name: *"A ring would be a plague
+of locusts and this is a people."*
+
+### How it would be settled
+
+Behind its own flag, in one sitting, because every piece already has a home:
+
+1. `driveHerds` moves out of `ai.js` into `tick.js` and runs for both seats.
+   Delete the steering target from `targets()` and the button from the row.
+2. Absorption: one loop in `herdTick`, adjacency only — `herdBlocked` already
+   refuses to let a band stand *on* a settlement, so adjacency is the only reading
+   available and it is the right one.
+3. Resolve the ceiling question first. Nothing else can be measured until it is.
+4. Split in `herdTick`, half and half, with a hard cap on bands per power.
+
+Then the measurement the null of A-24 / A-25 / A-26 could never take: **Bands and
+Haunt against Cities, with and without the flag**, plus the rival's farmland count
+at year forty, the mean band count, and the mean life of a band. If the settled
+side's farmland does not fall, the rule does nothing. If the board is eleven bands
+by year thirty, the cap is wrong rather than the rule.
+
+**And then a played game, because the whole proposal is about how it feels to have
+set something loose.** That is OP-21's question in miniature, and no number answers
+it.
+
 ## OP-07 · medium · Map generation is unexamined
 
 The generator makes blob islands with smoothed noise. It has never been checked for
@@ -1264,6 +1390,15 @@ is that.
   in the engine; whether *Wither* should also leave it is unmeasured beyond one
   row, and that row moves four numbers — cities 34→39, mixed 36→44, haunt 54→50,
   bands 29→26. It is off. It is not this rule and must not be turned on with it.
+
+**Superseded in its most important part by OP-24, 25 August 2026.** Rick has asked
+for the herds to move on their own — no steering, aimed at the adversary's fields,
+absorbing and splitting as they go. That answers the *what is a herd for* question
+this entry keeps circling, it is the one change that would make the flat null of
+A-24 / A-25 / A-26 measurable at all, and it collides with two numbers written
+above. **Read OP-24 before touching anything here.** What is left in this entry
+after that is the cycling price, the kurgans, and , and all three are
+smaller than they look next to it.
 
 ## OP-15 · medium · Endings as an unscored reading of the final board
 
