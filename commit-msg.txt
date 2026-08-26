@@ -1,5 +1,48 @@
-Repair one word lost to a shell substitution in OP-12
+OP-25, and the herds are ruled on
 
-A backtick pair inside a double-quoted heredoc was executed rather than
-written, so the pointer OP-12 now carries at OP-24 read 'the cycling
-price, the kurgans, and , and all three'. Restored.
+Two things, and the second is the larger.
+
+OP-24 is decided. Rick: they become fully autonomous, it is a one-way
+act, they may become too large and split at a given size, and being out
+of hearing is not a problem - he thinks they should be. So all three
+questions the entry opened are answered, and answered harder than it
+proposed. The audibleHerd collision stops being a collision and becomes
+the design: a band past the Seventy-Seven has walked out of hearing and
+stops adding courses to stones, which is a sentence rather than a bug.
+The logistic stops being a ceiling and becomes the pressure that drives
+the split, so the fuse gets set from the settles-at column and not from
+two Seventy-Sevens. Two consequences recorded before they are
+discovered: kurgans lose their only trigger and need another or need
+cutting, and the detour framing in 1.19 is now false - herding is a door
+after all, kept honest by scoring nothing rather than by coming back.
+
+OP-25 is new and sits beside OP-21 rather than below it. OP-21 is the
+instrument; this is the question. Rick's, and raised as the thing he is
+deliberately not deciding yet: creation is the first act, the middle has
+become interdiction through agriculture and through herds, and what the
+late game rewards is open.
+
+The engine answers more bluntly than expected. The valley is 84 walkable
+tiles: 252 points blessed, 168 ploughed. Total points on the board peak
+at year twelve or thirteen at about 230 of a possible 252 - 91% of
+everything that can ever exist - and fall for the remaining 27 years.
+Two settled powers destroy 29% of everything they ever made. So as the
+build stands, the late game is interdiction only by arithmetic: there is
+nothing left to reward because there is nothing left to make.
+
+Five directions written down, one measurement each where one was cheap.
+Integrating over time is computable today, since FG.G.hist has recorded
+the full component score every year since the beginning and nothing
+reads it but the chart: win rates go cities 42 to 29, haunt 55 to 79,
+bands 33 to 46. Read that as what the present game looks like under a
+different lens, not as what the game would become - every DOCTRINE
+weight is tuned to the current score, so measuring a new scoring against
+this chooser measures the chooser. OP-01 in its purest form.
+
+The order is part of the ruling and is written down: gameplay first,
+scoring after, and no scoring change may be made to fix a balance
+problem. Build sim/rescore.js first because it is nearly free and
+answers OP-20's standing ask at the same time. Then stop, and play.
+
+OP-09 folded into OP-25. Contiguity is a candidate answer to a question
+nobody has decided yet and must not be tuned on its own.

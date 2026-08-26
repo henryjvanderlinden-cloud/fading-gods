@@ -147,6 +147,138 @@ it was argued to have — see OP-07.
   game exactly from a seed, so an undo-within-turn is available in principle.
   Deferred until it is shown to be a problem in play.
 
+## OP-25 · highest · What does the late game reward, or is it interdiction only?
+
+**Raised by Rick, 25 August 2026, and raised as the thing he is deliberately not
+deciding yet:** *As for the scoring, to me that is still an open issue. I first
+want the gameplay to feel realistic, and then refine the scoring, to see what we
+will actually award points for. There are some emergent forms of gameplay coming
+out already, like interdicting through agriculture, interdicting through herds.
+Creation is the first act, with blessings, stones and small settlements. I am still
+pondering what we will actually reward in the later game, or if it is interdiction
+only.*
+
+**Placed beside OP-21 rather than below it.** OP-21 is the instrument. This is the
+question. Everything else in this register is a rule; this decides what the rules
+are for.
+
+### The order is part of the ruling
+
+Gameplay first, scoring after. Written down because it is the opposite of the
+instinct that produced `rejected.md` — and because it means **no scoring change
+may be made to fix a balance problem.** If a doctrine is winning too often that is a
+rule question. This entry is only ever about *what the game is about*.
+
+### What the engine answers today, and it is blunter than expected
+
+**The valley is a fixed pie of 84 walkable tiles.** Blessed, the whole board is
+worth **252**. Ploughed, it is worth **168**. Every furrow is a permanent reduction
+in how much the valley can ever be worth to anybody.
+
+Total points on the board, both powers together, 120 games a row:
+
+| | y1 | y5 | y8 | **y12** | y16 | y20 | y25 | y30 | y40 |
+|---|---|---|---|---|---|---|---|---|---|
+| haunt v cities | 58 | 200 | 221 | **228** | 225 | 220 | 214 | 207 | 202 |
+| bands v cities | 58 | 198 | 218 | **228** | 225 | 217 | 212 | 209 | 206 |
+| cities v cities | 58 | 185 | 208 | **216** | 212 | 197 | 181 | 171 | **163** |
+
+**The board peaks at year twelve or thirteen and falls for the remaining
+twenty-seven years.** At the peak the two powers hold about 230 of a possible 252
+— **91 per cent of everything that can ever exist.** Creation does not slow
+down because the players lose interest. It stops because there is nothing left to
+create on.
+
+So the answer to *is it interdiction only* is, as the build currently stands,
+**yes, by arithmetic.** After year thirteen the sum of points on the board only goes
+down, and two settled powers destroy **29 per cent** of everything they ever made
+between them. There is nothing else the late game could reward, because there is
+nothing left to make.
+
+That is not obviously wrong. It may be the game. But it should be chosen.
+
+### Five directions, and only one of them is a tuning change
+
+**a — Nothing. Interdiction only is correct.** The late game is about what is
+left when two gods have finished with a valley, and the one sentence supports it
+from the far end. The cost is stated plainly: **twenty-five of the forty years
+contain no constructive decision**, only choices about whose thing to break.
+
+**b — Integrate over time.** Score the area under the curve rather than the
+final board. **Computable today** — `FG.G.hist` has recorded the full component
+score for both powers every year since the beginning and nothing reads it but the
+chart. Measured over 200 games a row, win rate under final-board scoring versus
+integrated scoring:
+
+| | final board | integrated |
+|---|---|---|
+| cities | 42% | **29%** |
+| mixed | 33% | 38% |
+| haunt | 55% | **79%** |
+| bands | 33% | **46%** |
+| storm | 50% | 47% |
+
+It rewards holding and punishes the late grab, and it moves the settled side down
+and the magical side up because blessing is held early and long while farmland
+arrives late and erases. **The objection is that it makes an early lead very hard to
+lose**, and that it rewards *not having been interfered with* rather than doing
+anything.
+
+**c — Score what was, not what is.** Remembrance rather than ground, which is
+the one sentence read literally. A tile that was yours for thirty years and is
+furrows now ought to be worth something; a tile taken in year thirty-nine ought not.
+This is (b) narrowed to your own history rather than your own board, **and the
+object that says it already exists and scores nothing: the kurgan.** A grave in a
+field, holding no ground. Give the mound the memory and half of 1.19 stops being
+decoration — see OP-12, OP-15's *Forgotten*, and OP-16.
+
+**d — Asymmetric objectives.** One number cannot rank a doctrine that wins by
+accumulation against one that wins by subtraction, and A-32 shows those are
+structurally different games. The largest change here and the most likely to break
+the thing that makes this game good, which is that both players read the same board.
+
+**e — Make the pie growable.** The only option that changes *when* creation
+stops rather than *what is counted*. Creation ends at year thirteen because 84 tiles
+is a hard ceiling. Anything that lets the valley become worth **more** than its own
+ground — a stone with three courses worth more than the tile it stands on, a
+mound, a place that has been continuously quiet for a generation — moves the
+ceiling and gives the late game something to build. Note that `stonesGrow` and
+kurgans are both already objects that accumulate and score nothing, so the pieces
+exist.
+
+### What must not happen, already recorded
+
+- **Population must not score.** A-32: a city of 827 scores what one blessed tile
+  scores, and rewarding people would make the settled side's growth engine feed
+  itself. If population is to matter it should gate things, as it does now.
+- **The ratchet must not have a counter.** `ideas.md` under interface: a running
+  total of the blessing you have erased turns the quietest thing in the design into
+  a progress bar. A chronicle line is a thing that happened; a number is a score.
+
+### How it would be settled
+
+**Build the re-scorer first, because it is nearly free.** `sim/rescore.js` reading
+`FG.G.hist` from a finished game and reporting it under every candidate at once.
+The engine does not have to change, no game has to be re-run, and every doctrine
+table in the project can then be produced under any scoring in seconds. This is the
+same instrument OP-20 has been asking for as *the wonder count as its own series*,
+and it should be built once and answer both.
+
+**And then stop, because the harness cannot settle this.** Changing the score
+changes what a good player does, and every weight in `DOCTRINE` is tuned to the
+current score. An alternative scoring measured against the current chooser measures
+**the chooser**, not the scoring. That is OP-01 in its purest form and the numbers in
+this entry are subject to it — read the table above as *what the present game
+looks like under a different lens*, not as *what the game would become*.
+
+So: re-score for the shape, then **one played game per surviving candidate**, then
+decide. OP-21 again, and this is the largest thing waiting on it.
+
+**Folded in:** OP-09 (contiguity scoring, shelved) is a scoring question and belongs
+to this one now. OP-15's endings are the version of *what was this valley worth*
+that requires no scoring change at all, and if they land they may be the whole
+answer to (c).
+
 ## OP-01 · high · The rival AI is one-ply greedy
 
 Every balance number in `design/rules.md` was produced against an opponent that
@@ -1056,14 +1188,66 @@ and **both seats play herds identically and correctly**, and the harness can
 finally report what the rule is worth. That is the opposite of OP-01's usual
 direction and it is the strongest practical argument for building this.
 
-### What it takes away, and this has to be decided rather than discovered
+### Decided, 25 August 2026, by the person whose game it is
+
+Rick, asked what handle the player keeps: **none.** *They become fully autonomous.
+It is a one-way act.* And on the ceiling: *I would also allow them to become too
+large, and have them split autonomously at a given size.* And on the promise below:
+*the fact that they are not audible or hearing is not a problem for me. I think
+they should be.*
+
+So the three questions this entry opened are answered, and answered harder than the
+entry proposed:
+
+| the question | the ruling |
+|---|---|
+| what handle does the player keep? | **none.** Teaching herding is the last thing you ever say to them. |
+| what happens above the Seventy-Seven? | **they get too large, and split.** The ceiling stops being a ceiling and becomes a fuse. |
+| a herd is *always audible* — 1.19's compensation | **struck, on purpose.** A people who walked out of hearing is the rule, not a cost of it. |
+
+**What that settles, and what it costs.**
+
+The `audibleHerd` collision below is not a collision any more; it is the design. A
+band that has grown past the Seventy-Seven has walked out of hearing, and a band
+out of hearing **stops adding courses to stones** under 1.20. That is now a
+sentence rather than a bug: *a course goes on while somebody who can still hear you
+is standing in the stone's reach* — and the people who went after the grass
+stopped being those people. It also means the herd half of `stonesGrow` quietly
+becomes a **young-band** rule: a band feeds a stone only while it is small, only
+early, and only until it starts eating.
+
+The logistic stops being a ceiling and becomes the **pressure that drives the
+split**. It no longer needs to be defeated — absorbing more than the shed rate is
+exactly what makes a band swell toward its fuse, and the numbers in the table below
+become the tuning problem rather than the obstacle. **Set the split threshold from
+the settled-at column, not from two Seventy-Sevens.** At +20 a year a band settles
+near 118, so a fuse at 120 fires and a fuse at 154 never does.
+
+And `canStop` and `canMound` come out with the steering. That has one consequence
+worth saying out loud before it is discovered: **kurgans lose their only means of
+being raised.** OP-12 already suspected that half of 1.19 was decoration; this makes
+the question urgent rather than academic. Either mounds get another way to happen
+— a band that dies of attrition on a dead stone, say, which needs no act and is
+better — or they are cut. They cannot simply be left with no reachable trigger.
+
+**One thing the ruling does not settle, and it is the last open piece.** A band that
+can never be stopped can never become a settlement again, so the *detour* framing in
+`constants.js` 1.19 — *"It is not a door. It is a detour: a herd that stops is an
+ordinary untaught settlement standing at the same fork it left"* — is now false.
+Herding is a door out of the dilemma after all, and the thing that keeps it honest
+has to be that **they score nothing and cannot be recovered**, not that they come
+back. Rewrite that paragraph before building, or the code and the reasoning will
+disagree about what the rule is for. See also OP-25: what a band *ought* to be worth
+is now part of a larger question that is open on purpose.
+
+### What it took away, kept here because the reasoning is the record
 
 `constants.js` 1.19 makes one promise in exchange for a herd scoring nothing:
 **"a herd is always audible. Steering one costs no act, no intervention, and no
 toll, wherever it is. You never lose touch with the people who never stopped
-listening."** Autonomy withdraws exactly that. It may well be the better game, but
-it cannot be slipped in — the compensation has to be replaced, or the sentence
-has to be struck on purpose.
+listening."** Autonomy withdraws exactly that. **It has been struck on purpose**, above.
+Kept here because the promise is real and somebody will find it in
+`constants.js` and think it was overlooked.
 
 The sharper form: **what handle, if any, does the player keep?** Today there are
 three — steering (free), stopping (an act, in person, `canStop`), and raising a
@@ -1261,6 +1445,10 @@ it, rather than bolted onto a balance built without it.
 **OP-15** gives the metric a job that requires no re-tuning at all: an ending can
 *read* contiguity without anything scoring it. If the endings land, that may be the
 whole of what contiguity was ever for.
+
+**Folded into OP-25, 25 August 2026.** Contiguity is a candidate answer to a
+question that is now open on purpose: what the late game rewards. Do not test it on
+its own — it would be tuned against a scoring nobody has decided to keep.
 
 ## OP-10 · low · Only one rival
 
