@@ -1397,7 +1397,7 @@ absorbing and splitting as they go. That answers the *what is a herd for* questi
 this entry keeps circling, it is the one change that would make the flat null of
 A-24 / A-25 / A-26 measurable at all, and it collides with two numbers written
 above. **Read OP-24 before touching anything here.** What is left in this entry
-after that is the cycling price, the kurgans, and , and all three are
+after that is the cycling price, the kurgans, and `barren3`, and all three are
 smaller than they look next to it.
 
 ## OP-15 · medium · Endings as an unscored reading of the final board
