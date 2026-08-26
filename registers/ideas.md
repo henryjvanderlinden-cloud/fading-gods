@@ -311,3 +311,45 @@ file and diegetic: two peoples with two ways of laying out a field. Pairs with
 boundary stones, which read at tile scale where this reads at region scale.
 
 **Speech bubbles** — one or two a year for flavor and a bit of information, weighted by proximity/relevance/novelty; corpus and selection rule in registers/speech-bubbles.md
+
+**A line for what went out** — the settled side's only feedback, and it does not
+exist. A-32 named agriculture as a denial engine: it builds a low ceiling and wins
+by subtraction. Game 7 is the shape of that — 4,700 people, 71 points, and a
+win that came out of the rival's absence rather than anything on his own board.
+The trouble is that **nothing on the interface says so while it is happening.**
+The chips count what you hold. A player whose whole strategy is what the other one
+*stopped* holding has no number at all, and finds out at year forty.
+
+The engine already computes it and already speaks half of it. `growTick` counts
+the blessing the ratchet erases each year and says *"N tiles of your blessing go
+out. It has been surveyed."* — **but only for seat 0's losses.** The same loop
+knows exactly how many of theirs went out under your furrows and does not mention
+it. That is one `say()`, on a counter that is already there.
+
+Bigger versions, in order of how much they change:
+
+- **A chronicle line for their side of the ratchet.** *"Three tiles of their quiet
+  are under the plough now."* Costs nothing, needs no new state, and turns the
+  settled doctrine from a thing that happens into a thing you are doing.
+- **A fourth series on the two-of-you graph** — their blessing over the years,
+  falling, beside the scores. The graph already carries three lines and already
+  shows THEM, so this leaks no category of information the build has not already
+  decided to leak.
+- **A chip.** *gone out*, running total. Cheapest to read and the most likely to be
+  wrong: it makes the ratchet feel like a resource to farm rather than a
+  consequence of feeding people, which is precisely the wrong end of the one
+  sentence.
+
+**The honest objection is the third bullet generalised.** This game does not
+narrate and does not score things in advance — OP-15 makes that a hard
+constraint on endings, and OP-23 keeps the interface a laboratory rather than a
+coach. A counter that tells a farmer *how well the erasure is going* risks turning
+the quietest and most terrible thing in the design into a progress bar. The
+chronicle line does not have that problem, because a sentence about somebody
+else's ground going quiet is a thing that happened rather than a score. **Start
+there, and probably stop there.**
+
+Pairs with the two other things game 7 left lying about: the wonder count as its
+own series (OP-20, still unbuilt, and game 7 went six to zero with no record but
+the last frame), and population feeding nothing but the ploughing budget.
+

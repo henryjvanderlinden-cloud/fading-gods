@@ -1,53 +1,22 @@
-A-32: what the settled side is for
+An idea, not a requirement: a line for what went out
 
-Game 7, the first played from the agricultural side, and the first game
-of any kind to end where the README says a game ends: six taught, no
-working stone, every wonder struck through, ten percent of a body left
-and no blessed tile on the board. 71 to 66, with two of their levies two
-years out.
+registers/ideas.md, under interface and presentation. A-32 named the
+settled side a denial engine, and game 7 is the shape of it: 4,700
+people, 71 points, and a win that came out of the rival's absence.
+Nothing on the interface says so while it is happening. The chips count
+what you hold; a player whose whole strategy is what the other one
+stopped holding has no number at all until year forty.
 
-Rick's reading of it, which is the entry: the main mechanic is not
-gaining points with agriculture, because you can't. It is interdiction,
-and in that it is very effective. Agriculture destroys your own divine
-realm and lets you destroy theirs faster.
+The engine already computes it and already speaks half of it. growTick
+counts the blessing the ratchet erases each year and says so for seat
+0's losses only. The same loop knows how many of theirs went out under
+your furrows and never mentions it.
 
-Nothing changed in the engine. This is a name for something that has
-been running since 1.1, and tick.js already carried the sentence above
-the loop that does it — "the one-way ratchet: farmland does not
-out-score blessing, it erases it."
+Three sizes are written down, with the objection: a chronicle line for
+their side of the ratchet (one say(), no new state), a fourth series on
+the graph, or a chip. The chip is the one that is probably wrong, since
+it turns the quietest thing in the design into a progress bar, which is
+the wrong end of the one sentence. OP-15 and OP-23 both point the same
+way. Start at the chronicle line and probably stop there.
 
-Four lines make it true:
-
-  a furrow scores 2 and blessing scores 3
-  a furrow wipes every blessed tile touching it, to nobody
-  you cannot bless farmland, ever — blessEffect returns null on reck
-  ploughing is free, automatic, 3 tiles a year, 30 for a settlement's
-    life; blessing costs an act and a walk, one tile at a time
-
-Measured, 200 paired seeds against Cities, each doctrine compared with
-itself on the same seeds against Passive:
-
-                 builds alone   loses   takes   ends at
-  cities              153        -74     -69      79
-  mixed               165        -86     -58      79
-  haunt               253       -151     -55     102
-  bands               252       -157     -44      95
-
-Against the same opponent, agriculture takes half again as much and
-loses half as much. It simply cannot build. Bands makes 252 and keeps
-95 — it loses 62% of everything it ever holds.
-
-Blessing erased by the ratchet, 120 games: 8 to 15 tiles a game in a
-magical-against-settled game, 35 a side when both powers plough.
-
-Also recorded: deadOrders was load-bearing in this game and it is the
-first time it has been. Two silent stones, range 2, and with no working
-stone they were the only reach left. A-31 measured 1.21 at +2.0 and
-called it noise; that is correct and beside the point, because Cities
-raises 0.8 stones a game and rarely has a corpse to speak through. He
-had two. OP-01's null, not the rule's.
-
-Two things it opens, neither acted on: the score does not show a settled
-player how they are doing — the number that matters to that doctrine is
-the opponent's blessing going out, and the interface never names it. And
-population still feeds nothing but the ploughing budget.
+Nothing is committed to and nothing is measured. It is the dump.
