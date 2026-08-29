@@ -1,36 +1,40 @@
-Correct OP-06 and game 9: he was under siege, not distracted
+lore.md: the thread underneath, and the balance verdict overturned
 
-Both entries were written from a final screenshot and concluded the player had
-spent his forty years on tools that do not score. His own account says otherwise
-and it is better evidence: the adversary founded one settlement and taught it, and
-it became an engine in its own right, while he was walling magical settlements
-that were nearly taken by encirclement. The defence was necessary and it worked —
-the places it saved are still standing at year forty.
+Rick's own framing of the thesis, written down while it is fresh, because it only
+existed in a conversation.
 
-The correction is written in rather than over, because the reasoning is the record.
+The loss of innocence is the first move and not the ending — Jaynes's bicameral
+mind, Adam and Eve, a common thread through human history. And the rule for it has
+been in the build since 1.5 with nobody calling it that: `audible` is *a people few
+enough and untaught enough that there is nothing between them and you but air*.
+Under seventy-seven they bless the ground by being there; past it they cannot hear
+you; being shown the plough ends it too, because a people shown the plough are
+counting the fields, not listening. That is Jaynes as a population threshold and
+Eden as a teaching, in one predicate, and nobody set out to write it — it fell out
+of asking who can hear a god.
 
-And it sharpens the finding instead of dissolving it. A defence has to be attended
-and pays nothing; the plough compounds while you are elsewhere. That is A-32's
-fourth line read from the receiving end for the first time. One settlement taught
-once beat forty years of acts and walks.
+The pastoralists are already historically shaped: herding may only be taught once
+somebody has broken ground, which is a condition rather than a clock and happens
+to be the real dependency. Since 1.24 they walk out of hearing and never come back,
+and in a world where the gods have stopped they are the only thing still moving.
 
-"No room left to found" is not a second failure, it is the same one — founding
-needs quiet you hold, so squeezing the blessing squeezes the room. Measured over
-300 seeds: a refuser holds 7.5 legal foundings at year 35 and never averages zero,
-so running out is not the normal case, it is what nine tiles feels like from the
-inside. From the same run, the mirror image: `cities` has 1.6 places to found at
-year 5 and 0.1 by year 30, because its own farmland blocks it. The settled
-doctrine cannot expand by founding at all — it grows what it has and takes what it
-wants.
+The three layers — hunter-gatherers, Anatolian farmers, Yamnaya — are all in the
+game, with the right dependency structure. What is missing is mixture, and mixture
+is the point of the comparison: the layers absorbed each other, and what came out
+carried fragments of all three. Here ownership is binary and encirclement is a
+clean erasure, which is the one thing the real story never does.
 
-Also corrected: the 60% harness win rate against a person losing by thirty-nine is
-not the player's error. The chooser is never put under pressure it has to answer,
-so it maximises every year. OP-01's warning inverted — it looks like the better
-player only because it was never playing the same game.
+So "only some myths survive" is a scoring principle, not a mood. The myths that
+lasted did so inside somebody else's people. The question an ending should ask is
+not what do you still hold but what is still being carried by people who are no
+longer yours — the only version under which losing the ground and being remembered
+anyway makes sense. And that is where the kurgans have been pointing since 1.19: a
+mound is memory rather than possession, and a tile count has no way to value a
+grave.
 
-What survives: not one tool he used scores a point. Four stones, two rings, a
-herd, and a defence that held. A game in which the correct defensive play is worth
-nothing is a game whose ending is measuring the wrong thing. OP-25, from a new
-direction.
-
-No engine change.
+Also corrected in the same file: the balance table's verdict. It said Cities wins
+78% and Bands 24%, and called that the current build — the game saying the
+convinced were right and the refusers were fools. Measured at 400 seeds a cell,
+haunt is now 60% and bands 30%, with the refuser's blessing up from 19.4 tiles to
+34 and the rival's farmland down from 22.6 to 7.4. Mostly A-31. The game no longer
+says that.

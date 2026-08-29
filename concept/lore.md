@@ -165,17 +165,109 @@ other way round. Choosing an opponent becomes choosing what you are arguing with
 
 ### And it puts the balance table on the spot
 
-If a doctrine is a theology, then the win rates in §10 are the game's own verdict
-on the argument. Right now the game has one, and it is emphatic: **Cities wins 78%
-of everything it plays; Bands wins 24%.**
+If a doctrine is a theology, then the win rates are the game's own verdict on the
+argument. When this was written the game had one and it was emphatic: **Cities won
+78% of everything it played; Bands won 24%.** As it stood the game said the
+convinced were right and the refusers were fools, and it said so in a dropdown
+labelled with their names.
 
-That is the fiat outcome this document warns against, and it is not hypothetical —
-it is the current build. As it stands the game says the convinced were right and
-the refusers were fools, and it says so in a dropdown labelled with their names.
+**That verdict has been overturned, and it is worth recording that it was a
+measurement and not an opinion that did it.** 400 seeds a cell, 29 August 2026,
+the pre-batch game against the shipped one:
 
-**This is what OP-06 is actually about**, and it is a larger problem than "is an
-ascetic strategy viable". A refuser should be able to keep four hundred wild folk
-who hear it, build almost nothing, and win. If the balance says otherwise, that is
-a balance problem and not a moral.
+| | pre-batch | as it ships |
+|---|---|---|
+| haunt v cities | 20% | **60%** |
+| bands v cities | 10% | **30%** |
+| haunt's blessed tiles | 19.4 | **34.0** |
+| cities' farmland | 22.6 | **7.4** |
+
+A refuser is now the strongest of the three against the same opponent. Most of it
+is A-31 — the chooser stopped walking itself to death in its own furrows — and the
+rest is the August batch. **The game no longer says the refusers were fools.** See
+OP-06, which is open on a different question now.
 
 Write the powers as certain. Do not let the rules be.
+
+---
+
+## The thread underneath, which is one argument and not three
+
+Rick, 29 August 2026, and it is the clearest statement of the thesis this project
+has: *what I like is that we have some game mechanics that kind of mimic real
+developments in the bronze age and that you can watch them play out.*
+
+### The loss is the first move, not the ending
+
+The magical half is fantastical and it is **rooted in something specific**: the
+loss of innocence. Jaynes's bicameral mind, where the voices stop. Adam and Eve,
+who became too conscious and lost a light-hearted life. *I think this is a common
+thread throughout human history.*
+
+**And the rule for it has been in the build since 1.5, unlabelled.** `audible`
+reads *a people few enough and untaught enough that there is nothing between them
+and you but air.* Under seventy-seven they bless the ground round them simply by
+being there. Past seventy-seven they cannot hear you — and being shown the plough
+ends it too, because *a people who have been shown the plough are counting the
+fields, not listening.*
+
+That is Jaynes as a population threshold and Eden as a teaching, in one predicate.
+The voices stop when the society grows past the size that can be held in a head,
+and they stop when knowledge arrives. **Nobody set out to write the bicameral mind
+into this game; it fell out of asking who can hear a god.** Which is the strongest
+argument there is that the premise is doing real work — see `audible77` in
+`engine/constants.js` and 1.20, which reads the same predicate for the stones.
+
+### The countermovement is already historically shaped
+
+The pastoralists are *rooted in the agricultural revolution, took a slice of it,
+made it their own, and came up with a new way of life.* The build already says
+this and says it as a rule rather than as flavour: **herding may only be taught
+once somebody has broken ground.** `rejected.md` cut the reverse tech tree because
+a timer is weather; what replaced it is a condition, and the condition happens to
+be the actual historical dependency. A valley nobody ploughed has no herders in it.
+
+And since 1.24 they walk out of hearing and never come back — which makes them the
+only people in the game who carry something away from the god who made them. See
+A-33, and the fact that in a world where the gods have stopped, **the bands are the
+only thing still moving**.
+
+### The three layers, and the one the game does not have
+
+*Kind of the genetic layers of Europe, with the Western Hunter Gatherers, the
+Anatolian farmers, and the Yamnaya pastoralists. Populations increase, mixture is
+forced, and only some myths survive.*
+
+Three layers, and the game has all three: the wild folk who hear, the people shown
+the plough, and the band that walks off with a slice of it. It even has the right
+dependency structure, with the third emerging from the second rather than standing
+beside it.
+
+**What it does not have is mixture, and mixture is the whole point of the
+comparison.** The layers did not replace each other. They absorbed each other, and
+what came out carried fragments of all three. In this game ownership is binary — a
+tile is yours or theirs, a settlement is yours or theirs — and encirclement flips a
+place wholesale and forbids both teachings for ever. That is a clean erasure, and
+clean erasure is the one thing the real story never does.
+
+**Which is why *only some myths survive* is a scoring principle and not a mood.**
+The myths that lasted did so **inside somebody else's people**. Indo-European gods
+spread because Yamnaya ancestry spread, not because they were better gods. So the
+question an ending should ask is not *what do you still hold* but **what is still
+being carried by people who are no longer yours** — and that is a different
+question, and the only one under which losing the ground and being remembered
+anyway makes any sense.
+
+**And it is where the kurgans have been pointing since 1.19.** A mound is the one
+object in this design that is memory rather than possession. It survives being
+ploughed over; it belongs to nobody afterwards; it is precisely the thing an
+archaeologist digs up when everything else is gone. OP-12 has suspected for weeks
+that half of 1.19 is decoration, and the reason is that a tile count has no way to
+value a grave. An ending that asks what survived you does. See OP-25, and the
+extrapolation entries in `registers/ideas.md`.
+
+*And in the end, we're all in each other's way.* The board is eighty-four walkable
+tiles. Measured 29 August: a settled power has **1.6 legal places to found by year
+five and 0.1 by year thirty**, because its own fields block it. The pressure the
+sentence describes is already in the build. What is missing is a way for that
+pressure to resolve as **mixture** rather than as replacement.
