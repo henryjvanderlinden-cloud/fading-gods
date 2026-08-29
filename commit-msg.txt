@@ -1,43 +1,18 @@
-Ideas: what the world does without you, measured
+The terms panel was offering a checkbox called "undefined"
 
-Rick: what if after 40 turns settlements that can raise a levy sometimes do it on
-their own? The right instinct, and moveColumns already resets a captured
-settlement's ploughing budget, so conquest looks like it should hand a farming
-power thirty fresh tiles.
+1.24 put `roam` in `FG.R2BUILT` and never gave it a name. The rule list stopped
+being a second copy when the engine started exporting R2BUILT — A-16 — but the
+rule *names* are still a hand-kept map in `ui.js`, so the terms panel has been
+showing a live, working switch labelled **undefined** since `2f25ef3`, four
+commits ago. Rick found it by opening the panel.
 
-Built and run at 2%, 5% and 15% a generation. The wars happen and the ground does
-not move: towns change hands — storm 5.6 to 4.9, cities 5.5 to 6.2 — and blessing
-reads 28.8, 28.9, 29.1 across every rate, identical to no wars at all.
+It now reads *herds go where they will, and no hand reaches them*.
 
-Because the gate is not the budget, it is `taught`. Only a people shown the plough
-turn ground into fields, and a levy that takes a town does not teach it. Conquest
-moves ownership and never moves agriculture.
+A missing label cannot be caught by counting anything: the row is the right
+length, the checkbox works, the rule toggles correctly. Nothing was broken except
+the one thing a player actually reads. So the check goes in against the engine's
+own list, in both directions — every flag in the panel has a name, and the panel
+offers every flag the engine has. That is A-16's lesson for the third time, and
+the third distinct way this pair of lists has drifted.
 
-Tested the one-line version — a place taken by levy takes the teaching of whoever
-took it, which pairs with encirclement forbidding both teachings for ever:
-
-                            gen 80   gen 240   taught towns
-  conquest does not teach     28.9      29.1     2.8 -> 2.8
-  conquest teaches            27.6      26.2     2.8 -> 4.0
-
-It moves, at 2.7 tiles of blessing per two hundred generations. A seepage, not a
-takeover.
-
-So the finding is bigger than the ending. Every dynamic in this game is powered by
-a god, and the valley is in equilibrium at year forty by construction — ploughing
-is a lifetime allowance that is spent, ploughing requires `taught` and teaching is
-an act of a god, and blessing is only made by a god or an audible settlement. The
-valley is only alive while somebody is watching it.
-
-Which may be the theme, but it makes extrapolation impossible and the assessment
-trivial: on a frozen board everyone with one blessed tile is remembered for ever.
-The ending is therefore not a scoring question. It is: what does the world do
-without you, and that has to be answered first.
-
-Rick's three intuitions against the engine as it stands: herds keep their
-mythology, already true and nobody built it; blessing maintains if walled off,
-true and far too true — haunt is 34.4 blessed tiles at generation 40 and 34.4 at
-240, mathematically permanent; agriculture takes over by weight of numbers, false
-twice over and the one that needs a rule.
-
-No engine change. eng3 was a scratch copy; nothing in engine/ was touched.
+Checks: 11,978, all passing.

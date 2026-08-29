@@ -924,6 +924,25 @@ try {
  // arithmetic visible: it is `FG.TEACH` less the ones whose rule is off.
  ok("the teachings are there with the batch on", chips("teach").length === 3,
     "got " + chips("teach").length);
+
+ // A-16, third time. The rule *list* stopped being a second copy when the engine
+ // started exporting `R2BUILT` — but the rule *names* are still a hand-kept map
+ // in `ui.js`, and 1.24 shipped with `roam` in the list and no label, so the
+ // terms panel offered a checkbox reading **undefined** for four commits. Rick
+ // found it by opening the panel.
+ //
+ // A missing label cannot be caught by counting anything, because the row is the
+ // right length and the switch works. So it is asserted against the engine's own
+ // list, in both directions: every flag has a name, and no name is orphaned.
+ {
+  const labelled = Array.prototype.slice.call($$("r2").querySelectorAll("input[data-r2]"))
+    .map(i => ({key: i.dataset.r2, text: i.parentNode.querySelector("span").textContent}));
+  ok("every rule in the panel has a name", labelled.every(l => l.text && !/undefined/.test(l.text)),
+     labelled.filter(l => !l.text || /undefined/.test(l.text)).map(l => l.key).join(", "));
+  ok("and the panel offers every flag the engine has",
+     labelled.length === Object.keys(win.FG.R2).length,
+     `panel ${labelled.length}, engine ${Object.keys(win.FG.R2).length}`);
+ }
  ok("the works begin locked", chips("civic").every(c => c.classList.contains("off")));
  // 1.18. The works now open on teachings, so the locked reason has to say so —
  // and it is read from FG.civicNeed(), so this check fails if the interface and

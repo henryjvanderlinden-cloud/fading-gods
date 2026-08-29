@@ -1068,6 +1068,7 @@ const R2LABEL = {
  landGates:"works open on tilled land, not on numbers", pathFrac:"distance is measured by road",
  barren3:"withered ground stays barren three years", exitLane:"the fields never quite close over",
  herds:"a people may be taught to keep herds, and then they walk",
+ roam:"herds go where they will, and no hand reaches them",
  dreamTeach:"you may teach where you are heard, at 10% of you", 
  dreamWorks:"a work beyond your hearing costs 10% of you"
 };
