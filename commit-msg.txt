@@ -1,30 +1,53 @@
-A-33, and the third leg does not pay for itself
+A band with nowhere to go waits, and A-33 was measuring a defect
 
-OP-24 is settled and archived. A-33 carries the eleven rulings, the two things
-the code said that the register did not, and the measurement — 900 seeds, the
-322 in which a band ever walked, both arms on the same set:
+Rick played it: a band he had just taught became a settlement again in the same
+year. His guess at why was right and it was mine.
 
-                  win        score      their farmland   their big towns
-  steered (1.19)  54.3% ±2.8  82.0:76.1      13.5             5.0
-  roaming (1.24)  48.4% ±2.8  73.2:74.1      13.8             5.3
+Two defects, both introduced yesterday, compounding. `ploughed()` asks whether
+the board has a furrow on it and not whose, so an agricultural arm of your own
+unlocks herding years before the adversary has broken ground — which is fine, and
+was never the problem. The problem is that the second rank of `herdAim` is very
+nearly unreachable: *the open ground beside a town of theirs* sounds like a
+fallback and is not one, because a town stands in its own blessing and every tile
+touching it is closed country to a band. So a band born early had nothing in
+either rank, 1.24 read that as boxed in, and it handed away a town and a wonder in
+the year it was taught.
 
-Autonomy costs the side that uses it six points of win rate and nine of score,
-and denies the settled side nothing. Their farmland does not fall. Their big
-towns do not fall. The passive denial engine A-32 said the magical side did not
-have, it still does not have — and that absence is the finding, because it was
-the whole argument for building the rule.
+Rick's ruling: *let them wander through your own blessed lands, until the opponent
+unlocks agriculture, then the wayfinding points to the agricultural land.* So
+nothing to walk at is waiting, not ending. `herdWander` drifts them through their
+own god's country — never closed to them — on `FG.rand` so the seeds still hold.
+A people who cannot take a single step, ringed on every side by the other power's
+quiet, are the only ones who stop. The door back onto the plough is now opened by
+the adversary and by nobody else, at a price in acts, rather than opening by
+itself for a band that was early.
 
-The direction of the cost is 1.5 sigma and not proven. The absence of the denial
-is not a difference of means and does not need to be.
+And it overturns yesterday's table. Same 322 games, paired seed by seed, roaming
+minus steered, 95% intervals:
 
-So OP-26 opens, as a rule question and not a scoring one. Two candidate causes,
-both testable in an afternoon and both written down rather than guessed at: a
-band that settles comes home taught and costs a wonder, where stopping one used
-to be three free points; and one tile a year against a side that re-ploughs may
-simply be competing with the ratchet and losing. The order of the three
-measurements is in the entry, and the last of them is a played game.
+  win rate         +2.8  ± 5.1   not significant
+  your score       +0.6  ± 2.1   not significant — it costs its user nothing
+  their score      -4.0  ± 1.7   significant
+  their farmland   -2.5  ± 0.5   significant
 
-Two things the entry is explicit that nobody may do: change scoring to fix it
-(OP-25, and the ninth rule of the method), and re-weight `storm` to make the rule
-look better — every number here comes from one chooser with `herd: 1`, which is
-OP-01's warning stated as a measurement.
+The passive denial engine is real and it is measured. A-32 said the magical side
+had no answer to a plough that erases blessing for free; this is the answer — two
+and a half tiles a game that never get sown, and four points off the settled side,
+at no cost to the side that sent the people out. The win rate does not move and
+should not be expected to: four points is small against the spread of a forty-year
+game. The mechanism was the question.
+
+The fingerprint says it in one game. Seed 0 read 49:122 under the first cut
+against the steered 90:71; wandering restores it to 90:69. The two older arrays
+did not move at all, again.
+
+OP-26 is withdrawn an hour after it was raised. It was a real question about a
+number that was measuring a bug, and the seventh rule of the method read
+backwards: the null was not a null, it was a rule killing its own instrument
+before it could act, and the only reason it was caught is that Rick played a game.
+
+Checks: 11,976, all passing. Kurgans got worse — 0.4 a game down to 0.1, because a
+wandering band crosses its own silent stones by luck rather than by walking at
+them. And grazing is still owner-blind, which was theoretical while they only ever
+walked at the adversary and is not any more: a band waiting out the early years
+drifts through your country and will eat your own furrows if it crosses them.

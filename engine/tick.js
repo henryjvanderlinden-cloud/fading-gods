@@ -164,11 +164,22 @@ function roamTick() {
   // Where they are going, decided fresh every year. They are opportunists and
   // nothing holds them to last year's road — and re-aiming is nearly free now
   // that `herdAim` is one breadth-first walk rather than a scan of the board.
+  // Nothing to aim at is waiting, not ending. They wander their own god's
+  // country until somebody breaks ground somewhere they can reach, and then the
+  // wayfinding has something to point at again. Only a people who cannot take a
+  // single step — ringed, on every side, by the other power's quiet — are
+  // finished. That is now the sole way the door back onto the plough opens, and
+  // it is the adversary who opens it.
   const aim = FG.herdAim(h);
-  if (aim === null) { settleHerd(h); return; }
-  h.to = aim;
-  const step = FG.herdStep(h.at, aim, h.own);
-  if (step !== null && step !== undefined) h.at = step;
+  if (aim === null) {
+   const drift = FG.herdWander(h);
+   if (drift === null) { settleHerd(h); return; }
+   h.at = drift; h.to = drift;
+  } else {
+   h.to = aim;
+   const step = FG.herdStep(h.at, aim, h.own);
+   if (step !== null && step !== undefined) h.at = step;
+  }
 
   // The grass. One tile, the one under them — a ring would be a plague of
   // locusts and this is a people. Deliberately *not* scaled by how many of them

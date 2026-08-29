@@ -427,10 +427,23 @@ FG.R2 = {
  // does not eat more than one tile: splitting has to be the escalation, not a
  // relief to the man being eaten.
  //
- // **And they end exactly one way.** Boxed in — no field of theirs in reach, no
- // silent stone of ours, no town of theirs to come up beside, no road to any of
- // it — they put the roofs back up. See `settleHerd`: they come back *taught*,
- // and that is the ruling that makes this rule honest rather than free.
+ // **Nothing to walk at is waiting, not ending.** A band with no field of theirs
+ // in reach, no silent stone of ours and no town of theirs to come up beside does
+ // not stop: it **wanders its own god's country** — their own blessing was never
+ // closed to them — until somebody breaks ground somewhere it can get to. Rick,
+ // after a played game in which a band was taught and settled in the same year:
+ // *let them wander through your own blessed lands, until the opponent unlocks
+ // agriculture, then the wayfinding points to the agricultural land.* Herding is
+ // unlocked by ploughed ground of **any** owner, so a player with an agricultural
+ // arm of their own can raise a band years before there is anything for it to eat,
+ // and that is allowed to be a long wait rather than an instant loss.
+ //
+ // **And they end exactly one way.** A people who cannot take a single step —
+ // ringed on every side by the other power's quiet — put the roofs back up. See
+ // `settleHerd`: they come back *taught*. So the door back onto the plough is
+ // opened by the adversary and by nobody else, which is a better rule than the
+ // one it replaces: walling a band in is now a thing you do to somebody, at a
+ // price in acts, rather than a thing that happens to them for being early.
  roam:       true,   // 1.24  and then they stop listening
 };
 

@@ -13,7 +13,8 @@ these by number, so the numbers are kept here rather than left dangling:
 | OP-13 | do dead stones carry orders? | **A-28** — yes, at range two, works only |
 | OP-14 | walking on reckoned ground, and what zero is | **A-19 / A-30** — adopted; at zero you may only watch |
 | OP-18 | do the wild folk carry a number? | **A-29** — at the founding, and nowhere else |
-| OP-24 | should the herds leave your hand? | **A-33** — yes, built as 1.24, and it costs its user |
+| OP-24 | should the herds leave your hand? | **A-33** — yes, built as 1.24 |
+| OP-26 | why does the third leg not pay for itself? | **A-33** — it does. The question was raised on a defect and lived one hour. |
 
 ---
 
@@ -279,57 +280,6 @@ decide. OP-21 again, and this is the largest thing waiting on it.
 to this one now. OP-15's endings are the version of *what was this valley worth*
 that requires no scoring change at all, and if they land they may be the whole
 answer to (c).
-
-## OP-26 · high · The third leg does not pay for itself
-
-**Raised by the measurement of A-33, 29 August 2026, and raised as a rule question
-on purpose.** The herds now play themselves, exactly as ruled. Over 322 games in
-which a band walked, autonomy costs the side that uses it **six points of win rate
-and nine of score, and takes nothing off the adversary**: their farmland is 13.5
-against 13.8, their big towns 5.0 against 5.3. The rule runs — 6.3 tiles grazed
-and 112 people taken a game — and none of it lands.
-
-### Where the cost is most likely coming from, and it is testable in an afternoon
-
-**Settling taught is a wonder.** 0.6 bands a game come home boxed in, and each one
-is a taught settlement of yours that `lostCount` reads. Under 1.19 the same band
-could be *stopped* into an untaught settlement for three free points. So the
-ruling swapped a small gain for a real price, which is the harder reading working
-as intended — but nothing has checked that this is the whole of the nine points.
-
-**And grazing may simply be too slow to matter.** One tile a year against a
-settled side that re-ploughs, with `wither` at three. 6.3 tiles a game is 12
-points of farmland denied over forty years, against a board where two settled
-powers destroy 29% of everything they ever make on their own. The rule may be
-competing with a bigger effect and losing.
-
-### What must not happen
-
-**No scoring change may be made to fix this** — OP-25, and the ninth rule of the
-working method. A doctrine that loses is a rule question. And **no re-weighting of
-`storm` to make the rule look better**: every number above comes from one chooser
-with `herd: 1`, and OP-01's whole warning is that tuning the chooser against a
-rule measures the chooser.
-
-### How it would be settled
-
-Three measurements, in this order, none of them expensive:
-
-1. **Split the cost.** Run the roaming arm with settling forced untaught, against
-   settling taught. The gap between them is the price of the door, and the
-   remainder is the price of everything else. If the door is the whole nine
-   points, the ruling is doing exactly what Rick asked and the entry closes.
-2. **Measure the grazing against the ratchet.** Tiles denied per game against
-   tiles the settled side loses to its own furrows anyway. If the second dwarfs
-   the first, the denial engine is not slow, it is irrelevant, and the tile a year
-   is the number to argue about.
-3. **Then the cap and the fuse**, which are the only free parameters left: `bands`
-   at four binds in the games that matter, and a band that cannot split balloons
-   instead. Both are one-line sweeps.
-
-**And then a played game, because the whole proposal was about how it feels to
-have set something loose, and no number answers that.** OP-21.
-
 
 ## OP-01 · high · The rival AI is one-ply greedy
 

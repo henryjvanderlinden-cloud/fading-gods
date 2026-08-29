@@ -1084,12 +1084,9 @@ steered game frozen underneath it.
 | steered (1.19) | 54.3% ± 2.8 | 82.0 : 76.1 | 13.5 | 5.0 | 0 |
 | roaming (1.24) | **48.4% ± 2.8** | 73.2 : 74.1 | 13.8 | 5.3 | 0.4 |
 
-**Autonomy costs the side that uses it about six points of win rate and nine of
-score, and denies the settled side nothing.** Their farmland does not fall. Their
-big towns do not fall. The passive denial engine A-32 said the magical side did
-not have, it still does not have. Roughly 1.5 standard errors, so the direction is
-not proven — but the *absence* of the denial is, and that was the whole argument
-for building it.
+That table read **autonomy costs the side that uses it six points of win rate and
+nine of score, and denies the settled side nothing** — and it was wrong. It was
+measuring a defect. See the correction below, which is the number to quote.
 
 Per game the rule does run, and runs as designed: 1.4 bands, 13.5 band-years, 6.3
 tiles grazed, 112 people taken, 0.3 splits, 0.6 settlings, 0.4 mounds.
@@ -1103,9 +1100,71 @@ the logistic sheds n·0.32·(n/77 − 1) a year, so an intake of +12 levels at 1
 +15 at 110 and +20 at 118 — which is OP-24's own settles-at table, arrived at from
 the other end.
 
+### The correction, the same day, and it is the whole entry
+
+**Rick played it and a band he had just taught became a settlement again in the
+same year.** His guess at the cause was right and it was mine: *or is that because
+the opponent did not have agriculture yet?*
+
+Two defects, compounding, both introduced by this commit:
+
+- **Herding is unlocked by ploughed ground of *any* owner.** `ploughed()` asks
+  whether the board has a furrow on it, not whose. A player running an
+  agricultural arm of their own can therefore raise a band years before the
+  adversary has broken ground — which is fine, and was never the problem.
+- **The second rank of `herdAim` was very nearly unreachable.** *The open ground
+  beside a town of theirs* sounds like a fallback and is not one: a town stands in
+  its own blessing, and every tile touching it is closed country to a band. So a
+  band born early had nothing in either rank, and the first cut of 1.24 read that
+  as boxed in and settled it on the spot — handing away a town and a wonder for
+  nothing, in the year it was taught.
+
+**Ruled by Rick, 29 August 2026:** *let them wander through your own blessed
+lands, until the opponent unlocks agriculture, then the wayfinding points to the
+agricultural land.* So nothing to walk at is **waiting**, not ending. They drift
+through their own god's country — which was never closed to them — until somebody
+breaks ground somewhere they can reach. A people who cannot take a single step,
+ringed on every side by the other power's quiet, are the only ones who stop.
+
+That is a better rule than the one it replaces on its own terms: **the door back
+onto the plough is now opened by the adversary and by nobody else**, at a price in
+acts, rather than opening by itself for a band that was early.
+
+### And it overturns the table above
+
+Same 322 games, paired seed by seed, roaming minus steered, 95% intervals:
+
+| | change | |
+|---|---|---|
+| win rate | **+2.8** ± 5.1 | not significant |
+| your score | **+0.6** ± 2.1 | not significant — autonomy costs its user nothing |
+| **their score** | **−4.0** ± 1.7 | **significant** |
+| **their farmland** | **−2.5 tiles** ± 0.5 | **significant** |
+
+**The passive denial engine is real and it is measured.** A-32 said the magical
+side had no answer to a plough that erases blessing automatically and for free.
+This is the answer: two and a half tiles of farmland a game that never get sown,
+and four points off the settled side, at no measurable cost to the side that sent
+the people out. The win rate does not move significantly, and it should not be
+expected to — four points is small against the spread of a forty-year game. The
+mechanism is what was in question, and the mechanism is there.
+
+The fingerprint says the same thing in one game. Seed 0 read 49:122 under the
+first cut against the steered game's 90:71; wandering restores it to 90:69.
+
+**The lesson, and it is the seventh rule of the method read backwards:** the null
+was not a null. It was a rule killing its own instrument before it could act, and
+the only reason it was caught is that Rick played one game.
+
 ### What it opens
 
-- **The rule does not pay for itself, and that is a rule question.** See OP-26.
+- **Kurgans got worse, not better** — 0.4 a game down to 0.1, because a wandering
+  band crosses its own silent stones by luck rather than by walking at them. The
+  trigger works and there is still nothing to trigger it on. OP-12.
+- **Grazing is owner-blind and now it matters.** A band waiting out the early
+  years drifts through its own god's country, and if it crosses your own furrows
+  it eats them. That was theoretical when they only ever walked at the adversary.
+  Unruled, and left visible rather than decided quietly.
 - **Kurgans still almost never happen, and now for a different reason.** The
   trigger works. `storm` builds 0.73 stones a game and 0.27 of them go silent, so
   there is nothing to trigger it on. That is a chooser artifact and not a rule,

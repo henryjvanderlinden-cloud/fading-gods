@@ -625,6 +625,31 @@ function herdAim(h) {
   ring(k, 1).some(x => { const q = T(x).set; return q && q.own === foe; }));
 }
 
+// 1.24. Where a people with nothing to walk at goes, which is anywhere.
+//
+// Rick's ruling, from a played game in which a band was taught and settled again
+// in the same year: *let them wander through your own blessed lands, until the
+// opponent unlocks agriculture, then the wayfinding points to the agricultural
+// land.* So having nothing to aim at is no longer the end of them. It is waiting.
+//
+// The defect it repairs was two things at once, and both were mine. Herding is
+// unlocked by ploughed ground **of any owner**, so a player running an
+// agricultural arm of their own is offered the teaching while the adversary has
+// nothing to graze — and the second rank of `herdAim`, the open ground beside a
+// town of theirs, is very nearly unreachable in practice, because a town stands
+// in its own blessing and every tile touching it is closed country. A band born
+// before the other side breaks ground therefore had nothing in either rank and
+// put the roofs straight back up.
+//
+// Their own god's blessing never blocks them, so the country they wander is
+// yours. `FG.rand` rather than `Math.random`: a wandering people must fall the
+// same way on the same seed or every fingerprint in `sim/smoke.js` becomes noise.
+function herdWander(h) {
+ const open = NB[h.at].filter(x => !herdBlocked(x, h.own));
+ if (!open.length) return null;
+ return open[Math.floor(FG.rand() * open.length)];
+}
+
 // Mounds standing, by power. Nothing in the engine scores this or gates on it,
 // deliberately: a kurgan is memory and not a point. It is counted because
 // OP-15's *Forgotten* is the thing it is for, and that ending does not exist
@@ -804,7 +829,7 @@ Object.assign(FG, {cost, reach, walkStep, pathWithin, region, stoneRange, workin
  blessGain, canSplit, splitTargets, encircledBy, stoneBlock, canStone, mountainLine,
  targets, teachTargets, teachTargetsAt, nearestSource, score, band, manifest,
  manifestMp, wouldSeal,
- herdBlocked, herdStep, herdSeek, herdAim, herdsOf, herdAt, ploughed, barren,
+ herdBlocked, herdStep, herdSeek, herdAim, herdWander, herdsOf, herdAt, ploughed, barren,
  canStop, canMound, buryable, moundCount,
  // 1.20 / 1.21 / 1.22 / 1.23
  STONEWORK, courses, stoneNeed, stoneWorks, workingStrict, deadStones, orderReach,

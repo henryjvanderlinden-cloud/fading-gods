@@ -643,11 +643,31 @@ console.log("\nand then the hand comes off");
  ok("a rival's blessing still shuts them in, which is the counterplay",
     FG.herdAim(a4) === null);
 
- // --- and what happens when there is nothing left -----------------------
+ // --- nothing to walk at is waiting, not ending -------------------------
+ // The played game that found this: a band taught before the adversary had
+ // broken ground had nothing in either rank of `herdAim` and settled again in
+ // the same year. Herding is unlocked by ploughed ground of any owner, so your
+ // own furrows can raise a band years too early, and that has to be a long wait
+ // rather than an instant loss.
+ blank(); const w1 = put(4, 4, 0, 90);
+ FG.herdTick();
+ ok("with nothing to aim at they wander rather than stop",
+    FG.G.herds.length === 1 && w1.at !== K(4, 4));
+ ok("and the country they wander is open to them", !FG.herdBlocked(w1.at, 0));
+
+ blank(); const w2 = put(4, 4, 0, 90);
+ ring(K(4, 4), 1).forEach(x => { T(x).st = "bless"; T(x).own = 0; });
+ FG.herdTick();
+ ok("their own god's blessing is never a wall, even with nowhere to be",
+    FG.G.herds.length === 1 && w2.at !== K(4, 4));
+
+ // --- and the one way they end ------------------------------------------
  blank(); put(4, 4, 0, 90);
+ NB[K(4, 4)].forEach(x => { T(x).st = "bless"; T(x).own = 1; });
  FG.herdTick();
  const box = T(K(4, 4)).set;
- ok("boxed in, they put the roofs back up", !!box && FG.G.herds.length === 0);
+ ok("ringed on every side by the other power, the roofs go back up",
+    !!box && FG.G.herds.length === 0);
  ok("and it is still yours", box.own === 0);
  ok("and they come back **taught**, which is the whole cost of the door",
     box.taught === true);
@@ -801,10 +821,16 @@ console.log("\nthe baseline is still exact");
  // it or the check is decoration.
  //
  // Three of these eight seeds move and five do not, which is the same shape the
- // batch fingerprints have: the rule changes the games where it comes up. Seed 0
- // is the one to look at — 90:71 becomes 49:122, the largest single-rule swing
- // in the file, and it is a game where the bands walked and then settled.
- const ROAM = ["49:122", "72:94", "90:72", "120:108", "132:84", "64:67", "55:92", "126:105"];
+ // batch fingerprints have: the rule changes the games where it comes up.
+ //
+ // Re-frozen 29 August 2026, when a band with nothing to aim at stopped settling
+ // and started wandering. Seed 0 is the one to look at and it is the argument for
+ // the change: under the first cut of 1.24 it read 49:122 against the steered
+ // game's 90:71, because the band was taught before the adversary had broken
+ // ground, found nothing in either rank, and put the roofs back up in the same
+ // year — handing away a town and a wonder for nothing. Wandering restores it to
+ // 90:69. The two arrays above did not move at all, which is the point.
+ const ROAM = ["90:69", "72:94", "90:72", "120:108", "132:84", "75:89", "63:64", "126:105"];
  FG.R2reset();
  for (let s = 0; s < ROAM.length; s++)
   ok("the roaming game is unchanged, seed " + s, play("storm", "cities", s) === ROAM[s],
