@@ -1,18 +1,25 @@
-The terms panel was offering a checkbox called "undefined"
+OP-06 answered twice, in opposite directions
 
-1.24 put `roam` in `FG.R2BUILT` and never gave it a name. The rule list stopped
-being a second copy when the engine started exporting R2BUILT — A-16 — but the
-rule *names* are still a hand-kept map in `ui.js`, so the terms panel has been
-showing a live, working switch labelled **undefined** since `2f25ef3`, four
-commits ago. Rick found it by opening the panel.
+Against the chooser, the batch made refusing far stronger. 400 seeds a cell,
+R2all(false) against R2reset():
 
-It now reads *herds go where they will, and no hand reaches them*.
+                     pre-batch          as it ships
+  haunt v cities     20%  63.8: 99.6    60%  103.5: 94.7
+  bands v cities     10%  55.3:102.3    30%   95.5:107.6
+  mixed v cities     30%  71.9: 89.5    40%   80.1: 93.6
+  haunt blessed          19.4 tiles         34.0 tiles
+  cities farmland        22.6 tiles          7.4 tiles
 
-A missing label cannot be caught by counting anything: the row is the right
-length, the checkbox works, the rule toggles correctly. Nothing was broken except
-the one thing a player actually reads. So the check goes in against the engine's
-own list, in both directions — every flag in the panel has a name, and the panel
-offers every flag the engine has. That is A-16's lesson for the third time, and
-the third distinct way this pair of lists has drifted.
+Most of that is A-31's furrow guard — the rival stopped walking itself to nothing
+in its own fields — and the rest is the batch. An ascetic strategy does not merely
+win sometimes; against this opponent it is now the best of the three.
 
-Checks: 11,978, all passing.
+And in the same week a person refused and lost by thirty-nine. Game 9: 100% of
+himself at year forty, every wonder still held, four stones of which three are
+dead relays, two villages taken by ring, a band roving — and nine blessed tiles
+against a mean of thirty-four. The strategy is not the problem and the map is not
+the problem. He spent forty years on the tools that do not score.
+
+So OP-06's live question is no longer whether it can win. It is why the only thing
+that scores is also the least interesting thing to do, which is OP-25's question
+arriving from a completely different direction. Entry stays open.

@@ -552,6 +552,37 @@ is close enough to *possible, and hard* that they may not need to be.
 
 ## OP-06 · high · Does an ascetic strategy ever win?
 
+**Answered twice over and in opposite directions, 29 August 2026 — keep the entry
+open, because the two answers are about different questioners.**
+
+**Against the chooser, the batch made refusing far stronger.** 400 seeds a cell,
+`R2all(false)` against `R2reset()`:
+
+| | pre-batch | as it ships |
+|---|---|---|
+| haunt v cities | 20% · 63.8 : 99.6 | **60%** · 103.5 : 94.7 |
+| bands v cities | 10% · 55.3 : 102.3 | **30%** · 95.5 : 107.6 |
+| mixed v cities | 30% · 71.9 : 89.5 | **40%** · 80.1 : 93.6 |
+| haunt's blessed tiles | 19.4 | **34.0** |
+| cities' farmland | 22.6 | **7.4** |
+
+The rival's farmland falls from 22.6 tiles to 7.4 and the refuser's quiet nearly
+doubles. Most of that is A-31's furrow guard — the chooser stopped walking itself
+to nothing in its own fields — and the rest is the batch. **An ascetic strategy
+does not merely win sometimes; against this opponent it is now the best of the
+three.**
+
+**And in the same week a person refused and lost by thirty-nine.** Game 9: full
+manifestation at year forty, every wonder still held, four stones, two villages
+taken by ring, a band roving — and **nine blessed tiles**, against a mean of
+thirty-four. See the playtests doc. The strategy is not the problem and the map is
+not the problem. He spent his forty years on the tools that do not score.
+
+**So the live question is no longer *can it win*. It is why the only thing that
+scores is also the least interesting thing to do**, which is OP-25's question
+arriving from a completely different direction.
+
+
 **Raised from medium.** Re-measured against the game itself, Bands wins 8% against
 Cities and 24% across all matchups; Haunt, the pure-blessing line, wins 13% and
 40%. The old figures of 33% and 42–56% came from a simulator that was not this
