@@ -575,12 +575,27 @@ three.**
 **And in the same week a person refused and lost by thirty-nine.** Game 9: full
 manifestation at year forty, every wonder still held, four stones, two villages
 taken by ring, a band roving — and **nine blessed tiles**, against a mean of
-thirty-four. See the playtests doc. The strategy is not the problem and the map is
-not the problem. He spent his forty years on the tools that do not score.
+thirty-four.
 
-**So the live question is no longer *can it win*. It is why the only thing that
-scores is also the least interesting thing to do**, which is OP-25's question
-arriving from a completely different direction.
+**The reason is not that he played badly, and the first reading of this entry said
+he had.** In his own account he was under siege: the adversary founded one
+settlement and taught it, and it *became an engine in its own right*, while he
+spent forty years walling magical settlements that were nearly taken by
+encirclement. The defence was necessary and it worked. Then there was no room left
+to found — which is the same fact as nine blessed tiles, because founding needs
+quiet you hold.
+
+**So the gap between 60% and this is not the player's error. The chooser is never
+put under pressure it has to answer.** It maximises every year because nothing
+threatens to take its places. That is OP-01's warning inverted: the chooser looks
+like the better player here only because it was never playing the same game.
+
+**And the live question is no longer *can it win*.** It is that **a successful
+defence scores nothing while the plough it answers compounds unattended** — one
+settlement, taught once, running thirty years on its own against forty years of
+acts and walks. Stones, rings, mounds and bands are all unpaid. That is OP-25's
+question arriving from a completely different direction, and OP-20's from the
+receiving end.
 
 
 **Raised from medium.** Re-measured against the game itself, Bands wins 8% against

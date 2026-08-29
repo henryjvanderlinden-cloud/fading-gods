@@ -1,25 +1,36 @@
-OP-06 answered twice, in opposite directions
+Correct OP-06 and game 9: he was under siege, not distracted
 
-Against the chooser, the batch made refusing far stronger. 400 seeds a cell,
-R2all(false) against R2reset():
+Both entries were written from a final screenshot and concluded the player had
+spent his forty years on tools that do not score. His own account says otherwise
+and it is better evidence: the adversary founded one settlement and taught it, and
+it became an engine in its own right, while he was walling magical settlements
+that were nearly taken by encirclement. The defence was necessary and it worked —
+the places it saved are still standing at year forty.
 
-                     pre-batch          as it ships
-  haunt v cities     20%  63.8: 99.6    60%  103.5: 94.7
-  bands v cities     10%  55.3:102.3    30%   95.5:107.6
-  mixed v cities     30%  71.9: 89.5    40%   80.1: 93.6
-  haunt blessed          19.4 tiles         34.0 tiles
-  cities farmland        22.6 tiles          7.4 tiles
+The correction is written in rather than over, because the reasoning is the record.
 
-Most of that is A-31's furrow guard — the rival stopped walking itself to nothing
-in its own fields — and the rest is the batch. An ascetic strategy does not merely
-win sometimes; against this opponent it is now the best of the three.
+And it sharpens the finding instead of dissolving it. A defence has to be attended
+and pays nothing; the plough compounds while you are elsewhere. That is A-32's
+fourth line read from the receiving end for the first time. One settlement taught
+once beat forty years of acts and walks.
 
-And in the same week a person refused and lost by thirty-nine. Game 9: 100% of
-himself at year forty, every wonder still held, four stones of which three are
-dead relays, two villages taken by ring, a band roving — and nine blessed tiles
-against a mean of thirty-four. The strategy is not the problem and the map is not
-the problem. He spent forty years on the tools that do not score.
+"No room left to found" is not a second failure, it is the same one — founding
+needs quiet you hold, so squeezing the blessing squeezes the room. Measured over
+300 seeds: a refuser holds 7.5 legal foundings at year 35 and never averages zero,
+so running out is not the normal case, it is what nine tiles feels like from the
+inside. From the same run, the mirror image: `cities` has 1.6 places to found at
+year 5 and 0.1 by year 30, because its own farmland blocks it. The settled
+doctrine cannot expand by founding at all — it grows what it has and takes what it
+wants.
 
-So OP-06's live question is no longer whether it can win. It is why the only thing
-that scores is also the least interesting thing to do, which is OP-25's question
-arriving from a completely different direction. Entry stays open.
+Also corrected: the 60% harness win rate against a person losing by thirty-nine is
+not the player's error. The chooser is never put under pressure it has to answer,
+so it maximises every year. OP-01's warning inverted — it looks like the better
+player only because it was never playing the same game.
+
+What survives: not one tool he used scores a point. Four stones, two rings, a
+herd, and a defence that held. A game in which the correct defensive play is worth
+nothing is a game whose ending is measuring the wrong thing. OP-25, from a new
+direction.
+
+No engine change.
