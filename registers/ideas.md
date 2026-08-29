@@ -497,3 +497,86 @@ sitting there without a reason.
 **Not an open point yet — OP-25 is open on purpose and Rick is still thinking.**
 This is the dump, and this is where it should sit until he is not.
 
+### What if the settlements went to war on their own after year forty?
+
+**Rick's next move, and it is the right instinct:** *what if we assume that after
+40 turns, sometimes randomly armies are sent off by those settlements that can do
+it?* Something has to keep the world turning, and war is the obvious candidate —
+especially because `moveColumns` already resets a captured settlement's ploughing
+budget (`tgt.set.spent = 0`), so conquest looks like it should hand a farming
+power thirty fresh tiles.
+
+Built as a probe and run: after generation 40, every settlement over the levy
+threshold of 300 sends a levy at the nearest reachable enemy town with probability
+*p* a generation, at 2%, 5% and 15%.
+
+**The wars happen and the ground does not move.** Towns change hands — storm's
+5.6 settlements fall to 4.9 and cities' 5.5 rise to 6.2 — and blessing sits at
+28.8, 28.9, 29.1 across every rate, identical to no wars at all.
+
+**Because the gate is not the budget. It is `taught`.** Only a people shown the
+plough turn ground into fields, and a levy that takes a town does not teach it.
+So conquest moves ownership and never moves agriculture. The budget reset is
+irrelevant: the captured place has a full allowance and no idea what to do with it.
+
+Tested the one-line fix — **a place taken by levy takes the teaching of whoever
+took it**, which is historically the right rule and pairs neatly with encirclement,
+where taking a place by ring *forbids* both teachings for ever:
+
+| | gen 80 | gen 240 | taught towns |
+|---|---|---|---|
+| conquest does not teach | 28.9 | 29.1 | 2.8 → 2.8 |
+| **conquest teaches** | 27.6 | **26.2** | 2.8 → **4.0** |
+
+It moves. It moves at **2.7 tiles of blessing per two hundred generations**, which
+is a little over one per cent of the board a century. Not a takeover; a seepage.
+
+### So the finding is bigger than the ending, and it is this
+
+**Every dynamic in this game is powered by a god, and the valley is in equilibrium
+at year forty by construction.** Three separate stops, and they are independent:
+
+1. **Ploughing is a lifetime allowance** — `budget` 30 per settlement, spent by
+   year forty.
+2. **Ploughing requires `taught`, and teaching is an act of a god.** Agriculture
+   physically cannot spread once you leave. This is the big one, and nobody wrote
+   it down as a decision.
+3. **Blessing is only ever made by a god's act or an *audible* settlement**, and by
+   year forty almost nothing is audible. The magical country cannot grow either.
+
+So *the valley is only alive while somebody is watching it*. That is a striking
+sentence and it may even be the theme — when the gods stop, history stops. But it
+makes **extrapolation impossible**, because there is nothing to extrapolate, and
+it makes the assessment trivial: on a frozen board everyone with one blessed tile
+is remembered for ever.
+
+**Which means the ending is not really a scoring question at all. It is: what does
+the world do without you?** That is a larger and better question than *how do we
+count the board*, and it has to be answered first.
+
+The smallest set of dynamics that would make all three of Rick's intuitions true
+as *properties of the engine* rather than as assertions:
+
+- **The plough spreads without a god** — by conquest (one line, measured above) and
+  by imitation, an untaught place beside a taught one learning by watching. That is
+  demic diffusion and it is what actually happened.
+- **Ploughing is driven by people rather than by allowance** — a town that keeps
+  growing keeps needing ground. This is the backlog's *population feeds nothing*
+  note, and it is the load-bearing half.
+- **Blessing decays without a god unless somebody still hears it** — held by
+  audible settlements, by stones with courses, by bands carrying it. Otherwise a
+  refuser's country is immortal by default, which is why `haunt` is completely
+  static in every run: 34.4 blessed tiles at generation 40 and 34.4 at generation
+  240, untouched, because almost nothing of theirs is reachable and nothing decays.
+
+With those three the extrapolation is honest and needs no weights: run the engine
+with nobody playing and read what is left. Without them, an assessment has to be a
+verdict function with an opinion in it, which is the thing OP-25 was trying to
+avoid.
+
+**Rick's three intuitions, scored against the engine as it stands:** herds keep
+their mythology — **already true, and nobody built it**. Blessing maintains if
+walled off — **true, and far too true**: a walled refuser is not merely durable but
+mathematically permanent. Agriculture takes over by weight of numbers — **false**,
+twice over, and it is the one that needs a rule.
+
