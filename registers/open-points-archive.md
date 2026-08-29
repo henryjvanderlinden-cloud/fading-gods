@@ -1088,8 +1088,9 @@ That table read **autonomy costs the side that uses it six points of win rate an
 nine of score, and denies the settled side nothing** — and it was wrong. It was
 measuring a defect. See the correction below, which is the number to quote.
 
-Per game the rule does run, and runs as designed: 1.4 bands, 13.5 band-years, 6.3
-tiles grazed, 112 people taken, 0.3 splits, 0.6 settlings, 0.4 mounds.
+Per game, under the defect: 1.4 bands, 13.5 band-years, 6.3 tiles grazed, 112
+people taken, 0.3 splits, 0.6 settlings, 0.4 mounds. **Every one of those numbers
+is a measurement of bands dying young** — see the corrected table below.
 
 **`absCap` was measured before it was believed.** Without a cap on the bite a band
 beside a city of a thousand takes sixty people a year, blows the fuse in two
@@ -1156,15 +1157,58 @@ first cut against the steered game's 90:71; wandering restores it to 90:69.
 was not a null. It was a rule killing its own instrument before it could act, and
 the only reason it was caught is that Rick played one game.
 
+### What the rule actually does, once the bands live
+
+Same 322 games, per game, with wandering in:
+
+| | under the defect | corrected | |
+|---|---|---|---|
+| bands raised | 1.4 | **4.9** | |
+| band-years | 13.5 | **55.2** | 7.9 of them spent waiting with nothing to aim at |
+| tiles grazed | 6.3 | **18.3** | |
+| people taken | 112 | **443** | |
+| splits | 0.3 | **0.5** | |
+| settlings | 0.6 | **0.3** | the door is rarer now, and only the adversary opens it |
+| mounds | 0.4 | **0.1** | worse, and see below |
+
+**Four times the rule, for one line of code.** A band that does not kill itself in
+the year it is taught lives about eleven years and eats three times as much. This
+is what the eleventh rule of the method is about: the first table was not measuring
+a weak rule, it was measuring an instrument that broke on contact.
+
+### And the owner-blind grazing, measured rather than argued about
+
+Grazing has never asked whose furrow it is — that is 1.19's behaviour, not
+1.24's, and it was left alone through both commits because Rick ruled on where
+they *aim* and never on what they eat. Wandering made it a live question, because
+a band waiting out the early years drifts through your own country.
+
+Measured, same 322 games:
+
+| | |
+|---|---|
+| their furrows eaten | **18.11** a game |
+| **your** furrows eaten | **0.16** a game — 0.9% of everything they graze |
+| games where it happens at all | **6.2%** |
+| when it happens | 43 of 50 times **while walking at a target**, not while waiting |
+| median year | **38** — the very end, when the board is crowded |
+
+And making them refuse, paired over the same games: win **+0.31 ± 0.61**, your
+score **+0.13 ± 0.14**, their score **0.00 ± 0.16**. Only your own farmland count
+moves at all — **+0.09 tiles ± 0.06**, significant and meaningless.
+
+**So it stays owner-blind.** Not because the harder reading is better here, but
+because the measurement says the question is empty: it costs nothing, it happens
+in one game in sixteen, and it happens at the end of a long game to a band that
+was walking somewhere else. A special case that buys nothing should not be
+written. If it ever wants revisiting it will be because somebody watched it happen
+and did not like it, which is OP-21's business and not the harness's.
+
 ### What it opens
 
 - **Kurgans got worse, not better** — 0.4 a game down to 0.1, because a wandering
   band crosses its own silent stones by luck rather than by walking at them. The
   trigger works and there is still nothing to trigger it on. OP-12.
-- **Grazing is owner-blind and now it matters.** A band waiting out the early
-  years drifts through its own god's country, and if it crosses your own furrows
-  it eats them. That was theoretical when they only ever walked at the adversary.
-  Unruled, and left visible rather than decided quietly.
 - **Kurgans still almost never happen, and now for a different reason.** The
   trigger works. `storm` builds 0.73 stones a game and 0.27 of them go silent, so
   there is nothing to trigger it on. That is a chooser artifact and not a rule,

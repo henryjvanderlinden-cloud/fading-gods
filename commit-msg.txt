@@ -1,53 +1,39 @@
-A band with nowhere to go waits, and A-33 was measuring a defect
+The owner-blind grazing, measured, and left alone
 
-Rick played it: a band he had just taught became a settlement again in the same
-year. His guess at why was right and it was mine.
+Grazing has never asked whose furrow it is. That is 1.19's behaviour and it was
+left through both of yesterday's commits because Rick ruled on where the bands
+aim and never on what they eat. Wandering made it a live question — a band
+waiting out the early years drifts through your own country — so it is measured
+rather than argued about.
 
-Two defects, both introduced yesterday, compounding. `ploughed()` asks whether
-the board has a furrow on it and not whose, so an agricultural arm of your own
-unlocks herding years before the adversary has broken ground — which is fine, and
-was never the problem. The problem is that the second rank of `herdAim` is very
-nearly unreachable: *the open ground beside a town of theirs* sounds like a
-fallback and is not one, because a town stands in its own blessing and every tile
-touching it is closed country to a band. So a band born early had nothing in
-either rank, 1.24 read that as boxed in, and it handed away a town and a wonder in
-the year it was taught.
+  their furrows eaten          18.11 a game
+  YOUR furrows eaten            0.16 a game — 0.9% of everything they graze
+  games where it happens         6.2%
+  when                          43 of 50 times while walking at a target,
+                                not while waiting
+  median year                   38
 
-Rick's ruling: *let them wander through your own blessed lands, until the opponent
-unlocks agriculture, then the wayfinding points to the agricultural land.* So
-nothing to walk at is waiting, not ending. `herdWander` drifts them through their
-own god's country — never closed to them — on `FG.rand` so the seeds still hold.
-A people who cannot take a single step, ringed on every side by the other power's
-quiet, are the only ones who stop. The door back onto the plough is now opened by
-the adversary and by nobody else, at a price in acts, rather than opening by
-itself for a band that was early.
+And making them refuse, paired over the same 322 games: win +0.31 ± 0.61, your
+score +0.13 ± 0.14, their score 0.00 ± 0.16. Only your own farmland count moves
+— +0.09 tiles ± 0.06, significant and meaningless.
 
-And it overturns yesterday's table. Same 322 games, paired seed by seed, roaming
-minus steered, 95% intervals:
+So it stays as it is. Not because the harder reading is better here but because
+the question is empty: one game in sixteen, at the end of a long game, to a band
+that was walking somewhere else. A special case that buys nothing should not be
+written.
 
-  win rate         +2.8  ± 5.1   not significant
-  your score       +0.6  ± 2.1   not significant — it costs its user nothing
-  their score      -4.0  ± 1.7   significant
-  their farmland   -2.5  ± 0.5   significant
+The same run corrects every per-game figure in A-33, all of which were measuring
+bands dying in the year they were taught:
 
-The passive denial engine is real and it is measured. A-32 said the magical side
-had no answer to a plough that erases blessing for free; this is the answer — two
-and a half tiles a game that never get sown, and four points off the settled side,
-at no cost to the side that sent the people out. The win rate does not move and
-should not be expected to: four points is small against the spread of a forty-year
-game. The mechanism was the question.
+                 defect   corrected
+  bands            1.4      4.9
+  band-years      13.5     55.2     (7.9 of them spent waiting)
+  tiles grazed     6.3     18.3
+  people taken     112      443
+  splits           0.3      0.5
+  settlings        0.6      0.3
+  mounds           0.4      0.1
 
-The fingerprint says it in one game. Seed 0 read 49:122 under the first cut
-against the steered 90:71; wandering restores it to 90:69. The two older arrays
-did not move at all, again.
-
-OP-26 is withdrawn an hour after it was raised. It was a real question about a
-number that was measuring a bug, and the seventh rule of the method read
-backwards: the null was not a null, it was a rule killing its own instrument
-before it could act, and the only reason it was caught is that Rick played a game.
-
-Checks: 11,976, all passing. Kurgans got worse — 0.4 a game down to 0.1, because a
-wandering band crosses its own silent stones by luck rather than by walking at
-them. And grazing is still owner-blind, which was theoretical while they only ever
-walked at the adversary and is not any more: a band waiting out the early years
-drifts through your country and will eat your own furrows if it crosses them.
+Four times the rule for one line of code, and the door back onto the plough is
+half as common as it was — which is right, because only the adversary opens it
+now. No engine change in this commit.
