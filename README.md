@@ -17,6 +17,8 @@ You end the game holding everything you can build, and nothing you can call.
 ## Play it
 
 Open `game/index.html` in a browser. No build step, no dependencies, no server.
+The game itself installs nothing and imports nothing — the engine files are
+classic scripts rather than ES modules precisely so they load over `file://`.
 
 ## Measure it
 
@@ -36,7 +38,7 @@ it is present and skip them if it is not.
 | `game/` | The playable build — markup, and a renderer that owns no rules. |
 | `game/previous/` | Earlier prototypes, kept because they test different questions. |
 | `sim/` | Headless harness, balance matrix, and checks. |
-| `design/` | The rules as they currently stand, in full. The source of truth. |
+| `design/` | The rules in full, and the reasoning behind them. **History, not authority** — `engine/constants.js` is what is actually running. See the note at the top of `design/rules.md`. |
 | `concept/` | What the game is about, and what it should look and feel like. `art-direction/` holds the live comparison. |
 | `registers/` | Live working documents — open points, archive, ideas, rejected. |
 | `architecture/` | Where the code is now and where it should go. |

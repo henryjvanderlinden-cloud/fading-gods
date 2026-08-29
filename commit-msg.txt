@@ -1,35 +1,27 @@
-SOL's reading, and OP-27 / OP-28 / OP-29
+jsdom is a tool, not a dependency — and design/ is history, not authority
 
-Written in another session and left uncommitted in the working tree; committed
-here unchanged. Not my text and not adjudicated — the entry says so itself.
+Two documentation defects, both found by SOL's reading, both smaller and larger
+than it said.
 
-OpenAI's gpt-5.6-sol, running as Codex on this machine, was given read-only access
-to the repository and asked what the project is, what is good in it and what it
-would change. It read README.md and design/ and skimmed engine/. It has not played
-a game, has not run the harness, and never saw a number.
+**jsdom.** `package.json` declared it under `dependencies` while README.md says
+the game has none. SOL called the README wrong; it is not. The *Measure it*
+section already says exactly the right thing — *nothing to install, smoke.js will
+use jsdom for the interface checks if it is present and skip them if it is not* —
+and that is what the code does. The error was entirely in `package.json`, which
+declared a headless-test tool as something the project depends on to run. Moved to
+`devDependencies`, with `private: true` so nobody can publish it by accident. The
+*Play it* line now also says why the game needs nothing: classic scripts rather
+than ES modules, so they load over `file://`.
 
-Three items it raises that the register did not already carry:
+**The one that actually misleads, and SOL was right about it.** README.md's
+repository table called `design/` *the source of truth*, while `design/rules.md`
+opens by saying, bluntly and in a box, that **`engine/constants.js` is the
+authority and this document is the history**. A reader who trusts the README goes
+to the wrong file and quotes dead numbers — which is precisely the failure A-16
+was, and precisely what the note in rules.md exists to prevent. What SOL did not
+credit is that rules.md already says this about itself and already names the
+rewrite as the outstanding debt on the file; the contradiction was one line in the
+README, not a design problem. Fixed there, pointing at the note.
 
-  OP-27 · high    · is the first-game ruleset too large to be played? A
-                    complexity budget: ship a smaller ruleset, make each mechanic
-                    earn its way back in. Settled at the board, in OP-21, by
-                    asking the player what a move will cost before they make it
-                    and recording the gap. The A/B already exists — R2all(false)
-                    plays the smaller game.
-  OP-28 · medium  · are irreversible consequences visible before they are chosen?
-                    A forecast in the terms panel, watching for the opposite
-                    failure — perfect foresight turns temptation back into
-                    arithmetic.
-  OP-29 · medium  · nothing records a game well enough to re-run it. No action
-                    log, no deterministic save/load, though the state is already
-                    serialisable. The only item in the review with no existing
-                    home here.
-
-Its first recommendation is OP-21 — two people at one board — reached
-independently and from documents alone, without knowing it was already ranked
-highest. That convergence is the most useful thing in the entry.
-
-It also caught a real error the register did not have: README.md line 19 says
-"no build step, no dependencies, no server" while package.json declares jsdom
-^30.0.1 under `dependencies`. jsdom is a tool for the headless checks and not for
-the game; it belongs under devDependencies. Unfixed.
+No code touched. OP-29's action log and OP-27's complexity budget remain
+unadjudicated in the register.
