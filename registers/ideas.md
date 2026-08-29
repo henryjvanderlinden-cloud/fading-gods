@@ -353,3 +353,147 @@ Pairs with the two other things game 7 left lying about: the wonder count as its
 own series (OP-20, still unbuilt, and game 7 went six to zero with no record but
 the last frame), and population feeding nothing but the ploughing budget.
 
+---
+
+## Raised 29 August 2026, from the shape of a turn
+
+**A turn is one movement, one act, one intervention, forty times over, and that is
+the whole game.** Rick, saying why the herds had to be autonomous: *I like the way
+that it's 40 turns, because it makes for a quick game. 40x movement, 40x action,
+40x intervention, that's it. That's also why it's important that the herds are
+autonomous.*
+
+That is a constraint on every future mechanic and it is worth writing down as one.
+**Nothing new may add a fourth thing you do in a year.** If a rule needs
+management, it either replaces one of the three or it runs itself.
+
+### A levy should raise itself and then go
+
+**Rick, same conversation: *maybe Levy an Army should be autonomous.*** The
+generalisation of 1.24 rather than a second special case — *you decide to do it,
+and after that it is out of your hands*, which is the sentence the herd rule now
+carries and the only sentence the third leg needed.
+
+What it would settle, if it works:
+
+- **It removes the last thing the player micro-manages.** A levy is aimed today,
+  and steering it is not a decision so much as an errand.
+- **It takes the god out of a war the people are fighting.** Game 2 found the best
+  emergent result in the build — *a war fought by the people and paid for by the
+  gods* — because `dreamWorks` charges for an order issued out of hearing, so both
+  powers spent themselves down keeping columns moving. An autonomous levy deletes
+  that cost, and the war becomes something the people do to each other while the
+  gods watch. **Whether that is better is a real question**: the current version
+  makes war expensive to a god, which is a good rule, and this would make it free.
+  Worth saying out loud before building.
+- **It makes *one-way acts* a house pattern.** Teach herding, raise a levy: two
+  irrevocable decisions, no handles afterwards. That is the design value stated
+  three times now, and a pattern is more legible than an exception.
+
+The obvious risk: a levy is one of the few *aggressive* choices a player has, and
+autonomy removes the aiming. The mitigation is the herd one — the decision is
+*where and when to raise it*, and a levy raised in the wrong place is a mistake you
+have to watch happen.
+
+Not an open point yet. It becomes one when somebody decides what an unaimed levy
+walks at.
+
+---
+
+## The ending as an assessment, and what the engine says about it
+
+**Rick, 29 August 2026, thinking aloud about OP-25:** forty turns measured in
+generations is a thousand years, so the ending should not be a score but an
+**assessment — *will you be remembered*** — made by extrapolating the board
+forward past the last year. Three intuitions came with it:
+
+1. **Agriculture wins by weight of numbers.** A lot of enemy farmland *will
+   eventually take over any blessed lands, by simple fact of the overpopulation.*
+2. **Herds keep their mythology** — the Yamnaya reading. The people walk, and what
+   they carry goes with them.
+3. **Blessing can maintain, but only if it is walled off.**
+
+### Measured before it was argued about, and the result is the useful part
+
+The engine can already run the extrapolation: take both gods off the board
+(`p[0].doc = p[1].doc = null`) and call `worldTick` for another two hundred
+generations. Nobody acts, nobody intervenes; growth, ploughing, the ratchet, the
+herds and encirclement all keep running. That is exactly *what happens when the
+gods stop*, in the same rules rather than in a new model.
+
+Run over 25 games a matchup, 200 generations past the end:
+
+| | your blessing | their blessing | farmland | bands |
+|---|---|---|---|---|
+| storm v cities, gen 80 | 28.8 | 14.6 | 6.4 | 1.1 |
+| storm v cities, **gen 240** | **29.1** | **14.6** | **5.4** | **1.1** |
+| haunt v cities, gen 80 | 34.4 | 23.3 | 6.2 | 0 |
+| haunt v cities, **gen 240** | **34.4** | **23.3** | **6.2** | **0** |
+
+**The world freezes the moment the gods stop, and it freezes at once.** Two
+hundred generations of nothing. Not a slow drift, not a creep — the board at
+generation 240 is the board at generation 41 to a tile.
+
+**Because nothing in the build has forward dynamics that survive the player.**
+Ploughing is a *lifetime budget* per settlement — `TUNE.budget` is 30 — and by year
+forty it is spent. Blessing is only ever made by an act of a god or by an *audible*
+settlement, and by year forty almost nothing is audible. Growth still runs, so the
+towns get bigger, and **bigger buys nothing at all**, which is the backlog note
+about population made suddenly load-bearing.
+
+So the first intuition is **not a property of the engine**. Overpopulation does not
+take anything over, because population does not drive expansion — a fixed budget
+does, and it has run out.
+
+### Which makes the payoff question and the population question the same question
+
+If a settlement ploughed *because it had people to feed* rather than out of a
+lifetime allowance, the board would keep moving after the gods left, and all three
+of Rick's intuitions would become true mechanically rather than by assertion:
+farmland would creep over blessing by weight of numbers; a walled enclave would
+hold because nothing can reach it; and the bands would go on denying. **Then the
+extrapolation is not a formula at all — it is the same engine, run with nobody
+playing, and the ending is honest by construction.**
+
+That is the argument for doing it this way rather than scoring the final board
+under a new set of weights: a formula is a scoring lever with an opinion in it, and
+OP-25's ninth rule forbids exactly that kind of lever. A simulation has no weights
+to tune.
+
+### One fact the frozen run did produce, and it is Rick's second intuition already true
+
+**The bands are the only thing still moving.** In the storm games, 1.1 of them are
+still walking at generation 240 — every settlement static, every furrow static,
+every blessed tile static, and the herds still going. They have no terminal state:
+they cannot die, and they only stop if the other power rings them, and there is no
+other power any more. *Herds keep their mythology* is not a thing that needs
+building. It is what the rule already does, and nobody designed it.
+
+### What the assessment might read, if it is built
+
+Two axes rather than one, because a single number cannot hold the difference
+between being remembered *by many* and being remembered *exactly*:
+
+- **How long** — generations after the gods stop before nothing of you is left. A
+  scalar, comparable between two players, in the units the game already counts.
+- **How widely** — how much of the board, and how many people, carry it.
+
+The three doctrines then read as three ways of being remembered, and they do not
+collapse into each other: **the enclave** is remembered exactly, by almost nobody,
+for a very long time; **the herds** are remembered diffusely and everywhere and by
+people who kept walking; **agriculture** wins the ground and forgets what was under
+it — remembered as a substrate, a place-name, a stone in a field.
+
+**And that last one is where the kurgans finally earn their place.** OP-12 has
+suspected for weeks that half of 1.19 is decoration, and 1.24 made mounds rarer
+rather than commoner. But on a ploughed board a mound and a buried stone are the
+*only* things that survive the erasure — OP-16 measured that 92% of stones end
+under farmland, and a kurgan is the one object in the design that is explicitly
+memory rather than score. If the ending asks *what is left of you in a thousand
+years*, the answer for a god whose country went under the plough is: **the graves,
+and nothing else.** That is not a new mechanic. It is the mechanic that has been
+sitting there without a reason.
+
+**Not an open point yet — OP-25 is open on purpose and Rick is still thinking.**
+This is the dump, and this is where it should sit until he is not.
+

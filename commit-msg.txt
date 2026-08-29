@@ -1,31 +1,47 @@
-Game 8 into A-33: the herds worked, and the cap is the live question
+Ideas: the autonomous levy, and what the engine says about an ending
 
-The first game played on the roaming build, and the direct refutation of game 6.
-Same player, same shape of board. Game 6: both herds grazing on his own quiet
-ground while the rival held seven ploughed towns — the weapon used as fertiliser.
-Game 8: four bands, three of them grazing in the adversary's country at year
-forty, the fourth walking. Rick: the herds did some actual work, and made the game
-interesting. That is A-33's 18.3 tiles and -2.5 of their farmland seen once
-instead of averaged over 322 games.
+Three entries in the dump, none of them committed to.
 
-And it turns the cap from a free parameter into the live question. `bands` is 4
-and he finished with exactly 4. Two stood at 128 and 140 against a fuse of 110 —
-both over the line, neither able to split, both simply growing. The two at 64 are
-the halves, so the fuse had fired at least twice earlier. The harness called this
-2.2 capped crossings a game and filed it; here it is the end-state of a game
-somebody played. Either the cap rises, or a band that cannot split has to do
-something other than swell.
+The shape of a turn, as a constraint. One movement, one act, one intervention,
+forty times, and nothing new may add a fourth thing you do in a year. If a rule
+needs management it either replaces one of the three or it runs itself. That is
+why the herds had to be autonomous, in Rick's words.
 
-He raised no stone all game, which made kurgans impossible rather than rare and
-left stonesGrow and deadOrders inert. Beside game 7, where two dead stones were
-the only reach he had left, the pair say it cleanly: mounds, courses and relays
-all sit downstream of a decision to raise a stone, and a settled player may never
-make it. OP-12's suspicion is now a question about the stone, not the mound.
+A levy that raises itself and then goes — the generalisation of 1.24 rather than
+a second special case. Written down with the objection attached: game 2's best
+emergent result is a war fought by the people and paid for by the gods, and it
+exists precisely because dreamWorks charges for orders issued out of hearing. An
+autonomous levy deletes that cost and makes war free to a god. Worth deciding on
+purpose.
 
-The game also ended at zero manifestation — no move, no tile to walk into, every
-wonder struck through. Games 2 and 7 ended at a tenth; nobody had reached the
-actual bottom of the stock before. And it kills the play-style note this project
-has carried since game 4: 90 / 100 / 80 per cent, then 10, 10 and 0. Rick spends
-himself. Three of the last four have gone to the bottom.
+And the ending as an assessment — will you be remembered — extrapolated from the
+board rather than counted off it. Measured before arguing about it, because the
+engine can already run the extrapolation: take both gods off the board and call
+worldTick for two hundred more generations.
 
-No engine change. The full write-up is game 8 in the playtests doc.
+  storm v cities   your blessing  their blessing  farmland  bands
+    gen  80             28.8          14.6          6.4      1.1
+    gen 240             29.1          14.6          5.4      1.1
+
+The world freezes the moment the gods stop, and it freezes at once. The board at
+generation 240 is the board at generation 41 to a tile. Ploughing is a lifetime
+budget of 30 per settlement and by year forty it is spent; blessing is only made
+by a god or an audible settlement and by year forty almost nothing is audible.
+Growth still runs and bigger buys nothing.
+
+So "agriculture takes over by weight of numbers" is not a property of this engine,
+and the payoff question turns out to be the population question that has been
+sitting in the backlog as a note to self. If a settlement ploughed because it had
+people to feed, the board would keep moving after the gods left and the
+extrapolation would just be the engine run with nobody playing — no new weights, no
+scoring lever, which is what OP-25's ninth rule wants.
+
+One thing the frozen run did produce: the bands are the only thing still moving at
+generation 240. Every settlement static, every furrow static, and the herds still
+walking. They have no terminal state. Herds keep their mythology is not a thing
+that needs building.
+
+And a reason for kurgans at last. On a ploughed board a mound and a buried stone
+are the only things that survive the erasure. If the ending asks what is left of
+you in a thousand years, the answer for a god whose country went under the plough
+is the graves and nothing else. OP-12's decoration, given a job by OP-25.
