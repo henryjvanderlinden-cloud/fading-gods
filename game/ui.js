@@ -928,12 +928,18 @@ function render() {
  // Stop and Mound show *dark* when you are on a herd and the act is not legal,
  // because "you may not stop beside another settlement" is worth learning and a
  // button that vanishes teaches nobody anything.
- const mine = FG.R2.herds ? (FG.herdAt(k) && FG.herdAt(k).own === ME ? FG.herdAt(k) : null) : null;
+ //
+ // 1.24. And under the roaming flag all three go for good, which is the rule
+ // stated in the interface: once you have said the word there is no button that
+ // does anything to them ever again. Hidden rather than disabled for the same
+ // reason as above — a row of permanently dead buttons teaches the wrong thing.
+ const hand = FG.R2.herds && !FG.R2.roam;
+ const mine = hand ? (FG.herdAt(k) && FG.herdAt(k).own === ME ? FG.herdAt(k) : null) : null;
  const showHerd = (id, on) => { $(id).style.display = on ? "" : "none"; };
- showHerd("drive", FG.R2.herds && (myHerds.length > 0 || !!ARMHERD));
+ showHerd("drive", hand && (myHerds.length > 0 || !!ARMHERD));
  showHerd("stopherd", !!mine);
  showHerd("mound", !!mine);
- if (FG.R2.herds) {
+ if (hand) {
   // Send is not an act, so it stays live after you have acted — the only button
   // in this row of which that is true, and it is true on purpose.
   // Send is not an act, so it stays live after you have acted — but 1.23 stops it

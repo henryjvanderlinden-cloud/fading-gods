@@ -552,6 +552,79 @@ function canMound(h) {
  return region(h.at, h.own).length < 6;
 }
 
+// 1.24. A stone of your own that has gone silent and has no mound on it yet.
+//
+// `canMound`'s test with two clauses gone: the farmland one, because Rick's
+// ruling is that a monument does not need a field under it — *they graze the
+// ground and build their monument in their spare time, with the materials at
+// hand* — and the herd one, because nobody is standing here asking for it. The
+// silence test stays exactly as it was and for the reason written above
+// canMound: what matters is that the stone has stopped answering, not how it
+// was silenced.
+//
+// Note which stones this can ever reach. A rival's blessed country is closed to
+// a band, so the only stones they can walk to are their own god's and whatever
+// is standing under somebody's plough. That is not a restriction anybody had to
+// write; it falls out of `herdBlocked`, and it is the same 92% OP-16 measured.
+const buryable = (k, who) => !!FG.R2.roam && FG.G.stones[who].includes(k) &&
+ (T(k).kur === undefined || T(k).kur === null) && region(k, who).length < 6;
+
+// 1.24. The nearest tile a band wants, by road rather than by rule of thumb.
+//
+// `driveHerds` measured Manhattan distance on (c, r) and then asked `herdStep`
+// whether a road existed at all — a proxy and a check, and the proxy is wrong
+// wherever the road bends round water. One breadth-first walk outward answers
+// both questions exactly and answers them once: the first tile the wave touches
+// that `want` accepts is the nearest reachable one there is. Ties go to whatever
+// the neighbour order reached first, which is arbitrary and does not matter,
+// because they are the same distance away.
+//
+// The tile they are standing on is never a candidate. They move every year.
+function herdSeek(from, who, want) {
+ const seen = new Set([from]), q = [from];
+ while (q.length) {
+  const k = q.shift();
+  for (const nk of NB[k]) {
+   if (seen.has(nk)) continue;
+   if (herdBlocked(nk, who)) continue;
+   seen.add(nk);
+   if (want(nk)) return nk;
+   q.push(nk);
+  }
+ }
+ return null;
+}
+
+// 1.24 / OP-24. What a people out of hearing walk at, in the order they want it.
+//
+// **Their fields, and our graves, in the same rank.** Ploughed ground of the
+// adversary is the first thing they want, and a silent stone of their own god is
+// the other — and the two are ranked together on purpose rather than one above
+// the other. A band crossing a valley to eat a furrow buries a shrine standing
+// on the way without being told to, which is the whole of what Rick asked for
+// when he said they should also be drawn to nearby stones. It costs almost
+// nothing to add, because OP-16 measured that 92% of stones end up under exactly
+// the ground they are already walking at.
+//
+// **Failing that, their people.** A band cannot stand on a settlement, so the
+// second rank is the open ground beside one — which is where absorption happens.
+// That makes going to look for people the thing they do when there is nothing
+// left to graze, rather than a plan they hold: they are a plough-breaker first
+// and a press-gang second.
+//
+// **Failing that, null, and null is the end of them.** See `settleHerd`.
+function herdAim(h) {
+ const who = h.own, foe = 1 - who;
+ const want = herdSeek(h.at, who, k => {
+  const t = T(k);
+  if (t.st === "reck" && !t.set && t.own === foe) return true;
+  return buryable(k, who);
+ });
+ if (want !== null) return want;
+ return herdSeek(h.at, who, k => !T(k).set &&
+  ring(k, 1).some(x => { const q = T(x).set; return q && q.own === foe; }));
+}
+
 // Mounds standing, by power. Nothing in the engine scores this or gates on it,
 // deliberately: a kurgan is memory and not a point. It is counted because
 // OP-15's *Forgotten* is the thing it is for, and that ending does not exist
@@ -731,7 +804,8 @@ Object.assign(FG, {cost, reach, walkStep, pathWithin, region, stoneRange, workin
  blessGain, canSplit, splitTargets, encircledBy, stoneBlock, canStone, mountainLine,
  targets, teachTargets, teachTargetsAt, nearestSource, score, band, manifest,
  manifestMp, wouldSeal,
- herdBlocked, herdStep, herdsOf, herdAt, ploughed, barren, canStop, canMound, moundCount,
+ herdBlocked, herdStep, herdSeek, herdAim, herdsOf, herdAt, ploughed, barren,
+ canStop, canMound, buryable, moundCount,
  // 1.20 / 1.21 / 1.22 / 1.23
  STONEWORK, courses, stoneNeed, stoneWorks, workingStrict, deadStones, orderReach,
  audible, audibleHerd, foundPop, spent});

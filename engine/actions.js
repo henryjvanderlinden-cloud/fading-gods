@@ -102,6 +102,7 @@ function doAct(kind, who, opt) {
  // compensation for their scoring nothing. Stopping one is not steering. It is a
  // founding, and every founding in this game happens under your feet.
  } else if (kind === "stop") {
+  if (FG.R2.roam) return false;      // 1.24 — nobody is listening
   const h = FG.herdAt(k);
   if (!h || h.own !== who || !FG.canStop(h)) return false;
   const s = FG.newSet(Math.max(15, Math.round(h.n)), who);
@@ -115,6 +116,7 @@ function doAct(kind, who, opt) {
          : "One of theirs has stopped walking and put up roofs.", me ? "good" : "riv");
 
  } else if (kind === "mound") {
+  if (FG.R2.roam) return false;      // 1.24 — they raise it themselves, or not at all
   const h = FG.herdAt(k);
   if (!h || h.own !== who || !FG.canMound(h)) return false;
   h.n = Math.max(10, h.n * (1 - FG.R2TUNE.mound));

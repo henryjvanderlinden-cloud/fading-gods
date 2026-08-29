@@ -249,7 +249,12 @@ console.log("\nthe third leg");
  // now means *everything that is built*, and 1.12 and 1.19 are both built and
  // off. R2reset is the thing that says "the game".
  function blank() {
-  FG.resetTune(); FG.R2reset(); FG.R2.herds = true;
+  // 1.24 ships on, and everything below this line is the *steered* rule — the
+  // acts, the ceiling, the detour out. None of it is dead: it is what the game
+  // is with `roam` off, and it is the baseline the roaming version is measured
+  // against. So the flag is cleared by name here, and the new rule gets its own
+  // block rather than quietly rewriting the expectations in this one.
+  FG.resetTune(); FG.R2reset(); FG.R2.herds = true; FG.R2.roam = false;
   FG.createGame({you: null, them: "passive", seed: 1});
   FG.G.T.forEach(t => { t.t = "plain"; t.f = 1; t.st = "wild"; t.own = null; t.set = null;
                         t.bar = 0; t.kur = null; });
@@ -597,6 +602,150 @@ console.log("\nstones that grow, orders that carry, and the bottom of the stock"
 // ------------------------------------------------- the A/B baseline, exact
 // The one thing that must never move. FG.R2all(false) plays the pre-batch game,
 // and a rule added to the batch must not be able to reach it.
+console.log("\nand then the hand comes off");
+{
+ const before = fail;
+ const {K, NB, T, ring} = FG;
+ function blank() {
+  FG.resetTune(); FG.R2reset(); FG.R2.herds = true; FG.R2.roam = true;
+  FG.createGame({you: null, them: "passive", seed: 1});
+  FG.G.T.forEach(t => { t.t = "plain"; t.f = 1; t.st = "wild"; t.own = null; t.set = null;
+                        t.bar = 0; t.kur = null; });
+  FG.G.stones = [[], []]; FG.G.armies = []; FG.G.refugees = []; FG.G.herds = []; FG.G.log = [];
+  FG.G.p[0].pos = K(4, 4); FG.G.p[1].pos = K(12, 4);
+ }
+ const settle = (c, r, who, pop, taught) => {
+  const t = T(K(c, r));
+  t.set = FG.newSet(pop, who); t.set.taught = !!taught; t.st = "wild"; t.own = null; return t;
+ };
+ const furrow = (c, r, who) => { const t = T(K(c, r)); t.st = "reck"; t.own = who; return t; };
+ const put = (c, r, who, n) => {
+  const h = {at: K(c, r), to: K(c, r), n, own: who, kill: false, held: 0};
+  FG.G.herds.push(h); return h;
+ };
+
+ // --- what they walk at, which is the whole of the autonomy -------------
+ blank(); const a1 = put(4, 4, 0, 60); furrow(5, 4, 0); furrow(8, 4, 1);
+ ok("they walk at the adversary's furrows and not at their own god's",
+    FG.herdAim(a1) === K(8, 4));
+
+ blank(); const a2 = put(4, 4, 0, 60); settle(8, 4, 1, 200);
+ const aim2 = FG.herdAim(a2);
+ ok("with no furrows anywhere they go to look for people instead",
+    aim2 !== null && ring(K(8, 4), 1).includes(aim2));
+ ok("and never onto the town itself", aim2 !== K(8, 4));
+
+ blank(); const a3 = put(4, 4, 0, 60);
+ ok("nothing of theirs in reach at all is nothing to aim at", FG.herdAim(a3) === null);
+
+ blank(); const a4 = put(4, 4, 0, 60); furrow(8, 4, 1);
+ ring(K(4, 4), 1).forEach(x => { T(x).st = "bless"; T(x).own = 1; });
+ ok("a rival's blessing still shuts them in, which is the counterplay",
+    FG.herdAim(a4) === null);
+
+ // --- and what happens when there is nothing left -----------------------
+ blank(); put(4, 4, 0, 90);
+ FG.herdTick();
+ const box = T(K(4, 4)).set;
+ ok("boxed in, they put the roofs back up", !!box && FG.G.herds.length === 0);
+ ok("and it is still yours", box.own === 0);
+ ok("and they come back **taught**, which is the whole cost of the door",
+    box.taught === true);
+
+ // --- the grass, unchanged -----------------------------------------------
+ blank(); const g1 = put(4, 4, 0, 60); furrow(5, 4, 1);
+ FG.herdTick();
+ ok("they walk onto the furrows and take them",
+    g1.at === K(5, 4) && T(K(5, 4)).st === "wild" && T(K(5, 4)).own === null);
+ ok("and it will not take a furrow for three years", FG.barren(T(K(5, 4))));
+
+ // --- the mound, free and automatic --------------------------------------
+ blank(); FG.G.stones[0] = [K(5, 4)]; furrow(8, 4, 1);
+ const m1 = put(4, 4, 0, 100);
+ FG.herdTick();
+ ok("a silent stone of their own, walked over, is a mound",
+    m1.at === K(5, 4) && T(K(5, 4)).kur === 0 && FG.moundCount(0) === 1);
+ ok("a mound never becomes a working stone", FG.working(0).length === 0);
+ ok("and never touches the wonder brake", FG.lostCount(0) === 0);
+ // Against a control rather than against a number, because the grass takes its
+ // cut either way and the claim is about the *mound*: 1.19 charged a fifth of
+ // the band and the whole year for this, and 1.24 charges neither. A band that
+ // buried a stone must end the year exactly where a band that merely walked the
+ // same road ends it.
+ blank(); furrow(8, 4, 1);
+ const m0 = put(4, 4, 0, 100);
+ FG.herdTick();
+ ok("and it costs them nothing now — no act, no fifth, no year",
+    Math.abs(m1.n - m0.n) < 0.0001,
+    `buried ${m1.n.toFixed(2)}, walked ${m0.n.toFixed(2)}`);
+
+ blank(); FG.G.stones[0] = [K(5, 4)];
+ ok("no field is needed under it any more", FG.buryable(K(5, 4), 0));
+ ring(K(5, 4), 2).forEach(x => { T(x).st = "bless"; T(x).own = 0; });
+ ok("but a stone that still answers is not a grave", !FG.buryable(K(5, 4), 0));
+ blank(); FG.G.stones[1] = [K(5, 4)];
+ ok("and they bury their own god's stone, never the other one's",
+    !FG.buryable(K(5, 4), 0));
+ blank(); FG.G.stones[0] = [K(5, 4)]; T(K(5, 4)).kur = 0;
+ ok("one grave to a stone", !FG.buryable(K(5, 4), 0));
+
+ // --- absorption ---------------------------------------------------------
+ blank(); const b1 = put(4, 4, 0, 60); const town = settle(6, 4, 1, 1000);
+ FG.herdTick();
+ ok("they take people off a town of theirs they have come up beside",
+    town.set.pop < 1000 && b1.n > 60);
+ ok("and never more than the cap, however large the town",
+    Math.round(1000 - town.set.pop) === FG.R2TUNE.absCap,
+    `took ${Math.round(1000 - town.set.pop)}`);
+
+ blank(); const b2 = put(4, 4, 0, 60); const mine2 = settle(5, 4, 0, 1000);
+ FG.herdTick();
+ ok("they never take from their own", mine2.set.pop === 1000);
+
+ blank(); put(4, 4, 0, 60); const small = settle(5, 4, 1, FG.R2TUNE.absFloor);
+ FG.herdTick();
+ ok("and a town at the floor is drained no further, not to nothing",
+    small.set.pop === FG.R2TUNE.absFloor);
+
+ // --- the fuse -----------------------------------------------------------
+ blank(); const f1 = put(4, 4, 0, 200); furrow(9, 4, 1);
+ FG.herdTick();
+ ok("above the fuse, half go over the rise", FG.G.herds.length === 2);
+ ok("and the two halves are halves",
+    Math.abs(FG.G.herds[0].n - FG.G.herds[1].n) < 0.001 && f1.n < 110);
+ ok("the child inherits the other teaching and nothing else",
+    FG.G.herds[1].own === 0 && FG.G.herds[1].kill === f1.kill);
+
+ blank(); furrow(9, 4, 1);
+ for (let i = 0; i < FG.R2TUNE.bands; i++) put(4 + i, 6, 0, 200);
+ FG.herdTick();
+ ok("and never past the cap, or forty years is a great many doublings",
+    FG.G.herds.filter(h => h.own === 0).length === FG.R2TUNE.bands);
+
+ // --- the three handles are gone ----------------------------------------
+ blank(); const x1 = put(4, 4, 0, 70); FG.G.p[0].pos = K(4, 4);
+ ok("you may not stop them", FG.doAct("stop", 0) === false && FG.G.herds.length === 1);
+ FG.G.stones[0] = [K(4, 4)]; furrow(4, 4, 1);
+ ok("you may not raise the mound yourself either",
+    FG.doAct("mound", 0) === false && T(K(4, 4)).kur === null);
+ ok("and the herd is still standing there, not listening", FG.G.herds[0] === x1);
+
+ // --- both seats play it the same way, which is the point ---------------
+ blank(); const s0 = put(4, 4, 0, 60), s1 = put(10, 4, 1, 60);
+ furrow(6, 4, 1); furrow(8, 4, 0);
+ ok("the rival's bands aim by the same rule as yours",
+    FG.herdAim(s0) === K(6, 4) && FG.herdAim(s1) === K(8, 4));
+
+ // --- with the flag off, the steered rule is exactly as it was ----------
+ blank(); FG.R2.roam = false;
+ const o1 = put(4, 4, 0, 70); FG.G.p[0].pos = K(4, 4);
+ ok("flag off: stopping works again", FG.canStop(o1) && FG.doAct("stop", 0) === true);
+ ok("and comes back untaught, standing at the same fork",
+    T(K(4, 4)).set.taught === false);
+
+ console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
+}
+
 console.log("\nthe baseline is still exact");
 {
  const before = fail;
@@ -641,6 +790,31 @@ console.log("\nthe baseline is still exact");
  for (let s = 0; s < NOW.length; s++)
   ok("the shipped game is unchanged, seed " + s, play("bands", "cities", s) === NOW[s],
      `got ${play("bands", "cities", s)}, want ${NOW[s]}`);
+
+ // 1.24. And a third fingerprint, because the two above are blind to this rule.
+ //
+ // Worth stating plainly rather than discovering later: `bands` and `cities` are
+ // the doctrines both arrays are frozen on, and **neither of them ever teaches
+ // herding** — `storm` is the only chooser with a herd weight. So the shipped
+ // fingerprint did not move by one point when the third leg came off its leash,
+ // and it could not have. A rule needs a fingerprint played by somebody who uses
+ // it or the check is decoration.
+ //
+ // Three of these eight seeds move and five do not, which is the same shape the
+ // batch fingerprints have: the rule changes the games where it comes up. Seed 0
+ // is the one to look at — 90:71 becomes 49:122, the largest single-rule swing
+ // in the file, and it is a game where the bands walked and then settled.
+ const ROAM = ["49:122", "72:94", "90:72", "120:108", "132:84", "64:67", "55:92", "126:105"];
+ FG.R2reset();
+ for (let s = 0; s < ROAM.length; s++)
+  ok("the roaming game is unchanged, seed " + s, play("storm", "cities", s) === ROAM[s],
+     `got ${play("storm", "cities", s)}, want ${ROAM[s]}`);
+
+ const STEERED = ["90:71", "72:94", "90:72", "120:108", "132:84", "75:107", "66:85", "126:105"];
+ FG.R2reset(); FG.R2.roam = false;
+ for (let s = 0; s < STEERED.length; s++)
+  ok("and the steered game underneath it, seed " + s, play("storm", "cities", s) === STEERED[s],
+     `got ${play("storm", "cities", s)}, want ${STEERED[s]}`);
 
  FG.R2all(false); FG.R2built(true); FG.resetTune();
  console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
@@ -799,6 +973,10 @@ try {
  // the action row onto a second line and the four labelled rows are the layout.
  const shown = () => ["drive", "stopherd", "mound"]
    .filter(id => $$(id).style.display !== "none").join(",");
+ // 1.24 removes all three for good, so the steered row is checked with the
+ // roaming flag down and the ruling gets its own check underneath.
+ win.FG.R2reset(); win.FG.R2.roam = false;
+ $$("restart").click();
  ok("no herd buttons before there is a herd", shown() === "", shown());
  const GH = win.FG.G, HK = GH.p[0].pos;
  // a camp somewhere the player is not standing
@@ -812,9 +990,21 @@ try {
     shown() === "drive,stopherd,mound", shown());
  ok("Mound is dark with no stone under the ground", $$("mound").disabled);
 
- win.FG.R2reset(); win.FG.R2.herds = false;
+ win.FG.R2reset(); win.FG.R2.herds = false; win.FG.R2.roam = false;
  $$("restart").click();
  ok("and all three go away with the rule", shown() === "", shown());
+
+ // 1.24. And with the hand off, they never come back — not even standing on
+ // them. This is the rule stated in the interface: once you have said the word
+ // there is no button that does anything to them again.
+ win.FG.R2reset();
+ $$("restart").click();
+ const GR = win.FG.G, RK = GR.p[0].pos;
+ const near = win.FG.NB[RK].find(x => !win.FG.impassable(win.FG.T(x)) && !win.FG.T(x).set);
+ GR.herds.push({at: near, to: near, n: 60, own: 0, kill: false, held: 0});
+ GR.p[0].pos = near;
+ $$("sf").checked = !$$("sf").checked; $$("sf").onchange({target: $$("sf")});
+ ok("roaming: no button touches them, even standing on them", shown() === "", shown());
  win.FG.R2reset();
 
  // --- 1.16 / 1.17: the toll is shown before it is spent ------------------

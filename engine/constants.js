@@ -353,6 +353,16 @@ FG.R2 = {
  // door. It is a detour: a herd that stops is an ordinary untaught settlement
  // standing at the same fork it left.
  //
+ // **Under 1.24 that is false and the honest version is worse.** A people who
+ // cannot be stopped cannot be stopped *by you*, so herding is a door after all
+ // — and it opens onto the plough. A band with nowhere left to walk settles as
+ // a town of yours **taught to till**: they have been out there a long time,
+ // they have watched what the other lot do with the ground, and they can copy
+ // it. So the thing that keeps the third leg from being an escape is no longer
+ // that they come back unchanged. It is that they come back as the thing you
+ // sent them out to stop, and a wonder goes for it like any other town that
+ // learned.
+ //
  // **They move like their god, not like an army.** §7 says the player's movement
  // rules do not apply to mortals, and that is still true of levies and refugee
  // columns — but a people who were never taught the plough can still hear, and
@@ -366,14 +376,62 @@ FG.R2 = {
  // listening. See concept/lore.md — Storm & Sky were recorded as indifferent
  // because nobody had a third answer for them, and this is it.
  //
+ // **1.24 withdraws exactly that, on purpose.** A band past the Seventy-Seven
+ // has walked out of hearing, and a band out of hearing adds no more courses to
+ // a stone under 1.20 — so the herd half of `stonesGrow` quietly becomes a
+ // *young-band* rule: they feed a stone while they are small, early, and only
+ // until they start eating. Rick, asked: *the fact that they are not audible or
+ // hearing is not a problem for me. I think they should be.* The paragraph above
+ // is kept because the promise was real and somebody will find it here and think
+ // it was overlooked.
+ //
  // **Kurgans** come with it. A herd standing on farmland over one of your own
- // dead stones may raise a mound: a fifth of them, and the year. The tile stays
+ // dead stones may raise a mound: a fifth of them, and the year. **1.24 makes it
+ // free and automatic and drops the farmland clause** — nobody is asking them,
+ // so nothing is charged: they graze the ground and raise the earth in the same
+ // season, with what is to hand. A silent stone of their own god underfoot at
+ // the end of a year is a mound, and it is one of the two things they walk at. The tile stays
  // reckoned — a mound in a field — and the stone counts as *standing* without
  // ever working, blessing, or feeding the wonder brake. OP-16 measured that 92%
  // of stones end under farmland and that it is irreversible. This does not
  // reverse it. It makes it mean something, which is the better answer: a refuser
  // cannot have their shrines back as engines, and can have them back as graves.
  herds:      true,   // 1.19  a people taught to herd, who then stop standing still
+
+ // 1.24 / OP-24. **The hand comes off.** A people taught to keep herds stop
+ // hearing you, stop being steered, and go on without you for the rest of the
+ // game. Rick, asked what handle the player keeps: *none. They become fully
+ // autonomous. It is a one-way act.*
+ //
+ // This is the design value written as a mechanic rather than as balance:
+ // something set in motion by a decision made years ago by somebody who is no
+ // longer listening. Nothing else in the build is like it. Every other thing a
+ // god does is aimed.
+ //
+ // **A year of theirs, and the order of it is the argument.** They pick what
+ // they want fresh each year — they are opportunists and nothing holds them to
+ // last year's road — and take one step at it. They eat the ground they arrive
+ // on. They raise the earth over a stone of yours if they are standing on one.
+ // They take people off any town of the adversary they have come up beside.
+ // Then the grass has its say, and only then are the people they took added.
+ //
+ // That last ordering is the whole of the ceiling question OP-24 could not
+ // answer. The logistic pulls a band back toward the Seventy-Seven every year;
+ // absorption is the only thing that pushes it past. So a band eating fields
+ // stays a band, and **a band gnawing at a city swells** — which means the fuse
+ // is lit by the size of the thing being eaten. Big towns breed what eats them.
+ //
+ // **Above the fuse they split**, half and half, the child inheriting the other
+ // teaching and nothing else, under a hard cap per power because two becomes
+ // four becomes eight and forty years is a great many doublings. A bigger band
+ // does not eat more than one tile: splitting has to be the escalation, not a
+ // relief to the man being eaten.
+ //
+ // **And they end exactly one way.** Boxed in — no field of theirs in reach, no
+ // silent stone of ours, no town of theirs to come up beside, no road to any of
+ // it — they put the roofs back up. See `settleHerd`: they come back *taught*,
+ // and that is the ruling that makes this rule honest rather than free.
+ roam:       true,   // 1.24  and then they stop listening
 };
 
 FG.R2all = function (on) {
@@ -416,7 +474,7 @@ FG.R2built = function (on) {
 FG.R2BUILT = ["logistic", "teaching", "taughtLoss", "audible77", "fade", "exitLane",
               "dreamTeach", "dreamWorks", "taughtGates",
               "split2", "unmake", "encircle", "barren3", "herds",
-              "stonesGrow", "deadOrders", "wildFolk", "zeroSpent"];
+              "stonesGrow", "deadOrders", "wildFolk", "zeroSpent", "roam"];
 
 // The caps in FG.R2. Separate from FG.TUNE because TUNE is the slider panel and
 // these are not sliders yet — if they earn their way into the build they move.
@@ -439,6 +497,29 @@ FG.R2TUNE = {
  // that stops and settles again starts as a band rather than as a village.
  kHerd:    77,    // what the grass carries. The Seventy-Seven, walking.
  mound:    0.20,  // of the herd, to raise a kurgan over a stone in a field
+ // 1.24. The fuse, the cap, and the bite. `fuse` is set from the settles-at
+ // column of OP-24's table and not from two Seventy-Sevens: absorbing +20 a year
+ // a band levels off near 118, so 154 never fires and 110 fires for a band
+ // taking something like +15 or better. It is a threshold on a curve that
+ // flattens, so it is more sensitive than it looks — move it in tens.
+ fuse:     110,   // people, above which half of them go over the rise
+ bands:    4,     // most bands one power may have walking at once
+ absorb:   0.06,  // of an adjacent town of theirs, taken every year
+ absCap:   15,    // ...and never more than this many, however large the town
+ absFloor: 15,    // ...and never taking one below this. A drain, not a delete.
+ // Measured before it was believed. Without `absCap` a band standing beside a
+ // city of a thousand takes sixty people a year, blows through the fuse in two,
+ // splits until it hits `bands` and then balloons — 4.1 fuse-crossings a game of
+ // which 3.7 were already capped, and a band of **302** standing on the board
+ // with nowhere to put the surplus. The fraction alone is not a rule, it is a
+ // multiplier on somebody else's success.
+ //
+ // Fifteen is chosen off the curve rather than by feel. The logistic sheds
+ // n·0.32·(n/77 − 1) a year, so a band settles where that equals its intake:
+ // +12 levels at 105, +15 at 110, +20 at 118 — which is OP-24's table, arrived
+ // at from the other end. At the cap the fuse sits exactly on the equilibrium of
+ // a band eating a large city, so **splitting is what a big town does to itself**
+ // and a band nibbling a village stays a band for ever.
  toll:     0.10,  // of your corporeal being, for ending a year in their fields
  dreamToll: 0.10, // ...and for saying something in country you are not standing in
  mp:       3,     // movement at full manifestation

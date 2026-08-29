@@ -144,8 +144,12 @@ const notUnderfoot = (tg, who) => {
 // will not starve a city, it will not ring anything, and it will not cross the
 // board for a better target than the one under its nose. A player driving herds
 // at a rival's breadbasket is doing something this function has no concept of.
+//
+// 1.24 takes the whole function out of the chooser's hands and out of the act
+// phase: `roamTick` does this for both seats, every year, in the tick. The
+// function stays here for the flag-off path and for nothing else.
 function driveHerds(who) {
- if (!FG.R2.herds) return;
+ if (!FG.R2.herds || FG.R2.roam) return;
  FG.herdsOf(who).forEach(h => {
   if (h.held > 0) return;
   if (h.to !== h.at && FG.herdStep(h.at, h.to, who) !== undefined) return;  // still walking
@@ -199,7 +203,12 @@ function aiPlay(who) {
   // read them as coverage, not as judgement. Deciding *when* a people should
   // stop walking is the whole of this rule and it is precisely the kind of
   // decision a one-ply chooser has no way to make. OP-01, OP-21.
-  const hh = FG.R2.herds ? FG.herdAt(k) : null;
+  // 1.24. Both acts are gone with the steering — there is nothing to weigh,
+  // because there is nothing the chooser may do to a people who have stopped
+  // listening. This is the one place in the build where taking a decision away
+  // from the chooser makes the rule *more* measurable rather than less: both
+  // seats now play herds identically and correctly. OP-24, A-24/25/26.
+  const hh = FG.R2.herds && !FG.R2.roam ? FG.herdAt(k) : null;
   if (hh && hh.own === who) {
    if (FG.canMound(hh)) c.push([w.mound || 0, "mound"]);
    else if (hh.to === hh.at && FG.canStop(hh)) c.push([w.stop || 0, "stop"]);

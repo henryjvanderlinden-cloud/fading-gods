@@ -127,8 +127,126 @@ function moveColumns() {
 // stone may bless this year. The herd unmakes and the god makes, in that order,
 // inside one tick. That is 1.8's line — creation at a distance, unmaking only in
 // person — running through mortals instead of through you.
+// 1.24 / OP-24. The end of a people, and it is now the only one there is.
+//
+// Boxed in: no field of theirs in reach, no silent stone of ours, no town of
+// theirs to come up beside, and no road to any of it. 1.19 called stopping a
+// detour — *an ordinary untaught settlement standing at the same fork it left*.
+// That was the softer reading and it is gone. They have been out there a long
+// time and they have watched what the other lot do with the ground, so they come
+// back **taught**, and they start ploughing next year like anything else that
+// learned.
+//
+// Which is what makes the third leg honest now that it is a door. It is still
+// yours; that is the whole of the cost. A wonder goes for it through `lostCount`
+// exactly as it would for a town you taught yourself, and the people you sent
+// out to break their plough come home holding one.
+function settleHerd(h) {
+ const s = FG.newSet(Math.max(15, Math.round(h.n)), h.own);
+ s.kill = h.kill;
+ s.taught = true;
+ const t = T(h.at);
+ t.set = s; t.st = "wild"; t.own = null;
+ FG.G.herds.splice(FG.G.herds.indexOf(h), 1);
+ say(h.own === 0
+  ? "The herds have nowhere left to go. They put the roofs back up — and this time they know what to do with the ground."
+  : "One of theirs has run out of grass and settled, and they are ploughing.",
+  h.own === 0 ? "bad" : "riv");
+}
+
+// 1.24 / OP-24. A year in the life of a people nobody is steering, and the order
+// of it is the argument. See constants.js 1.24 for why it is this order.
+function roamTick() {
+ const born = [];
+ FG.G.herds.slice().forEach(h => {
+  const foe = 1 - h.own;
+
+  // Where they are going, decided fresh every year. They are opportunists and
+  // nothing holds them to last year's road — and re-aiming is nearly free now
+  // that `herdAim` is one breadth-first walk rather than a scan of the board.
+  const aim = FG.herdAim(h);
+  if (aim === null) { settleHerd(h); return; }
+  h.to = aim;
+  const step = FG.herdStep(h.at, aim, h.own);
+  if (step !== null && step !== undefined) h.at = step;
+
+  // The grass. One tile, the one under them — a ring would be a plague of
+  // locusts and this is a people. Deliberately *not* scaled by how many of them
+  // there are: a band that splits has to be twice the destruction, or the fuse
+  // is a relief to the man being eaten instead of a threat.
+  const t = T(h.at);
+  if (t.st === "reck" && !t.set) {
+   t.st = "wild"; t.own = null;
+   t.bar = FG.G.turn + FG.R2TUNE.wither;
+   say(h.own === 0 ? "The herds are over their furrows, and the furrows are going."
+                   : "Their herds are over your fields.", h.own === 0 ? "good" : "bad");
+  }
+
+  // The mound, and it costs them nothing. 1.19 charged a fifth of the band and
+  // the whole year, because it was an act and a god had asked for it. Nobody is
+  // asking. They are camped on the place where it is buried and they raise the
+  // earth in the season they are there, with what is to hand.
+  if (FG.buryable(h.at, h.own)) {
+   T(h.at).kur = h.own;
+   say(h.own === 0
+    ? "They have come over one of your buried stones, and left a mound standing on it."
+    : "They have raised a mound over one of their own, far out.",
+    h.own === 0 ? "omen" : "riv");
+  }
+
+  // The grass has its say first...
+  const m = 1 + FG.R2TUNE.r / 100 * (1 - h.n / FG.R2TUNE.kHerd);
+  h.n = Math.max(8, h.n * Math.max(1 - FG.R2TUNE.decline, m));
+
+  // ...and the people they take are added after it, which is the only reason a
+  // band ever gets above the Seventy-Seven at all. Adjacency only: `herdBlocked`
+  // will not let them stand on a town, so beside one is the only reading there
+  // is and it is the right one. Their towns and never yours — you taught these
+  // people, and they have not forgotten that much.
+  //
+  // Never below `absFloor`. A band that could absorb a village out of existence
+  // would be a second way of removing settlements from the board, and this rule
+  // already has enough jobs.
+  let took = 0;
+  ring(h.at, 1).forEach(x => {
+   const q = T(x).set;
+   if (!q || q.own !== foe) return;
+   const take = Math.min(q.pop * FG.R2TUNE.absorb, FG.R2TUNE.absCap, q.pop - FG.R2TUNE.absFloor);
+   if (take <= 0) return;
+   q.pop -= take; h.n += take; took += take;
+  });
+  if (took >= 5) say(h.own === 0
+   ? "Some of theirs have gone out to the herds — willingly or otherwise."
+   : "People are leaving one of yours, out to where their herds are standing.",
+   h.own === 0 ? "good" : "bad");
+
+  // The fuse. `split2` is the wrong precedent — it sends half a settlement to
+  // blessed ground you already hold, which is exactly what a roving band has
+  // none of. The nearer one is the sentence actions.js already carries: *they
+  // keep the Seventy-Seven, half go over the rise.* The child inherits the other
+  // teaching and nothing else, and the cap is hard because two becomes four
+  // becomes eight and forty years is a great many doublings.
+  const mine = FG.herdsOf(h.own).length + born.filter(b => b.own === h.own).length;
+  if (h.n >= FG.R2TUNE.fuse && mine < FG.R2TUNE.bands) {
+   const spot = NB[h.at].find(x => !FG.herdBlocked(x, h.own) && !FG.herdAt(x));
+   if (spot !== undefined) {
+    h.n = h.n / 2;
+    born.push({at:spot, to:spot, n:h.n, own:h.own, kill:h.kill, held:0});
+    say(h.own === 0
+     ? "There are too many of them to be one people now. Half go over the rise, and there are two."
+     : "One of their herds has broken in two.",
+     h.own === 0 ? "omen" : "riv");
+   }
+  }
+ });
+ // Added after the loop, so a band born this year walks next year. A child that
+ // moved in the tick it was born in would double the rule's tempo for free.
+ born.forEach(b => FG.G.herds.push(b));
+}
+
 function herdTick() {
  if (!FG.R2.herds) return;
+ if (FG.R2.roam) return roamTick();
  FG.G.herds.slice().forEach(h => {
   // a year spent raising a mound is a year spent standing still
   if (h.held > 0) { h.held--; }
@@ -455,7 +573,8 @@ function endYear() {
  return worldTick(snap);
 }
 
-Object.assign(FG, {stoneTick, growTick, moveColumns, herdTick, snapshot, worldTick, endYear,
+Object.assign(FG, {stoneTick, growTick, moveColumns, herdTick, roamTick, settleHerd,
+ snapshot, worldTick, endYear,
  resolveContested, encircleTick, exodus});
 
 if (typeof module !== "undefined" && module.exports) module.exports = FG;
