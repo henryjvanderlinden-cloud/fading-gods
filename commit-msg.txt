@@ -1,40 +1,35 @@
-lore.md: the thread underneath, and the balance verdict overturned
+SOL's reading, and OP-27 / OP-28 / OP-29
 
-Rick's own framing of the thesis, written down while it is fresh, because it only
-existed in a conversation.
+Written in another session and left uncommitted in the working tree; committed
+here unchanged. Not my text and not adjudicated — the entry says so itself.
 
-The loss of innocence is the first move and not the ending — Jaynes's bicameral
-mind, Adam and Eve, a common thread through human history. And the rule for it has
-been in the build since 1.5 with nobody calling it that: `audible` is *a people few
-enough and untaught enough that there is nothing between them and you but air*.
-Under seventy-seven they bless the ground by being there; past it they cannot hear
-you; being shown the plough ends it too, because a people shown the plough are
-counting the fields, not listening. That is Jaynes as a population threshold and
-Eden as a teaching, in one predicate, and nobody set out to write it — it fell out
-of asking who can hear a god.
+OpenAI's gpt-5.6-sol, running as Codex on this machine, was given read-only access
+to the repository and asked what the project is, what is good in it and what it
+would change. It read README.md and design/ and skimmed engine/. It has not played
+a game, has not run the harness, and never saw a number.
 
-The pastoralists are already historically shaped: herding may only be taught once
-somebody has broken ground, which is a condition rather than a clock and happens
-to be the real dependency. Since 1.24 they walk out of hearing and never come back,
-and in a world where the gods have stopped they are the only thing still moving.
+Three items it raises that the register did not already carry:
 
-The three layers — hunter-gatherers, Anatolian farmers, Yamnaya — are all in the
-game, with the right dependency structure. What is missing is mixture, and mixture
-is the point of the comparison: the layers absorbed each other, and what came out
-carried fragments of all three. Here ownership is binary and encirclement is a
-clean erasure, which is the one thing the real story never does.
+  OP-27 · high    · is the first-game ruleset too large to be played? A
+                    complexity budget: ship a smaller ruleset, make each mechanic
+                    earn its way back in. Settled at the board, in OP-21, by
+                    asking the player what a move will cost before they make it
+                    and recording the gap. The A/B already exists — R2all(false)
+                    plays the smaller game.
+  OP-28 · medium  · are irreversible consequences visible before they are chosen?
+                    A forecast in the terms panel, watching for the opposite
+                    failure — perfect foresight turns temptation back into
+                    arithmetic.
+  OP-29 · medium  · nothing records a game well enough to re-run it. No action
+                    log, no deterministic save/load, though the state is already
+                    serialisable. The only item in the review with no existing
+                    home here.
 
-So "only some myths survive" is a scoring principle, not a mood. The myths that
-lasted did so inside somebody else's people. The question an ending should ask is
-not what do you still hold but what is still being carried by people who are no
-longer yours — the only version under which losing the ground and being remembered
-anyway makes sense. And that is where the kurgans have been pointing since 1.19: a
-mound is memory rather than possession, and a tile count has no way to value a
-grave.
+Its first recommendation is OP-21 — two people at one board — reached
+independently and from documents alone, without knowing it was already ranked
+highest. That convergence is the most useful thing in the entry.
 
-Also corrected in the same file: the balance table's verdict. It said Cities wins
-78% and Bands 24%, and called that the current build — the game saying the
-convinced were right and the refusers were fools. Measured at 400 seeds a cell,
-haunt is now 60% and bands 30%, with the refuser's blessing up from 19.4 tiles to
-34 and the rival's farmland down from 22.6 to 7.4. Mostly A-31. The game no longer
-says that.
+It also caught a real error the register did not have: README.md line 19 says
+"no build step, no dependencies, no server" while package.json declares jsdom
+^30.0.1 under `dependencies`. jsdom is a tool for the headless checks and not for
+the game; it belongs under devDependencies. Unfixed.

@@ -1918,3 +1918,147 @@ undocumented in the build, and still unmeasured, and 1.19 does not go near it.
 whole purpose is OP-15's *Forgotten*, and that ending does not exist. `moundCount`
 is tracked and shown against the day it does. If that day does not come, this is
 decoration and should be cut.
+
+---
+
+## SOL's reading, 29 August 2026 — an outside opinion, unadjudicated
+
+**What this is, and what it is worth.** OpenAI's `gpt-5.6-sol`, running as Codex
+on this machine and reachable from a Cowork session, was given read-only access
+to this repository and asked three things: what the project is, what is good in
+it, and what it would change. It read `README.md` and `design/`, and skimmed
+`engine/`. **It has not played a game, has not run the harness, and never saw a
+number.** Everything below is a judgement made from documents by a reader with no
+history here. It is filed in the live register rather than in `ideas.md` because
+that is where it was asked to go; nothing in it has been adjudicated. The three
+points it raises that the register did not already carry are numbered below as
+**OP-27**, **OP-28** and **OP-29**, so that they can be referred to; the
+severities on them are provisional and are Rick's to set.
+
+**What it saw in the concept.** That the engine of the game is not an opposing
+resource but your own success: *"progress is not merely an opposing resource
+engine: it is your own success becoming the force that erases you."* It picked
+out as strongest the consequences the rules produce rather than script — refugees
+saving one town and pushing another past a fatal threshold, distant teaching
+destroying the sacred network that carried it, settled land physically excluding
+the god who enabled it — and called the shrinking repertoire, from moving
+mountains to tending hedgerows, the best of it.
+
+**The worry, which is the half worth keeping.** *"The design may be more
+fascinating to analyse than pleasurable to inhabit."* Too many interacting
+thresholds, exceptions, reach definitions, population states and irreversible
+losses for a player to predict an outcome or understand why a plan failed; forty
+turns of managed decline reading as punitive rather than tragic; and, if
+settlement-heavy doctrine remains optimal, *"the supposed tragedy becomes less a
+painful choice than a solved economic obligation."* Its test for the whole design
+is whether a player feels temptation — wanting to teach, grow, split or refuse
+while knowing the cost — or merely calculates which irreversible penalty is
+cheapest.
+
+**Where it lands on the register.** Its first recommendation is **OP-21, arrived
+at independently and from documents alone**: stop adding mechanics, put two
+people at one board, and record decisions, predicted outcomes, actual outcomes
+and moments of confusion, because *"AI balance matrices cannot answer this."*
+That convergence is the most useful thing in this entry, precisely because it did
+not know OP-21 was already ranked highest or why.
+
+Its complaint about mechanics players cannot anticipate — it named teachings,
+manifestation tolls, hearing versus presence, growing and dead stones, orders
+through silent stones, roaming herds, courses, mounds and the multiple settlement
+thresholds as collectively beyond a reasonable first-game model — is OP-23 and
+OP-03 restated from outside, with one addition the register does not carry, now
+**OP-27**: a **complexity budget**, shipping a deliberately smaller ruleset and making each
+mechanic earn its return. Its point about victory is OP-15 and OP-25 from
+outside, also with an addition, now **OP-28**: **previewability**, forecasting which wonder will
+go and what growth will reckon next year, so that *"the tragedy should come from
+choosing knowingly, not discovering hidden resolution order."*
+
+**The one thing here the register does not contain in any form**, now **OP-29**,
+is tooling:
+replayable action logs and deterministic save/load built on the already
+serialisable state, for playtest diagnosis, rules regression, and sharing an
+exact interesting game. Given OP-21 is about to generate exactly the kind of
+evidence that is lost the moment the two people stand up, this looks like the
+cheapest item on the list.
+
+**Two checkable claims, both verified against the files.** First, `README.md`
+line 39 calls `design/` the source of truth while `design/rules.md` opens by
+saying `engine/constants.js` is the authority and itself the history. SOL called
+the contradiction actively harmful to design work and asked for a rewrite; what
+it did not credit is that rules.md says so itself, bluntly, in the box at the
+top, and already names that rewrite as the outstanding debt on the file. Second,
+`README.md` line 19 says *"no build step, no dependencies, no server"* while
+`package.json` declares `jsdom ^30.0.1` under `dependencies`. That one is simply
+wrong as written: jsdom is a tool for the headless checks, not for the game, and
+belongs under `devDependencies` or in a sentence that says so.
+
+**What it explicitly argued against.** Restructuring anything. *"The shared engine
+is already the correct foundation."* It would postpone architectural work until
+the playable ruleset stops moving.
+
+---
+
+## OP-27 · high · Is the first-game ruleset too large to be played?
+
+**Raised by SOL, August 2026, from the documents alone.** The charge is that
+teachings, manifestation tolls, hearing versus presence, growing and dead stones,
+orders through silent stones, roaming herds, courses, mounds and the several
+settlement thresholds together exceed what a person can hold in their head on a
+first game, and that a player who cannot anticipate an outcome cannot be tempted
+by it — they can only be surprised. The proposed remedy is a **complexity
+budget**: keep everything experimentally, ship a deliberately smaller ruleset,
+and make each mechanic earn its way back in.
+
+**Why it matters.** It is the mechanism behind the worry in OP-03 and OP-23 and,
+if true, it is upstream of both: an illegible rule is not a hard choice, it is a
+dice roll the player is asked to feel responsible for. It also cuts against the
+grain of this project, which has added eighteen rules in one batch and found them
+a clear improvement — but that verdict came from the person who wrote them.
+
+**How it would be settled.** At the board, in OP-21, and cheaply. Before a player
+commits to a move, ask them what it will cost. Record the answer against what
+actually happens. A ruleset the player can play but not predict shows up as a
+wide gap that does not close over a session, and it can be attributed to specific
+mechanics rather than to the game as a whole. The A/B already exists —
+`FG.R2all(false)` plays the smaller game — so the cut-down ruleset does not have
+to be built to be tested.
+
+## OP-28 · medium · Are irreversible consequences visible before they are chosen?
+
+**Raised by SOL, August 2026.** That the game resolves its losses at year end and
+reports them afterwards, so the player learns what a choice cost after the choice
+is unrecoverable. Its formulation is the useful one: *"the tragedy should come
+from choosing knowingly, not discovering hidden resolution order."* What it asks
+for is a forecast — which wonder is about to go, what growth will reckon next
+year, what a settlement is about to stop hearing.
+
+**Why it matters.** This is OP-15 and OP-25 approached from the other end. Those
+ask what the ending rewards; this asks whether the player can see the ending
+coming in time for it to hurt. A tragedy the player walks into with open eyes is
+the stated design intent, and hidden resolution order is the one thing that
+reliably converts it into a feeling of being cheated.
+
+**How it would be settled.** Build the forecast into the terms panel first, where
+it is cheap and unpolished, and watch whether the confusion moments recorded in
+OP-21 fall. Watch also for the opposite failure, which is the real risk: perfect
+foresight turns a temptation back into an arithmetic problem, which is the thing
+OP-06 and OP-25 are already circling.
+
+## OP-29 · medium · Nothing records a game well enough to re-run it
+
+**Raised by SOL, August 2026, and the only item in its review with no existing
+home in this register.** There is no action log and no deterministic save/load,
+though the state is already serialisable, so a game exists only while it is being
+played.
+
+**Why it matters.** OP-21 is about to start producing the evidence this project
+ranks above the matrix, and all of it currently evaporates when the two people
+stand up. It also has a second use that is worth more than the first: a recorded
+game replayed against a changed ruleset is a rules regression test, which is the
+class of defect that produced A-16.
+
+**How it would be settled.** It is not a question so much as a build, and the
+test writes itself: replay a recorded game and assert the end state is identical,
+in `sim/smoke.js` alongside the existing A/B. It is on this list rather than in
+`ideas.md` because the cost is low, the moment for it is now, and it goes stale
+the day OP-21 begins.
