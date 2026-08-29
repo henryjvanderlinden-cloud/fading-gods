@@ -1,39 +1,31 @@
-The owner-blind grazing, measured, and left alone
+Game 8 into A-33: the herds worked, and the cap is the live question
 
-Grazing has never asked whose furrow it is. That is 1.19's behaviour and it was
-left through both of yesterday's commits because Rick ruled on where the bands
-aim and never on what they eat. Wandering made it a live question — a band
-waiting out the early years drifts through your own country — so it is measured
-rather than argued about.
+The first game played on the roaming build, and the direct refutation of game 6.
+Same player, same shape of board. Game 6: both herds grazing on his own quiet
+ground while the rival held seven ploughed towns — the weapon used as fertiliser.
+Game 8: four bands, three of them grazing in the adversary's country at year
+forty, the fourth walking. Rick: the herds did some actual work, and made the game
+interesting. That is A-33's 18.3 tiles and -2.5 of their farmland seen once
+instead of averaged over 322 games.
 
-  their furrows eaten          18.11 a game
-  YOUR furrows eaten            0.16 a game — 0.9% of everything they graze
-  games where it happens         6.2%
-  when                          43 of 50 times while walking at a target,
-                                not while waiting
-  median year                   38
+And it turns the cap from a free parameter into the live question. `bands` is 4
+and he finished with exactly 4. Two stood at 128 and 140 against a fuse of 110 —
+both over the line, neither able to split, both simply growing. The two at 64 are
+the halves, so the fuse had fired at least twice earlier. The harness called this
+2.2 capped crossings a game and filed it; here it is the end-state of a game
+somebody played. Either the cap rises, or a band that cannot split has to do
+something other than swell.
 
-And making them refuse, paired over the same 322 games: win +0.31 ± 0.61, your
-score +0.13 ± 0.14, their score 0.00 ± 0.16. Only your own farmland count moves
-— +0.09 tiles ± 0.06, significant and meaningless.
+He raised no stone all game, which made kurgans impossible rather than rare and
+left stonesGrow and deadOrders inert. Beside game 7, where two dead stones were
+the only reach he had left, the pair say it cleanly: mounds, courses and relays
+all sit downstream of a decision to raise a stone, and a settled player may never
+make it. OP-12's suspicion is now a question about the stone, not the mound.
 
-So it stays as it is. Not because the harder reading is better here but because
-the question is empty: one game in sixteen, at the end of a long game, to a band
-that was walking somewhere else. A special case that buys nothing should not be
-written.
+The game also ended at zero manifestation — no move, no tile to walk into, every
+wonder struck through. Games 2 and 7 ended at a tenth; nobody had reached the
+actual bottom of the stock before. And it kills the play-style note this project
+has carried since game 4: 90 / 100 / 80 per cent, then 10, 10 and 0. Rick spends
+himself. Three of the last four have gone to the bottom.
 
-The same run corrects every per-game figure in A-33, all of which were measuring
-bands dying in the year they were taught:
-
-                 defect   corrected
-  bands            1.4      4.9
-  band-years      13.5     55.2     (7.9 of them spent waiting)
-  tiles grazed     6.3     18.3
-  people taken     112      443
-  splits           0.3      0.5
-  settlings        0.6      0.3
-  mounds           0.4      0.1
-
-Four times the rule for one line of code, and the door back onto the plough is
-half as common as it was — which is right, because only the adversary opens it
-now. No engine change in this commit.
+No engine change. The full write-up is game 8 in the playtests doc.

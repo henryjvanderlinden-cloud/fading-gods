@@ -1204,6 +1204,34 @@ was walking somewhere else. A special case that buys nothing should not be
 written. If it ever wants revisiting it will be because somebody watched it happen
 and did not like it, which is OP-21's business and not the harness's.
 
+### Played, once, and it is the evidence the harness could not give
+
+**Game 8, 29 August 2026 — the first game on the roaming build, and the direct
+refutation of game 6.** Game 6 is the same player, the same shape of board, and the
+herd rule before the leash came off: *both were grazing — stopped, on his own quiet
+ground — while the rival held seven ploughed towns. The weapon was used as
+fertiliser.* Game 8 finished with **four bands, three of them grazing in the
+adversary's country at year forty**, and the fourth walking. Rick: *the herds did
+some actual work, and made the game interesting.*
+
+That is the 18.3 tiles and the −2.5 of their farmland above, seen once instead of
+averaged, and it is what OP-24 was built to buy.
+
+**And it turns the cap from a free parameter into the live question.** `bands` is 4
+and he finished with exactly 4. Two of them stood at **128 and 140** against a fuse
+of **110** — both over the line, neither able to split, both simply growing. The
+two at 64 are the halves, so the fuse had fired at least twice earlier. The
+measurement called this 2.2 capped crossings a game and filed it; here it is the
+end-state of a game somebody played. **Either the cap rises, or a band that cannot
+split has to do something other than swell** — shed harder, stop absorbing when
+full, or take the ceiling as a real ceiling. Nothing about that is settled.
+
+He also **raised no stone all game**, which made kurgans not rare but impossible
+and left `stonesGrow` and `deadOrders` inert. Set beside game 7, where two dead
+stones were the only reach he had left, the pair say it cleanly: mounds, courses
+and relays all sit downstream of a decision to raise a stone, and a settled player
+may simply never make it. See the playtests doc, games 7 and 8.
+
 ### What it opens
 
 - **Kurgans got worse, not better** — 0.4 a game down to 0.1, because a wandering
