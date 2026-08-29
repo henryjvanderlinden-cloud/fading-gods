@@ -1022,3 +1022,95 @@ than as a request. Measured the same day and it holds. Nothing changed in the
 engine — this is a name for something that was already running. See
 `engine/tick.js` (the ratchet), `engine/constants.js` `blessEffect`, and the
 playtests doc, game 7.
+
+---
+
+## A-33 · Should the herds leave your hand? — **settled: yes, and it costs the side that uses them**
+
+**Settled by:** Rick, 26 and 29 August 2026, ruling on every open piece of OP-24
+in one sitting; built and measured the same day as `1.24 roam`, commit `2f25ef3`.
+Was OP-24.
+
+### What was ruled
+
+| the question | the ruling |
+|---|---|
+| what handle does the player keep? | **none.** Steering, stopping and the mound all come off. |
+| where do they walk? | the nearest ploughed ground **of the adversary**, and they keep roaming there |
+| and if there is none in reach? | the open ground beside a town of theirs |
+| re-aim, or finish the walk? | **re-aim every year.** *They are opportunistic, so a re-aim every year is within lore.* |
+| who do they take people from? | enemy settlements only |
+| does a bigger band eat more? | **no.** One tile, always. |
+| the ceiling | growth first, absorbed added after — the logistic is the fuse's pressure, not its ceiling |
+| kurgans | they are **drawn to** their own silent stones, and raise the mound automatically on ending a year there |
+| what does a mound cost? | **nothing.** *They graze everything and at the same time build their monument in their spare time with the materials at hand.* |
+| and when there is nothing left at all? | **they settle** — *lore-wise they can easily copy what the others are doing* |
+
+**The last row is the one that matters, and Rick took the harder reading of it a
+second time when asked.** A boxed-in band comes back as a settlement of yours
+**taught to till**. So OP-24's last open piece — that 1.19's *detour* paragraph is
+now false — is closed the opposite way from how the entry expected: herding is a
+door after all, and it opens onto the plough. What keeps it honest is no longer
+that they come back unchanged. It is that they come back as the thing you sent
+them out to stop, a wonder goes for it through `lostCount`, and nothing was
+gained. *Worst case you hand the opponent a settlement for free, which is also a
+fair risk.*
+
+### Two things the code said that the register did not
+
+**A band walked at the nearest farmland of any owner, including yours.**
+`driveHerds` filtered on *is it ploughed and is there a road* and never asked
+whose it was. The chronicle line printed *the herds are over their furrows*. The
+comment assumed an adversary; the code never did. Exactly the shape of A-31, and
+the fifth lesson of the working method holds for the seventh time.
+
+**Grazing is still owner-blind and has been left that way,** because it was not
+ruled on and quietly deciding it would be worse than leaving it visible. A band
+crossing its own side's fields eats them.
+
+### What it measures at, and it is the point of the entry
+
+`sim/smoke.js` at **11,973 checks**, all passing, both old fingerprints exact —
+**and that is itself the finding.** `bands` and `cities` are the doctrines both
+arrays are frozen on and *neither of them ever teaches herding*; `storm` is the
+only chooser with a herd weight. So the shipped fingerprint could not have seen
+this rule. A third one on `storm` v `cities` now sits beside them, with the
+steered game frozen underneath it.
+
+900 seeds, the 322 of them in which a band ever walked, both arms on the same set:
+
+| | win | score | their farmland | their big towns | kurgans |
+|---|---|---|---|---|---|
+| steered (1.19) | 54.3% ± 2.8 | 82.0 : 76.1 | 13.5 | 5.0 | 0 |
+| roaming (1.24) | **48.4% ± 2.8** | 73.2 : 74.1 | 13.8 | 5.3 | 0.4 |
+
+**Autonomy costs the side that uses it about six points of win rate and nine of
+score, and denies the settled side nothing.** Their farmland does not fall. Their
+big towns do not fall. The passive denial engine A-32 said the magical side did
+not have, it still does not have. Roughly 1.5 standard errors, so the direction is
+not proven — but the *absence* of the denial is, and that was the whole argument
+for building it.
+
+Per game the rule does run, and runs as designed: 1.4 bands, 13.5 band-years, 6.3
+tiles grazed, 112 people taken, 0.3 splits, 0.6 settlings, 0.4 mounds.
+
+**`absCap` was measured before it was believed.** Without a cap on the bite a band
+beside a city of a thousand takes sixty people a year, blows the fuse in two
+years, splits until it hits `bands` and then balloons — 4.1 fuse-crossings a game
+of which 3.7 were already capped, and a band of **302** standing on the board with
+nowhere to put the surplus. Fifteen is taken off the curve rather than off feel:
+the logistic sheds n·0.32·(n/77 − 1) a year, so an intake of +12 levels at 105,
++15 at 110 and +20 at 118 — which is OP-24's own settles-at table, arrived at from
+the other end.
+
+### What it opens
+
+- **The rule does not pay for itself, and that is a rule question.** See OP-26.
+- **Kurgans still almost never happen, and now for a different reason.** The
+  trigger works. `storm` builds 0.73 stones a game and 0.27 of them go silent, so
+  there is nothing to trigger it on. That is a chooser artifact and not a rule,
+  and OP-12's suspicion that half of 1.19 is decoration survives A-33 intact.
+- **`storm` is the only doctrine that herds.** Every claim above rests on one
+  chooser with `herd: 1`, which is a thinner instrument than any other rule in the
+  build has been measured on. OP-01, again.
+

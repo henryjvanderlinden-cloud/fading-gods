@@ -13,6 +13,7 @@ these by number, so the numbers are kept here rather than left dangling:
 | OP-13 | do dead stones carry orders? | **A-28** — yes, at range two, works only |
 | OP-14 | walking on reckoned ground, and what zero is | **A-19 / A-30** — adopted; at zero you may only watch |
 | OP-18 | do the wild folk carry a number? | **A-29** — at the founding, and nowhere else |
+| OP-24 | should the herds leave your hand? | **A-33** — yes, built as 1.24, and it costs its user |
 
 ---
 
@@ -278,6 +279,57 @@ decide. OP-21 again, and this is the largest thing waiting on it.
 to this one now. OP-15's endings are the version of *what was this valley worth*
 that requires no scoring change at all, and if they land they may be the whole
 answer to (c).
+
+## OP-26 · high · The third leg does not pay for itself
+
+**Raised by the measurement of A-33, 29 August 2026, and raised as a rule question
+on purpose.** The herds now play themselves, exactly as ruled. Over 322 games in
+which a band walked, autonomy costs the side that uses it **six points of win rate
+and nine of score, and takes nothing off the adversary**: their farmland is 13.5
+against 13.8, their big towns 5.0 against 5.3. The rule runs — 6.3 tiles grazed
+and 112 people taken a game — and none of it lands.
+
+### Where the cost is most likely coming from, and it is testable in an afternoon
+
+**Settling taught is a wonder.** 0.6 bands a game come home boxed in, and each one
+is a taught settlement of yours that `lostCount` reads. Under 1.19 the same band
+could be *stopped* into an untaught settlement for three free points. So the
+ruling swapped a small gain for a real price, which is the harder reading working
+as intended — but nothing has checked that this is the whole of the nine points.
+
+**And grazing may simply be too slow to matter.** One tile a year against a
+settled side that re-ploughs, with `wither` at three. 6.3 tiles a game is 12
+points of farmland denied over forty years, against a board where two settled
+powers destroy 29% of everything they ever make on their own. The rule may be
+competing with a bigger effect and losing.
+
+### What must not happen
+
+**No scoring change may be made to fix this** — OP-25, and the ninth rule of the
+working method. A doctrine that loses is a rule question. And **no re-weighting of
+`storm` to make the rule look better**: every number above comes from one chooser
+with `herd: 1`, and OP-01's whole warning is that tuning the chooser against a
+rule measures the chooser.
+
+### How it would be settled
+
+Three measurements, in this order, none of them expensive:
+
+1. **Split the cost.** Run the roaming arm with settling forced untaught, against
+   settling taught. The gap between them is the price of the door, and the
+   remainder is the price of everything else. If the door is the whole nine
+   points, the ruling is doing exactly what Rick asked and the entry closes.
+2. **Measure the grazing against the ratchet.** Tiles denied per game against
+   tiles the settled side loses to its own furrows anyway. If the second dwarfs
+   the first, the denial engine is not slow, it is irrelevant, and the tile a year
+   is the number to argue about.
+3. **Then the cap and the fuse**, which are the only free parameters left: `bands`
+   at four binds in the games that matter, and a band that cannot split balloons
+   instead. Both are one-line sweeps.
+
+**And then a played game, because the whole proposal was about how it feels to
+have set something loose, and no number answers that.** OP-21.
+
 
 ## OP-01 · high · The rival AI is one-ply greedy
 
@@ -1143,184 +1195,6 @@ Silence is not achieved; loudness is moved.
   are simply never extended. Wither is still the only thing that undoes farmland.
   OP-17's fill colour now has to say *forbidden*, and today it is a thin inner
   ring and the settlement list saying so.
-
-## OP-24 · high · The herds should leave your hand
-
-**Raised by Rick, 25 August 2026, and raised as the point of the game rather than
-as a balance idea:** *I want the pastoralists to move independently. This is the
-whole point of the game, setting things in motion that you can no longer
-personally control.*
-
-Four parts, and they are not one change:
-
-1. **They walk themselves.** Aimed at the nearest reckoned ground of the
-   adversary, and rampaging from there.
-2. **They absorb.** Standing beside a settlement of the adversary, they take some
-   of its people every year — joining the band willingly or otherwise.
-3. **They split.** Above some size a band becomes two bands, and now there are two
-   of them roving.
-4. **The ground they lay waste stays waste about three years.** *Already built* —
-   `herdTick` writes `t.bar = turn + wither` and `wither` is 3. A-14 adds the part
-   nobody asked for: a tile refused by `barren` is **not spent** from the
-   settlement's lifetime ploughing budget, so it is spent again when the ground
-   comes back. Grazed ground is lost twice, and the second time invisibly.
-
-### Why it matters, and it matters three ways
-
-**It is the design value stated as a mechanic.** Irrevocability, and a cost that
-arrives from a decision made years earlier by somebody who is no longer listening.
-Nothing else in the build is like this: every other thing a god does is aimed. See
-A-19 and A-30 — both times the harder reading was the one taken.
-
-**It is the answer to A-32 that the magical side does not currently have.**
-Agriculture wins by subtraction: 69 points taken off the rival against Bands' 44,
-because a furrow erases blessing automatically and for free while blessing must be
-walked to and laid down one tile at a time. The refuser's only interdiction is
-`unmake` — three points, one act, in person. **A band that walks into their
-fields by itself is the mirror of the plough**, and it is the only proposal so far
-that gives the magical side a passive denial engine without giving it points.
-
-**And it is the one rule in the build that gets *more* measurable by becoming
-autonomous.** A-24 / A-25 / A-26 measured herds at a flat null and said why: a
-one-ply chooser cannot drive them, will not send one four years across the board,
-and grazes nothing it did not happen to be standing beside. Take the driving away
-and **both seats play herds identically and correctly**, and the harness can
-finally report what the rule is worth. That is the opposite of OP-01's usual
-direction and it is the strongest practical argument for building this.
-
-### Decided, 25 August 2026, by the person whose game it is
-
-Rick, asked what handle the player keeps: **none.** *They become fully autonomous.
-It is a one-way act.* And on the ceiling: *I would also allow them to become too
-large, and have them split autonomously at a given size.* And on the promise below:
-*the fact that they are not audible or hearing is not a problem for me. I think
-they should be.*
-
-So the three questions this entry opened are answered, and answered harder than the
-entry proposed:
-
-| the question | the ruling |
-|---|---|
-| what handle does the player keep? | **none.** Teaching herding is the last thing you ever say to them. |
-| what happens above the Seventy-Seven? | **they get too large, and split.** The ceiling stops being a ceiling and becomes a fuse. |
-| a herd is *always audible* — 1.19's compensation | **struck, on purpose.** A people who walked out of hearing is the rule, not a cost of it. |
-
-**What that settles, and what it costs.**
-
-The `audibleHerd` collision below is not a collision any more; it is the design. A
-band that has grown past the Seventy-Seven has walked out of hearing, and a band
-out of hearing **stops adding courses to stones** under 1.20. That is now a
-sentence rather than a bug: *a course goes on while somebody who can still hear you
-is standing in the stone's reach* — and the people who went after the grass
-stopped being those people. It also means the herd half of `stonesGrow` quietly
-becomes a **young-band** rule: a band feeds a stone only while it is small, only
-early, and only until it starts eating.
-
-The logistic stops being a ceiling and becomes the **pressure that drives the
-split**. It no longer needs to be defeated — absorbing more than the shed rate is
-exactly what makes a band swell toward its fuse, and the numbers in the table below
-become the tuning problem rather than the obstacle. **Set the split threshold from
-the settled-at column, not from two Seventy-Sevens.** At +20 a year a band settles
-near 118, so a fuse at 120 fires and a fuse at 154 never does.
-
-And `canStop` and `canMound` come out with the steering. That has one consequence
-worth saying out loud before it is discovered: **kurgans lose their only means of
-being raised.** OP-12 already suspected that half of 1.19 was decoration; this makes
-the question urgent rather than academic. Either mounds get another way to happen
-— a band that dies of attrition on a dead stone, say, which needs no act and is
-better — or they are cut. They cannot simply be left with no reachable trigger.
-
-**One thing the ruling does not settle, and it is the last open piece.** A band that
-can never be stopped can never become a settlement again, so the *detour* framing in
-`constants.js` 1.19 — *"It is not a door. It is a detour: a herd that stops is an
-ordinary untaught settlement standing at the same fork it left"* — is now false.
-Herding is a door out of the dilemma after all, and the thing that keeps it honest
-has to be that **they score nothing and cannot be recovered**, not that they come
-back. Rewrite that paragraph before building, or the code and the reasoning will
-disagree about what the rule is for. See also OP-25: what a band *ought* to be worth
-is now part of a larger question that is open on purpose.
-
-### What it took away, kept here because the reasoning is the record
-
-`constants.js` 1.19 makes one promise in exchange for a herd scoring nothing:
-**"a herd is always audible. Steering one costs no act, no intervention, and no
-toll, wherever it is. You never lose touch with the people who never stopped
-listening."** Autonomy withdraws exactly that. **It has been struck on purpose**, above.
-Kept here because the promise is real and somebody will find it in
-`constants.js` and think it was overlooked.
-
-The sharper form: **what handle, if any, does the player keep?** Today there are
-three — steering (free), stopping (an act, in person, `canStop`), and raising a
-kurgan (an act, a fifth of the band). If steering goes and the other two stay, this
-is not out of your hands; it is a leash with more slack. If all three go,
-**teaching herding becomes a one-way act** and the mechanic says what Rick says it
-should say. That is the version worth building first, because the softer one can
-always be recovered from it.
-
-### Four collisions, found by reading before proposing
-
-**Absorption fights the Seventy-Seven, and the Seventy-Seven wins.** `audibleHerd`
-is `h.n < kHerd` — literally `n < 77`. **Any absorption at all silences the band
-immediately**, and a silent band stops adding courses to stones under 1.20. Two
-rules from the same batch cancel each other on contact.
-
-**And the logistic eats the absorption, so the split never fires.** A herd above
-its ceiling sheds at up to 28 per cent a year. Starting at 77 and absorbing every
-year, against the numbers the build actually carries:
-
-| taken a year | settles at | reaches two Seventy-Sevens (154) |
-|---|---|---|
-| +5 | ~90 | **never** |
-| +10 | ~101 | **never** |
-| +20 | ~118 | **never** |
-| +40 | ~144 | **never** |
-
-So the split threshold cannot be "two bands' worth" unless absorbed people bypass
-the logistic, or `kHerd` rises, or `audibleHerd` stops reading the ceiling. Pick
-one deliberately. Note also that a herd above its ceiling **evaporates** people,
-while the settled side's equivalent (`exodus`, OP-20) puts them on the road —
-which is the better rule, and the herd never got it.
-
-**Splitting has a precedent and it is not the settlement one.** `split2` sends half
-a settlement to *blessed ground you already hold*, which is exactly what a roving
-band has none of. The nearer precedent is the sentence already in `actions.js` —
-*"They keep the Seventy-Seven. Half go over the rise."* Half, and the new band
-inherits `kill`, is the obvious reading. Exponential unless capped: two becomes
-four becomes eight, and forty years is a great many doublings.
-
-**Movement is already written.** `driveHerds` in `ai.js` is precisely *walk at the
-nearest reckoned tile there is a road to*, and `herdStep` already honours the rule
-that the other power's blessing is closed country to them. So part 1 is mostly
-**deleting the player's steering and pointing both seats at the function that
-exists**, not writing pathfinding. Two things it does not answer: what a band does
-when there is no adversarial farmland anywhere on the board (today it stops if
-`canStop` allows and stands in the open if it does not), and whether *rampage*
-means anything more than the one tile a year `herdTick` already converts. If it
-means more — a ring, or a tile plus a bite of the settlement beside it — say
-so, because the existing comment refuses a ring by name: *"A ring would be a plague
-of locusts and this is a people."*
-
-### How it would be settled
-
-Behind its own flag, in one sitting, because every piece already has a home:
-
-1. `driveHerds` moves out of `ai.js` into `tick.js` and runs for both seats.
-   Delete the steering target from `targets()` and the button from the row.
-2. Absorption: one loop in `herdTick`, adjacency only — `herdBlocked` already
-   refuses to let a band stand *on* a settlement, so adjacency is the only reading
-   available and it is the right one.
-3. Resolve the ceiling question first. Nothing else can be measured until it is.
-4. Split in `herdTick`, half and half, with a hard cap on bands per power.
-
-Then the measurement the null of A-24 / A-25 / A-26 could never take: **Bands and
-Haunt against Cities, with and without the flag**, plus the rival's farmland count
-at year forty, the mean band count, and the mean life of a band. If the settled
-side's farmland does not fall, the rule does nothing. If the board is eleven bands
-by year thirty, the cap is wrong rather than the rule.
-
-**And then a played game, because the whole proposal is about how it feels to have
-set something loose.** That is OP-21's question in miniature, and no number answers
-it.
 
 ## OP-07 · medium · Map generation is unexamined
 

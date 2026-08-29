@@ -1,63 +1,30 @@
-OP-24: the herds leave your hand
+A-33, and the third leg does not pay for itself
 
-1.24 `roam`, built behind its own flag, on. The three handles come off —
-steering, stopping, and raising a mound — and `roamTick` plays herds for both
-seats in the tick. Rick's ruling of 26/29 August, harder than the entry proposed
-at every point where there was a softer reading.
+OP-24 is settled and archived. A-33 carries the eleven rulings, the two things
+the code said that the register did not, and the measurement — 900 seeds, the
+322 in which a band ever walked, both arms on the same set:
 
-A year of theirs, and the order is the argument. They re-aim every year, because
-they are opportunists and nothing holds them to last year's road. They walk at
-the nearest ploughed ground of the adversary or a silent stone of their own god,
-ranked together — a band crossing a valley to eat a furrow buries a shrine on the
-way without being told to, and OP-16 says 92% of stones end under exactly that
-ground. Failing both, the open ground beside a town of theirs. They graze the one
-tile they arrive on, never scaled by how many of them there are: splitting has to
-be the escalation and not a relief to the man being eaten. They raise the mound
-free and automatic, no act, no fifth, no year, and no field needed under it —
-*they build their monument in their spare time with the materials at hand*. Then
-the grass has its say, and only then are the absorbed added.
+                  win        score      their farmland   their big towns
+  steered (1.19)  54.3% ±2.8  82.0:76.1      13.5             5.0
+  roaming (1.24)  48.4% ±2.8  73.2:74.1      13.8             5.3
 
-That last ordering is the ceiling question OP-24 could not answer. The logistic
-pulls a band back toward the Seventy-Seven; absorption is the only thing that
-pushes it past. So a band eating fields stays a band and a band gnawing at a city
-swells — big towns breed what eats them.
+Autonomy costs the side that uses it six points of win rate and nine of score,
+and denies the settled side nothing. Their farmland does not fall. Their big
+towns do not fall. The passive denial engine A-32 said the magical side did not
+have, it still does not have — and that absence is the finding, because it was
+the whole argument for building the rule.
 
-`absCap` was measured before it was believed. Without it a band beside a city of
-a thousand takes sixty a year, blows the fuse in two, splits to `bands` and then
-balloons: 4.1 fuse-crossings a game of which 3.7 were already capped, and a band
-of 302 on the board. Fifteen is off the curve, not off feel — the logistic sheds
-n·0.32·(n/77−1), so +12 levels at 105, +15 at 110, +20 at 118, which is OP-24's
-table arrived at from the other end.
+The direction of the cost is 1.5 sigma and not proven. The absence of the denial
+is not a difference of means and does not need to be.
 
-And they end one way. Boxed in — nothing of theirs in reach and no road to any of
-it — they put the roofs back up **taught to till**. 1.19 called stopping a detour
-and that is now false: herding is a door, and it opens onto the plough. It is
-still yours, a wonder goes for it through `lostCount`, and nothing was gained.
-The two paragraphs in `constants.js` that promised otherwise are corrected in
-place rather than deleted, because the promises were real.
+So OP-26 opens, as a rule question and not a scoring one. Two candidate causes,
+both testable in an afternoon and both written down rather than guessed at: a
+band that settles comes home taught and costs a wonder, where stopping one used
+to be three free points; and one tile a year against a side that re-ploughs may
+simply be competing with the ratchet and losing. The order of the three
+measurements is in the entry, and the last of them is a played game.
 
-Checks: 11,973, all passing. Both old fingerprints exact — and *that is the
-finding*, because `bands` and `cities` never teach herding, so neither array
-could see this rule. A third fingerprint on `storm` v `cities` goes in beside
-them, with the steered game frozen underneath it.
-
-Measured, 200 paired seeds, 79 of them games where a band ever walked:
-
-                     win     score      their farmland   their big towns
-  steered           50.6%   79.9:78.3        13.7              5.0
-  roaming           44.3%   74.2:74.2        13.3              5.2
-
-Null, or a little worse for the side that uses it, and well inside the interval
-at 79 games. Per game the rule does run: 1.4 bands, 13.5 band-years, 6.3 tiles
-grazed, 112 people taken, 0.3 splits, 0.6 settlings, 0.4 mounds. What it does not
-do is show up in the score, and the likeliest reason is written down rather than
-tuned away — a band that settles comes back taught and costs a wonder, where
-stopping one used to be three free points. Gameplay first, scoring after: OP-25.
-
-Kurgans still almost never happen, and now for a different reason. The trigger
-works; `storm` builds 0.73 stones a game and 0.27 of them go silent, so there is
-nothing to trigger it on. That is a chooser artifact, not a rule.
-
-Two things left unruled and left alone rather than decided quietly: grazing is
-still owner-blind, so a band crossing its own side's fields eats them; and the
-cap of four binds in the games that matter.
+Two things the entry is explicit that nobody may do: change scoring to fix it
+(OP-25, and the ninth rule of the method), and re-weight `storm` to make the rule
+look better — every number here comes from one chooser with `herd: 1`, which is
+OP-01's warning stated as a measurement.
