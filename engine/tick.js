@@ -475,6 +475,9 @@ function worldTick(snap) {
   // fields, which is what a siege *is*, and it hands the defender the right
   // counter: break the ring and the ploughing resumes the same year.
   if (FG.R2.encircle && t.set.ring) return;
+  // 1.25. A town moving earth does not also go out to the fields. One year, and
+  // it is the only cost of a cairn paid in tempo rather than in future.
+  if (FG.R2.cairn && t.set.built === FG.G.turn) return;
   if (t.set.spent >= FG.TUNE.budget.v) {
    if (!t.set.done) { t.set.done = true;
     if (t.set.own === 0) say("They have taken in as much ground as they ever will.", ""); }
@@ -520,6 +523,31 @@ function worldTick(snap) {
   if (NB[k].some(x => T(x).st === "reck")) { if (t.own === 0) lost++; t.st = "wild"; t.own = null; }
  });
  if (lost) say(lost + " tile" + (lost > 1 ? "s of your blessing go" : " of your blessing goes") + " out. It has been surveyed.", "bad");
+
+ // 1.25. **A cairn falls the moment any tile of its footprint stops being
+ // reckoned.** Run here, after the ratchet and after everything else that writes
+ // to the ground this year, so grazing, a Wither and a Drown all reach it by the
+ // same door and none of them had to be told about monuments.
+ //
+ // This is the whole of the exposure, and it is the same sentence as the whole
+ // of the height: a footprint is what a course *is*, so the tallest thing in the
+ // valley is also the thing with the most places to break it. Nothing was added
+ // to make bigger riskier. It could not have been otherwise.
+ //
+ // The record does not fall with it. The tiles are released — the town may plough
+ // them again, though it has already been charged for them and that is not given
+ // back — and the ground the earth was piled on goes back to being a field.
+ if (FG.R2.cairn) FG.G.T.forEach((t, k) => {
+  if (!t.mnd) return;
+  const gone = t.mnd.tiles.filter(x => T(x).st !== "reck");
+  if (!gone.length) return;
+  const own = t.mnd.own, h = t.mnd.h;
+  t.mnd.tiles.forEach(x => { if (T(x).cmt === k) T(x).cmt = null; });
+  t.mnd = null;
+  say(own === 0
+   ? "The ground went out from under it and the earth came down after. " + h + " course" + (h > 1 ? "s" : "") + " of it, and it is a field again."
+   : "One of theirs has come down. The fields took it back.", own === 0 ? "bad" : "good");
+ });
 
  const q = FG.G.stones[0].filter(k => !FG.stoneWorks(k, 0)).length;   // 1.20
  if (q > FG.G.warned) { FG.G.warned = q; say("A stone stands in ground that no longer answers. It is only a stone now.", "bad"); }

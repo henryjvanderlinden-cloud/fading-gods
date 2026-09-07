@@ -294,8 +294,14 @@ function carryCap(t) {
 // are yours now, and they are loud.
 // 1.20. `workingStrict`, not `working` — the courses a stone has gained are the
 // one thing that may not reach this line. See the note beside the two functions.
+// 1.25. And the cairn, which subtracts exactly as a working stone does and for
+// exactly one power: whoever holds the sole tallest monument standing. See
+// `soleTallest` — the ties clause is what stops this becoming a refund on
+// teaching rather than a contest over one wonder.
 const lostCount = who =>
- Math.max(0, (FG.R2.taughtLoss ? taughtCount(who) : bigCount(who)) - workingStrict(who).length);
+ Math.max(0, (FG.R2.taughtLoss ? taughtCount(who) : bigCount(who))
+             - workingStrict(who).length
+             - (soleTallest(who) ? 1 : 0));
 function divineLeft(who) { return DIVINE.slice(Math.min(lostCount(who), DIVINE.length)); }
 
 // 1.18. What opens a work.
@@ -338,6 +344,11 @@ function civicOpen(who) {
  if (cs >= g[0]) o.push("clear");
  if (cs >= g[1]) o.push("colony");
  if (cs >= g[2]) o.push("levy");
+ // 1.25. On the first rung, with clearance. A cairn needs a settlement that has
+ // been taught to till before it can be ordered at all, so a gate of its own
+ // would be a gate on something already true — and the chip row gains a fourth
+ // work rather than a fourth ladder.
+ if (FG.R2.cairn && cs >= g[0]) o.push("cairn");
  return o;
 }
 
@@ -658,6 +669,110 @@ function herdWander(h) {
 // should be cut.
 const moundCount = who => FG.G.T.filter(t => t.kur === who).length;
 
+// --- 1.25 cairns --------------------------------------------------------
+// A cairn lives on the tile it stands on, as `{own, h, tiles}` — the power that
+// raised it, its height in courses, and the footprint it committed. The same
+// choice `courses` made for stones and for the same reason: the tile is the
+// monument's identity, state stays JSON-serialisable, and there is no parallel
+// array to fall out of step with the board.
+//
+// `tiles` always contains the cairn's own tile, so height and footprint are one
+// number and not two. Height 1 is a mound on a single field.
+const cairnAt = k => T(k).mnd || null;
+const cairns = who => FG.G.T.map((t, k) => ({t, k}))
+ .filter(o => o.t.mnd && o.t.mnd.own === who).map(o => ({k: o.k, h: o.t.mnd.h}));
+
+// The tallest cairn standing, whoever holds it. Zero when there are none.
+const tallestCairn = () => FG.G.T.reduce((m, t) => t.mnd && t.mnd.h > m ? t.mnd.h : m, 0);
+
+// 1.25, and the clause the whole rule turns on. **Only the sole tallest cairn
+// standing holds a wonder back, and ties hold nothing.**
+//
+// Without the tie clause this is a tax schedule wearing a race's clothes: every
+// cairn would subtract one, a tall cairn would buy exactly what a short one
+// bought, and outbidding would take nothing from the other power — you would
+// simply have purchased the same brake in a larger package. Worse, it would
+// close the loop teaching is supposed to open: teach, lose a wonder, raise a
+// cairn on the fields that teaching bought, get the wonder back, repeat. One
+// contested brake in the valley is what stops the settled side financing its own
+// divine cost. **[load-bearing]**
+//
+// Ties holding nothing also means the *first* answer to a cairn is worth making:
+// matching the leader does not merely fail to win it, it takes theirs away.
+function soleTallest(who) {
+ if (!FG.R2.cairn) return false;
+ const h = tallestCairn();
+ if (h <= 0) return false;
+ let mine = 0, theirs = 0;
+ FG.G.T.forEach(t => { if (t.mnd && t.mnd.h === h) (t.mnd.own === who ? mine++ : theirs++); });
+ return mine === 1 && theirs === 0;
+}
+
+// What the next cairn must be. **The record, not the tallest standing** — it
+// only ever rises, and levelling every cairn on the board does not make the next
+// one cheap again. Granite has memory: once somebody has moved that much of it,
+// nothing smaller reads as a claim any more.
+//
+// Capped at `cairnMax`, so the escalation ends somewhere a settlement can still
+// reach rather than in an arithmetic that no 84-tile board could satisfy.
+const cairnNeed = () => Math.min((FG.G.record || 0) + 1, FG.R2TUNE.cairnMax);
+
+// May this tile be part of a footprint? Reckoned ground of yours, and nothing
+// else standing on it. Barren ground is refused for the same reason Clearance
+// refuses it: ground that has just come off the plough is not ground you are
+// working, and a monument may not buy its way past that.
+function cairnTile(k, who) {
+ const t = T(k);
+ if (impassable(t) || t.set) return false;
+ if (t.st !== "reck" || t.own !== who) return false;
+ if (t.mnd || t.cmt !== undefined && t.cmt !== null) return false;
+ if (t.kur !== undefined && t.kur !== null) return false;
+ if (FG.G.stones[0].includes(k) || FG.G.stones[1].includes(k)) return false;
+ if (barren(t)) return false;
+ return true;
+}
+
+// The footprint a cairn at `k` would take, or null if the country cannot carry
+// one that big. A breadth-first walk outward from the cairn tile, taking
+// eligible ground until it has `need` of it, and never leaving `cairnRad` of the
+// settlement paying for it.
+//
+// Connected by construction, deterministic by construction — the neighbour table
+// is a fixed order, so the same board yields the same footprint every time and
+// the fingerprints in sim/smoke.js stay meaningful.
+function cairnFoot(src, k, who, need) {
+ if (!cairnTile(k, who)) return null;
+ const near = new Set(ring(src, FG.R2TUNE.cairnRad));
+ const out = [k], seen = new Set([k]), q = [k];
+ while (q.length && out.length < need) {
+  const x = q.shift();
+  for (const nk of NB[x]) {
+   if (out.length >= need) break;
+   if (seen.has(nk)) continue;
+   seen.add(nk);
+   if (!near.has(nk) || !cairnTile(nk, who)) continue;
+   out.push(nk); q.push(nk);
+  }
+ }
+ return out.length === need ? out : null;
+}
+
+// Which settlements may pay for one. Taught to till — the monument is downstream
+// of the central sacrifice and there is no other way to reach it — not forbidden,
+// past the same 150 the other works ask of the town that orders them, and with
+// enough of its thirty-tile life left to spend the footprint out of.
+function cairnSource(k, who) {
+ let best = null, bp = -1;
+ settlements(who).forEach(o => {
+  const s = o.t.set;
+  if (!s.taught || s.tabu || s.pop < 150) return;
+  if (s.spent + cairnNeed() > FG.TUNE.budget.v) return;
+  if (!ring(o.k, FG.R2TUNE.cairnRad).includes(k)) return;
+  if (s.pop > bp) { best = o; bp = s.pop; }
+ });
+ return best;
+}
+
 // 1.9 / OP-20. Who, if anyone, has closed this place in.
 //
 // A settlement is ringed when every neighbour it has that is not rock or water
@@ -792,12 +907,25 @@ function targets(id, who) {
   if (id === "levy" && o.t.set.pop >= 300)
    ring(o.k, 4).forEach(x => { const q = T(x);
     if (q.set && q.set.own !== who && walkStep(o.k, x) !== undefined) out.push(x); });
+  // 1.25. Where a cairn could stand: reckoned ground of this settlement's own,
+  // that can carry a footprint of the required height without leaving its ring.
+  // The settlement's own tests are in `cairnSource` and are asked again there,
+  // because `targets()` and the thing that actually builds must not have two
+  // copies of one rule between them.
+  if (id === "cairn" && FG.R2.cairn && o.t.set.taught && !o.t.set.tabu
+      && o.t.set.pop >= 150 && o.t.set.spent + cairnNeed() <= FG.TUNE.budget.v)
+   ring(o.k, FG.R2TUNE.cairnRad).forEach(x => {
+    if (cairnFoot(o.k, x, who, cairnNeed())) out.push(x); });
  });
  return [...new Set(out)];
 }
 
 // Which of your settlements pays for a work aimed at k — the largest in range.
 function nearestSource(id, k, who) {
+ // 1.25. A cairn's payer has tests of its own — taught, not forbidden, and with
+ // enough of its thirty tiles left to spend the footprint out of — so it asks
+ // its own function rather than adding three clauses to this one.
+ if (id === "cairn") return cairnSource(k, who);
  let best = null, bp = -1;
  settlements(who).forEach(o => {
   const min = id === "levy" ? 300 : id === "colony" ? 200 : 150;
@@ -831,6 +959,8 @@ Object.assign(FG, {cost, reach, walkStep, pathWithin, region, stoneRange, workin
  manifestMp, wouldSeal,
  herdBlocked, herdStep, herdSeek, herdAim, herdWander, herdsOf, herdAt, ploughed, barren,
  canStop, canMound, buryable, moundCount,
+ // 1.25
+ cairnAt, cairns, tallestCairn, soleTallest, cairnNeed, cairnTile, cairnFoot, cairnSource,
  // 1.20 / 1.21 / 1.22 / 1.23
  STONEWORK, courses, stoneNeed, stoneWorks, workingStrict, deadStones, orderReach,
  audible, audibleHerd, foundPop, spent});

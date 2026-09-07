@@ -294,6 +294,33 @@ function doIntervene(id, k, who) {
     if (!impassable(q) && !q.set && !FG.barren(q) && !(q.st === "reck" && q.own === who) && n < 3) { q.st = "reck"; q.own = who; n++; }});
    say(me ? "They fell the wood and put the plough through it — " + n + " tiles in one season." : "They clear a stretch of wood.", me ? "civ" : "riv");
   }
+  // 1.25 / OP-25. The cairn. The one work that takes no people and no ground —
+  // what it spends is the ground this town will now never break.
+  if (id === "cairn") {
+   if (!FG.R2.cairn) return false;
+   const need = FG.cairnNeed();
+   const foot = FG.cairnFoot(src.k, k, who, need);
+   if (!foot) return false;
+   // The footprint is charged to the settlement's thirty-tile life. The tiles
+   // stay reckoned and go on scoring for whoever holds them: nothing is taken
+   // off the board, and that is the point. What is gone is the future — a town
+   // that spends six of its thirty on a monument has a fifth less country it
+   // will ever plough, and it can see exactly which fields it has given up,
+   // because they are the ones with the earth piled on them. OP-28.
+   src.t.set.spent += need;
+   foot.forEach(x => { T(x).cmt = k; });
+   T(k).mnd = {own: who, h: need, tiles: foot.slice()};
+   // The record rises and never falls again. See state.js.
+   FG.G.record = Math.max(FG.G.record || 0, need);
+   // They do not go out to the fields in the year they are moving earth.
+   src.t.set.built = FG.G.turn;
+   const sole = FG.soleTallest(who);
+   say(me ? "They pile the earth over their own fields, " + need + " course" + (need > 1 ? "s" : "") + " of it, and it is taller than anything standing in the valley. "
+            + (sole ? "You are in it, and they cannot hear you say so."
+                    : "It is not the only one that high, and so it holds nothing.")
+          : "They have raised a cairn out of their own fields, " + need + " course" + (need > 1 ? "s" : "") + " high.",
+       me ? "omen" : "riv");
+  }
   if (id === "colony") {
    src.t.set.pop *= 0.65;
    // A colony is a work of the settled, and is born tilling. OP-19.

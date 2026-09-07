@@ -445,6 +445,69 @@ FG.R2 = {
  // one it replaces: walling a band in is now a thing you do to somebody, at a
  // price in acts, rather than a thing that happens to them for being early.
  roam:       true,   // 1.24  and then they stop listening
+
+ // 1.25 / OP-25. **The cairn.** A settlement taught to till may spend a
+ // measured piece of its own agricultural future to raise a monument, and only
+ // the tallest monument in the valley holds anything back.
+ //
+ // Raised from the Breton megaliths — Carnac, Barnenez, Gavrinis — and from the
+ // reading of them as an *architecture of anxiety*: monument building explodes
+ // exactly where foragers and farmers collide over finite land, because a
+ // wooden marker rots in a generation and fifty tonnes of granite is a permanent
+ // legal claim. The inversion this rule takes from that reading is the whole of
+ // it: **the giant stones belong to the settled side.** Every monument in this
+ // game so far has been the refusers' — raised on blessed ground, killed by
+ // farmland. This one is raised by people who can no longer hear you, out of the
+ // country that stopped them hearing you, and it is the only thing in the game
+ // built for you by anyone who has been shown the plough.
+ //
+ // **It answers OP-25 and it is the only rule here that tries to.** The board is
+ // 84 walkable tiles and its total point value peaks at year twelve and falls
+ // for the remaining twenty-seven, so the late game is interdiction by
+ // arithmetic: there is nothing left to make. A cairn is something to make that
+ // is not more ground. It is not a way to hold more of the valley — it is a way
+ // to spend the valley on being remembered, which is the one sentence with the
+ // arithmetic finally on its side.
+ //
+ // **What it costs is future furrows, and the cost is spatial.** Raising one
+ // commits a connected footprint of the settlement's own reckoned ground and
+ // charges those tiles to the settlement's thirty-tile lifetime budget. The
+ // tiles stay reckoned and go on scoring; what is spent is what that settlement
+ // will now never plough. OP-28 is the reason the footprint is tiles on the
+ // board rather than a number decremented out of sight: an invisible allowance
+ // is a rule whose consequence arrives in year thirty-five from a decision made
+ // in year twenty, and this project already calls that weather.
+ //
+ // **What it buys is one wonder, and only for the tallest.** `lostCount`
+ // subtracts one for the sole tallest cairn standing, exactly as it subtracts
+ // for a working stone. Ties hold nothing back. This is the load-bearing half:
+ // if every cairn held a wonder, building bigger would buy the same thing in a
+ // larger package — a tax schedule rather than a race, and worse, a financing
+ // loop in which teaching pays for the means to undo teaching's own cost. One
+ // contested brake in the valley closes both. **[load-bearing]**
+ //
+ // **Escalation is a permanent record, not a standing height.** `FG.G.record` is
+ // the tallest cairn ever completed by anybody and never falls — granite has
+ // memory. The next one must exceed it. So levelling the board does not reset
+ // the price, which is what makes this Kermario rather than a bidding war: once
+ // Le Ménec existed, Kermario had to be bigger, and each generation could claim
+ // legitimacy only by moving more stone than the last.
+ //
+ // **Bigger is more exposed, and that is the same sentence as bigger.** A cairn
+ // falls the moment any tile of its footprint stops being reckoned. Height is
+ // footprint, so every course is another tile the other power can graze or
+ // Wither, and the tallest thing in the valley is the most attackable thing in
+ // it. Nothing had to be written for the counterplay: the verbs are the ones the
+ // game already has.
+ //
+ // **And it survives the ground going over.** A cairn holds its wonder for the
+ // power that raised it whatever happens to who owns the country round it —
+ // `lostCount` reads `mnd.own` and not the settlement. `concept/lore.md` asks
+ // what is still being carried by people who are no longer yours; this is the
+ // first object in the build that answers. Losing the province and staying
+ // audible in it is now a thing that can be chosen, and choosing it deliberately
+ // is a line nobody has played yet.
+ cairn:      true,   // 1.25  the settled raise a monument, and pay in furrows
 };
 
 FG.R2all = function (on) {
@@ -487,7 +550,7 @@ FG.R2built = function (on) {
 FG.R2BUILT = ["logistic", "teaching", "taughtLoss", "audible77", "fade", "exitLane",
               "dreamTeach", "dreamWorks", "taughtGates",
               "split2", "unmake", "encircle", "barren3", "herds",
-              "stonesGrow", "deadOrders", "wildFolk", "zeroSpent", "roam"];
+              "stonesGrow", "deadOrders", "wildFolk", "zeroSpent", "roam", "cairn"];
 
 // The caps in FG.R2. Separate from FG.TUNE because TUNE is the slider panel and
 // these are not sliders yet — if they earn their way into the build they move.
@@ -553,9 +616,21 @@ FG.R2TUNE = {
  // double is a resource to be farmed.
  foundLow:  20,   // a founding with nothing blessed round it
  foundHigh: 40,   // a founding in the middle of a blessed country
- foundRing: 18    // tiles in a full second ring — rock, water and the map edge
+ foundRing: 18,   // tiles in a full second ring — rock, water and the map edge
                   // are counted here and never in the numerator, which is the
                   // whole of the coastal discount
+ // 1.25. How far a cairn's footprint may lie from the settlement that pays for
+ // it. Two, the same ring a settlement's own fields reach into, so a monument
+ // stands in country that place actually worked — and so the footprint cannot be
+ // laid across the map to fence off ground the settlement never had.
+ cairnRad:  2,
+ // The most courses a cairn may ever be. The record only ever rises, so without
+ // a ceiling the rule ends in a requirement no settlement on an 84-tile board
+ // could ever meet, and the escalation would stop by exhaustion rather than by
+ // anybody deciding anything. Six is chosen against the budget: a settlement has
+ // thirty tiles for its whole life and six of them is a fifth of everything it
+ // will ever do, which is about as far as a sacrifice can go and still be one.
+ cairnMax:  6
 };
 
 // A-17, first candidate fix — rejected. Ground both powers take in the same
@@ -639,7 +714,13 @@ FG.TEACH = [
 FG.CIVIC = [
  {id:"clear",n:"Clearance",d:"Fell and plough three tiles at once. Costs a tenth of the town."},
  {id:"colony",n:"Send a colony",d:"Found a settlement three tiles out, on any ground. Costs a third."},
- {id:"levy",n:"Raise a levy",d:"An army forms and marches on a hostile town. Costs near half."}];
+ {id:"levy",n:"Raise a levy",d:"An army forms and marches on a hostile town. Costs near half."},
+ // 1.25. Fourth and last, and it opens on the same rung as clearance because the
+ // settlement doing it has to have been taught to till anyway — a second gate
+ // would be a gate on a condition that is already true. It takes no people: what
+ // a cairn costs is ground the town will now never break, which is a cost the
+ // other three do not have and the reason this one is not simply a fourth work.
+ {id:"cairn",n:"Raise a cairn",d:"They pile the earth over their own fields. It must stand higher than any raised before it, and only the highest in the valley holds a wonder back."}];
 
 // --- chronicle fragments ------------------------------------------------
 FG.DROWN = ["The ground opened and the water came up through it.",

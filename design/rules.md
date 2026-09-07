@@ -1052,3 +1052,135 @@ longer spending itself to nothing, and is the whole of the change.
 **Third time.** OP-01 has now been the largest term in a measurement three times:
 the teaching weight worth 35 points, Split never having been legal, and this. It
 carries a fourth entry.
+
+---
+
+## 19. The cairn — a monument, and what it costs to keep one
+
+**Built 31 August 2026 as `FG.R2.cairn`, 1.25, and it ships on.** The first rule
+in this project to come from outside it: a reading of the Breton megaliths —
+Carnac, Barnenez, Gavrinis, Er Lannic — as an *architecture of anxiety*, in which
+monument building explodes exactly where foragers and farmers collide over finite
+land, because a wooden marker rots and fifty tonnes of granite is a permanent
+legal claim.
+
+**The inversion is the whole of why it is here.** Every monument in this game has
+belonged to the refusers: raised on blessed ground, needing eight connected
+blessed tiles, killed by farmland 92% of the time. In Brittany the giant stones
+belong to the **settled** side, and the impulse is scaled up precisely when
+farming makes land ownable. So this one is raised by people who can no longer
+hear you, out of the country that stopped them hearing you.
+
+### The rule
+
+A settlement **taught to till**, not forbidden, past 150, may raise a cairn on
+its own reckoned ground within two tiles.
+
+- **Height is footprint.** A cairn of *h* courses commits *h* connected reckoned
+  tiles of that settlement's own, its own tile included.
+- **The price floor is a record, not a height.** `FG.G.record` is the tallest
+  cairn ever completed by anybody in the valley. It never falls. The next one
+  must exceed it, capped at `cairnMax` = 6. Levelling every cairn on the board
+  does not make the next one cheap again — **granite has memory**, and that is
+  the difference between Kermario and a bidding war.
+- **What it costs is future furrows.** The footprint is charged to the
+  settlement's thirty-tile lifetime budget, and the town does not go out to the
+  fields the year it is moving earth. The tiles stay reckoned and go on scoring.
+  Nothing is taken off the board; what is gone is what that place will now never
+  plough.
+- **What it buys is one wonder, for the sole tallest only.** `lostCount`
+  subtracts one for the uniquely tallest cairn standing, exactly as it subtracts
+  for a working stone. **Ties hold nothing.** **[load-bearing]**
+- **It falls the moment any tile of its footprint stops being reckoned.** Graze
+  one, Wither one, Drown one. The record does not fall with it.
+- **It survives the ground going over.** `lostCount` reads `mnd.own`, not the
+  settlement, so a cairn holds its wonder for whoever raised it however the
+  country round it changes hands.
+
+### Why ties hold nothing, which is the clause the rule turns on
+
+Without it, every cairn subtracts one and a seven-course cairn buys exactly what
+a one-course cairn buys. Escalation would then be a tax schedule — *the same
+action costs more because somebody previously performed it* — and outbidding
+would take nothing from anybody. Worse, it would close a loop the game must not
+have: teach, lose a wonder, raise a cairn on the fields the teaching bought, get
+the wonder back, repeat, until the settled side is financing its own divine cost.
+**One contested brake in the valley closes both.** SOL raised this against the
+first draft and it was the objection that reshaped the rule.
+
+### Why the footprint is tiles and not a number
+
+The obvious version spends the reckoning budget invisibly. It is not formally a
+clock, so it clears A-10 — but its feedback behaves like weather: the player acts
+in year twenty and discovers in year thirty-five which edge tile the missing
+allowance would have bought. **OP-28**, in its own author's words. So the courses
+are ground, marked on the board and drawn with a hatch across the furrows, and
+what the player gives up is a direction of growth they can see.
+
+That decision does the exposure for free. Height *is* footprint, so the tallest
+thing in the valley is also the thing with the most places to break it, and
+nothing had to be added to make bigger riskier.
+
+### What it is for
+
+**OP-25, and it is the only rule so far that has tried.** The board peaks at year
+twelve or thirteen and falls for the remaining twenty-seven years because 84
+walkable tiles is a hard ceiling — so the late game is interdiction by
+arithmetic. A cairn is something to *make* that is not more ground. It is the
+register's option (e), the pie made growable, arriving as a thing to build rather
+than as a scoring change: no new category, population still scores nothing, and
+the committed tiles keep the value they always had.
+
+### Measured, and read the diagnostic rather than the table
+
+Five doctrines against Cities, 80 games a cell, the build's own turn order.
+
+| | cities | mixed | haunt | bands | storm |
+|---|---|---|---|---|---|
+| the game as it ships | 36% | 39% | 51% | 34% | 69% |
+| less 1.25 | 36% | 36% | 53% | 33% | 68% |
+
+**Every difference is inside the noise, and that is the expected result.** It is
+the fourth rule in this project to measure at nothing for the same reason —
+`taughtLoss`, `audible77`, `stonesGrow` and `zeroSpent` all did, and kurgans were
+raised zero times in three hundred games. A one-ply greedy chooser cannot weigh a
+settlement's future against a wonder held only while nobody outbuilds it.
+
+**The diagnostic is the finding and it is blunt.** Over 400 games: a cairn is
+raised at all in **43%** of them, the mean record ends at **1.11**, and **0.91**
+cairns are standing at year forty. So the AI raises about one cairn, one course
+high, and **the escalation ladder is never climbed.** The record rises above one
+almost never, which means the entire mechanism this rule exists for — outbidding,
+the contested brake, the cold war of stone — is exercised only by the constructed
+boards in `sim/smoke.js` and by nobody at all in play.
+
+That is not evidence the rule is weak. It is evidence the instrument is wrong,
+and the instrument has been wrong for this class of rule five times running.
+**OP-21.** One played game, two people, and the question to watch is the one
+Rick raised when the idea was still a spitball: whether anybody, seeing a levy
+four tiles out, decides to spend a province on being remembered in it.
+
+### What is deliberately unbuilt
+
+- **Cannibalism.** Taking the top course of a rival's cairn to legitimate your
+  own is the historically exact verb — Gavrinis, the Table des Marchands and Er
+  Grah are three pieces of one shattered menhir — and SOL's six unanswered
+  questions about resolution order are all real. It also has a structural
+  problem nobody has solved: transferring a course makes *challenging* cheaper
+  than *leading*, permanently, so nobody wants to build first. The fix on the
+  table is presence — cannibalism is unmaking, and §14 says unmaking happens in
+  person — which would make deposing cheap in granite and expensive in what is
+  left of you. Not built. Argue it first.
+- **Big Men versus Barnenez.** The southern tumuli and the northern confederated
+  cairn are two settled theologies and the dropdown has one. Content, not beam.
+- **Potlatch, and soil exhaustion.** Both excellent history. Neither earns its
+  complexity against OP-27 today.
+
+### The cost to OP-27, stated plainly
+
+This adds a fourth work, one flag, one new piece of state on the tile (`mnd`,
+`cmt`) and one on the game (`record`). It cuts nothing. The kurgan was the
+obvious thing to cut for it — SOL argued for that and argued well — and it has
+not been cut, because 1.24 made kurgans free and automatic and they are now
+something a herd does rather than a rule the player has to hold in mind. If the
+first played game finds two monuments one too many, the kurgan is the one to go.

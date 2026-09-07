@@ -286,7 +286,18 @@ function aiPlay(who) {
 
  // works first, strongest first
  const cv = civicOpen(who);
- for (const id of ["levy", "colony", "clear"]) {
+ // 1.25. **`cairn` is last on purpose, and this is a change to the chooser
+ // recorded rather than slipped in.** A cairn is the class of decision OP-01
+ // says this AI cannot make: it spends a settlement's future for a wonder held
+ // only while nobody outbuilds you, and a one-ply greedy chooser weighs neither
+ // half. Put it first and the rival would spend its thirty-tile life on
+ // monuments it cannot value; leave it out and the rule never fires in the
+ // harness at all and only the constructed boards in sim/smoke.js ever see it.
+ // Last is the honest compromise — it builds one when it has a work to spend and
+ // nothing better to spend it on — and the resulting numbers should be read as
+ // *the chooser did not object*, never as *the rule measures at nothing*. OP-21
+ // is the instrument for this, as it was for herds and for kurgans before it.
+ for (const id of ["levy", "colony", "clear", "cairn"]) {
   if (!cv.includes(id)) continue;
   let tg = free(id, targets(id, who), who);
   if (id === "clear") tg = notUnderfoot(tg, who);   // A-31

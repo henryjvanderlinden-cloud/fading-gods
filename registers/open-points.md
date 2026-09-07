@@ -257,6 +257,33 @@ exist.
   total of the blessing you have erased turns the quietest thing in the design into
   a progress bar. A chronicle line is a thing that happened; a number is a score.
 
+### Answered in part, 31 August 2026 — direction (e), built as `FG.R2.cairn`
+
+**A settlement taught to till may spend a piece of its own agricultural future on
+a monument, and only the tallest monument in the valley holds a wonder back.**
+`design/rules.md` §19. It is direction **(e)**, *make the pie growable*, and it
+arrives as a thing to build rather than as a scoring change: no new category,
+population still scores nothing, the committed tiles keep the value they had.
+
+It came from outside the project — a reading of the Breton megaliths as an
+*architecture of anxiety* — and its load-bearing borrowing is an inversion of
+this game: there, the giant stones belong to the **settled** side, raised by
+people who can no longer hear the thing they are raising them to.
+
+**It does not close this entry.** The arithmetic above is untouched: the board
+still peaks at year twelve and still falls. What has changed is that some of the
+fall is now a decision rather than an erosion — a cairn is twenty-seven late
+years' worth of something to make. Whether that is *enough* to make the late game
+constructive, or whether it is one act repeated, is exactly what this entry was
+raised to decide and it still needs deciding.
+
+**And the harness cannot say.** Win rates move inside the noise for all five
+doctrines, which is the fifth time this class of rule has measured at nothing.
+The diagnostic is the real result: over 400 games a cairn is raised in 43% of
+them, the mean record ends at **1.11**, and **the escalation ladder is never
+climbed once**. The contest the rule exists for is unexercised outside
+`sim/smoke.js`. OP-21, again, and this is now the largest thing waiting on it.
+
 ### How it would be settled
 
 **Build the re-scorer first, because it is nearly free.** `sim/rescore.js` reading

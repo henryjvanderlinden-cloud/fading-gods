@@ -47,6 +47,12 @@ FG.createGame = function (opts) {
        // puts anything in it — the same discipline `taught` and `kill` follow on
        // a settlement. Each is {at, to, n, own, kill, held}.
        herds: [], claims: {},
+       // 1.25. The tallest cairn ever completed in this valley, by anybody. It
+       // only ever rises — knocking every monument down does not make the next
+       // one cheap again, which is the difference between an escalation and a
+       // bidding war. Present whatever FG.R2.cairn says, so state stays one
+       // shape and the flag decides only whether anything ever writes to it.
+       record: 0,
        seed: (opts.seed === undefined ? null : opts.seed),
        pvp: !!opts.pvp,
        // `body` is what is left of your manifestation — OP-14. It is only read
