@@ -8,7 +8,10 @@ __pycache__/
 # Keep it backed up somewhere: without it the sets cannot be rebuilt.
 design/Artwork/
 
-# Working files for that art — Paint.NET sources and camera dumps. Same
-# reasoning; nothing in the build reads them.
+# Working files for that art — Paint.NET sources, camera dumps, and mock-ups of
+# the whole screen. Same reasoning; nothing in the build reads them. The pieces
+# in this folder that *are* read — the two gods cut for the sprite sets — are
+# tracked, so this excludes the scratch and keeps the sources.
 concept/Artwork-inspiration/*.pdn
 concept/Artwork-inspiration/IMG_*.PNG
+concept/Artwork-inspiration/game-viz-idea-*.png
