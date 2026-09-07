@@ -162,6 +162,14 @@ duplicates under different timestamps. Without a content hash the ladder would
 have been weighted towards whichever pieces happened to get exported twice —
 47 unique of 61 files.
 
+**Sorted by size, and that may be the wrong axis.** `registers/ideas.md` carries
+a proposal to sort them by *architecture* instead — nuragic, cyclopic, wattle and
+daub — with a settlement keeping the kind it was born as however large it grows.
+Size says only *more*; architecture would say *who*, and persistence would make a
+settlement a place with a history rather than a value on a scale. It needs state
+the engine does not keep, so it is an idea and not a re-cut, but if it is ever
+taken the tiers below are what it replaces.
+
 **Variety is bought in proportion to how often a thing appears.** Cutting all
 sixteen cities cost 284 KB of a 592 KB set to draw pictures a player will rarely
 see two of at once; five is past the point where repetition shows. Eight each

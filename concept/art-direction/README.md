@@ -58,6 +58,14 @@ border is who holds it*) has nowhere left to live.
 The ChatGPT tiles are also ~380px illustrations. The board is 24px hexes. Detail
 that survives a ninth of the area is the only detail worth drawing.
 
+**And all of the above was read off stills.** Nothing here has been taken from how
+Fantasy Empires *moves* — what a spell looks like when it fires, what a marching
+army does, how long a set piece holds the screen. This game has six wonders, four
+works and no animation vocabulary beyond a banner and a twinkle: an intervention
+is a state change with no moment in it. An analysis pass on the animations, with
+the same discipline this file used on the screens, is open in
+`registers/ideas.md`.
+
 ---
 
 ## The three directions

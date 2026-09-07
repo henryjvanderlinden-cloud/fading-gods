@@ -270,6 +270,25 @@ with labour.
 **Naming** — letting the player name settlements and stones, which is cheap and
 does an enormous amount for attachment in a game about being remembered.
 
+**Colonies should travel** — a colony arrives the year it is sent. An army walks,
+a herd walks, refugees walk; only a colony teleports. It is the one place in the
+game where distance costs nothing, and distance is what the whole map is for.
+Make it a column on the road like the others: visible on its way, interceptable,
+and slow enough that founding far off is a commitment rather than a click. It
+would also give *Send a colony* a cost it currently hides — the years between
+sending and arriving are years the parent is short of people and the ground is
+unheld.
+
+**You cannot tell an army where to strike, only where to rise** — pick the
+settlement a levy comes *from*, not the place it attacks. You are a god who is
+barely heard. You send a dream and a people take up arms; where they go is
+theirs. Choosing the target is the most un-godlike gesture in the game — it is a
+general's order, and it is the one moment the interface forgets what you are.
+It is also the cheapest available answer to OP-25's complaint that the late game
+is interdiction only: an army you raise and cannot aim is a different instrument
+from one you point, and it makes *where your people already are* the thing you
+plan with, which is the map again rather than the menu.
+
 ## Interface and presentation
 
 **The interface becomes administrative over forty years** — direct manipulation
@@ -352,6 +371,57 @@ there, and probably stop there.**
 Pairs with the two other things game 7 left lying about: the wonder count as its
 own series (OP-20, still unbuilt, and game 7 went six to zero with no record but
 the last frame), and population feeding nothing but the ploughing budget.
+
+**Their share, not only yours** — the bar shows *of you* as a percentage and the
+rival only as a total. So you cannot see what the tolls have cost *them*, which
+is half of the only comparison the number exists to make. Show both. Cheap, and
+it turns `fade` from a personal budget into a race, which is what 1.23 meant it
+to be.
+
+**A mark should be clickable, and at present is not** — *defect, not preference.*
+Only the `.hx` path carries the click handler, and every mark on a tile — tree,
+hill, mountain, furrow, settlement — is drawn after it in the same layer with no
+`pointer-events="none"`. A click that lands on the art does nothing; a click on
+bare fill works. It predates the sprites, but the sprites made it serious: the
+marks used to be small vector glyphs and are now 34-unit clumps and full-hex
+cities, so on a developed board most of a tile is dead to the pointer.
+
+The fix that cannot rot is a transparent hit layer — one `<path class="hx">` per
+tile with no fill, drawn last, above every other layer — rather than remembering
+`pointer-events="none"` on every mark anyone ever adds. The current arrangement
+fails by *omission*, which is the kind that comes back.
+
+**The two of you, at either hand** — under the left palette your own god, under
+the right theirs, drawn as the figures already standing on the board. The
+palettes already read as *what a year is* on the left and *what it buys* on the
+right; putting the two powers at the outer edges makes the page a pair of
+players facing each other across the valley, which is the game.
+
+**Settlements should progress by architecture, not by size alone** — nuragic,
+then cyclopic, then wattle and daub, and **a place keeps the kind it was born
+as**: nuragic stays nuragic however large it grows.
+
+Size is currently the only axis — the cut sets in
+`concept/art-direction/sprites/` sort purely by footprint — so a town is a bigger
+village and the ladder says nothing but *more*. Architecture would say *who*, and
+persistence would make a settlement a place with a history rather than a value on
+a scale. It gives the board a second reading it does not have: a valley of
+nuragic towers and a valley of wattle huts are different countries, and the
+difference would survive their growing.
+
+It needs one piece of state the engine does not keep — a settlement's kind, fixed
+at founding and inherited by its splinters — which is what makes it an idea
+rather than an art task.
+
+**Read Fantasy Empires properly: the screens, and the action and magic
+animations** — `concept/art-direction/README.md` took its palette, its border
+discipline and its low-resolution argument from stills. Nothing has been taken
+from how it *moves*: what a spell looks like when it fires, what a marching army
+does, how long a set piece is allowed to hold the screen and what it stops while
+it does. This game has six wonders, four works and no animation vocabulary at all
+beyond a banner and a twinkle — an intervention is a state change with no moment
+in it. Worth a pass with the same discipline the art-direction README used on the
+stills: what to take, and what is a misread.
 
 ---
 
