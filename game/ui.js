@@ -68,6 +68,24 @@ const pvp = () => !!(FG.G && FG.G.pvp);
 
 const $ = id => document.getElementById(id);
 const u = n => n * U;                       // marks were authored against a 24px hex
+
+// How strongly a ground texture is laid over the state colour. Measured, not
+// picked. Blessed-vs-wild WCAG contrast, which is what `concept.md`'s one
+// load-bearing visual rule runs on:
+//
+//        alpha   plain   forest   hill
+//        0.00     1.65     1.54    1.31   <- as built, no texture
+//        0.25     1.46     1.38    1.23
+//        0.35     1.39     1.32    1.19
+//        0.50     1.29     1.24    1.15
+//
+// Any alpha composite pulls both states toward the same colour, so texture
+// costs contrast unavoidably. The art-direction README already calls 1.35 close
+// enough to read as the same ground at speed, and scores the old renderer's
+// 1.00 as a failure — so 0.25 is where this sits: enough grain to see, and
+// still clear of the number the direction was chosen to avoid. Raise it and the
+// board gets prettier and harder to read, in that order.
+const TEXA = 0.25;
 function px(c, r) { return [W * (c + 0.5 * (r & 1)) + W / 2 + u(4), VS * r + SZ + u(4)]; }
 function verts(x, y, s) {
  const v = [];
@@ -104,9 +122,51 @@ const COL = ["#7CF04A", "#A96BF0"];                          // you, them
 const SPARK = [["#E8FFC8", "#7CF04A", "#B4FF80"], ["#F0E4FF", "#A96BF0", "#C89CFF"]];
 
 // ------------------------------------------------------------------ marks
-function conifer(x, y, h, w, col, dark) {
+//
+// Every mark below opens the same way: ask `art.js` whether the active set has
+// a sprite for it, and draw the sprite if it does. `FGART.sprite` returns null
+// in the mode this game has always shipped in, and null for any key a set has
+// not filled in, so the vector drawing underneath is not a fallback in the
+// apologetic sense — it is still the default, and it is what a half-finished
+// sprite set shows through to. See the note at the top of art.js.
+const ART = FGART;
+function conifer(x, y, h, w, col, dark, bless) {
+ // scale off the authored height, because a tile draws three at three sizes
+ const sp = ART.sprite(bless ? "conifer.bless" : "conifer", x, y, {scale: h / 10});
+ if (sp) return sp;
  return `<path d="M${x} ${y - u(h)} L${x + u(w)} ${y} L${x - u(w)} ${y} Z" fill="${col}"/>`
       + `<path d="M${x} ${y - u(h)} L${x} ${y} L${x - u(w)} ${y} Z" fill="${dark}" opacity=".45"/>`;
+}
+// The hill hump and the mountain were written inline in `tileArt`. They are
+// marks like any other and now say so, because a sprite needs a call site with
+// a name on it.
+function hillMark(x, y, bless, seed) {
+ // Two piles of cut hills, green and dry, and which pile is used says whether
+ // the ground is blessed. That is the one distinction the whole ratchet runs
+ // on, and on hills the fills carry it worst of anywhere on the board — so the
+ // mark carries it here instead, by hue and silhouette rather than by a
+ // difference in lightness the eye has to hunt for.
+ const sp = ART.sprite(ART.variantKey(bless ? "hill.bless" : "hill",
+                                      rng(seed + 6.4)()), x, y);
+ if (sp) return sp;
+ const col = bless ? shift(P.bless.hill, -.40) : shift(P.land.hill, -.34);
+ return `<path d="M${x - u(11)} ${y + u(7)} q${u(5.5)} ${u(-11)} ${u(11)} 0 Z" fill="${col}"/>`
+   + `<path d="M${x - u(1)} ${y + u(8)} q${u(5)} ${u(-13)} ${u(11)} 0 Z" fill="${shift(col, .20)}"/>`
+   + `<path d="M${x - u(11)} ${y + u(7)} q${u(5.5)} ${u(-11)} ${u(11)} 0" fill="none"
+      stroke="${shift(col, -.3)}" stroke-width="${u(0.9)}"/>`;
+}
+function mountMark(x, y, seed) {
+ // Four cut peaks where a set holds them, picked off the tile's own seed. Not
+ // off a counter and not off Math.random: the land layer is cached and rebuilt
+ // whenever the board changes, so a variant chosen any other way would reshuffle
+ // the whole range every time somebody blessed a tile on the far side of the
+ // map. Seeded, a mountain is that mountain for the length of the game.
+ const sp = ART.sprite(ART.variantKey("mount", rng(seed + 2.7)()), x, y);
+ if (sp) return sp;
+ return `<path d="M${x - u(12)} ${y + u(8)} L${x - u(3)} ${y - u(9)} L${x + u(3)} ${y - u(1)}
+        L${x + u(7)} ${y - u(7)} L${x + u(13)} ${y + u(8)} Z" fill="${shift(P.land.mount, .16)}"/>`
+    + `<path d="M${x - u(3)} ${y - u(9)} L${x + u(1)} ${y - u(2)} L${x - u(6)} ${y + u(2)} Z" fill="${shift(P.land.mount, .5)}"/>`
+    + `<path d="M${x - u(3)} ${y - u(9)} L${x - u(12)} ${y + u(8)} L${x - u(5)} ${y + u(8)} Z" fill="${shift(P.land.mount, -.3)}"/>`;
 }
 // Sparkle phase is seeded rather than fixed, so that re-rendering the map on
 // every click does not resynchronise the whole field into one blink.
@@ -118,6 +178,54 @@ function twinkle(x, y, r, col, ph) {
   + ` Q${(x - q).toFixed(1)} ${(y + q).toFixed(1)} ${(x - r).toFixed(1)} ${y.toFixed(1)}`
   + ` Q${(x - q).toFixed(1)} ${(y - q).toFixed(1)} ${x.toFixed(1)} ${(y - r).toFixed(1)} Z"/>`;
 }
+// Blessing, as a scatter of small points in the owner's colour.
+//
+// The four-pointed stars read as *stars* — a literal sparkle sitting on top of
+// the board. Against flat vector ground that was fine; against textured ground
+// it looks like clip art. Many small points instead: they read as the ground
+// being charged rather than decorated, and being the owner's colour they say
+// whose blessing it is, which the pale stars never did.
+//
+// Seeded off the tile rather than the shared stream, so restyling the sparkle
+// cannot move anything else on the tile.
+function sparkPoints(x, y, own, seed) {
+ const g = rng(seed + 11.7), col = COL[own], lit = shift(col, .45);
+ // Sampled against the hex's own edge rather than in a box, and pushed out to
+ // the rim.
+ //
+ // The middle of a tile is the busiest part of it — the mountain, the wood, the
+ // temple, the power itself all stand there — so points scattered evenly landed
+ // on top of whatever the tile was about and read as speckle over the art. The
+ // periphery is the quiet ground, and blessing gathered at the edges reads as
+ // something coming *in* over the tile rather than something sprinkled on it.
+ //
+ // R is the circumradius less a margin, A the apothem. For a pointy-top hex the
+ // edge normals lie at 0°, 60°, 120° …, so folding the angle into one 60° wedge
+ // gives the distance to the edge along it, and every point can then be placed
+ // as a fraction of the way out. A box could not do this: the distance to the
+ // boundary is not the same in every direction, which is exactly the thing that
+ // makes a hex look like a hex.
+ const R = 22.5, A = R * 0.8660254;
+ let out = "";
+ for (let i = 0; i < 18; i++) {
+  const th = g() * Math.PI * 2;
+  const edge = A / Math.cos(((th + Math.PI / 6) % (Math.PI / 3)) - Math.PI / 6);
+  // Four in five out on the rim, the rest scattered inside — enough that the
+  // middle is not conspicuously empty, not so many that they crowd the mark.
+  const d = edge * (g() < 0.8 ? 0.68 + g() * 0.28 : 0.14 + g() * 0.40);
+  const dx = Math.cos(th) * u(d), dy = Math.sin(th) * u(d), t = g();
+  // Small. The first pass used a radius up to u(1.7) and the result was
+  // confetti — at this hex size anything past about u(0.8) stops being a point
+  // and becomes a bead. Depth comes from varying `fill-opacity`, not size, and
+  // not `opacity`: the twinkle animation drives opacity and would override it.
+  out += `<circle class="sp" cx="${(x + dx).toFixed(1)}" cy="${(y + dy).toFixed(1)}"`
+   + ` r="${u(0.3 + t * 0.5).toFixed(2)}" fill="${t > 0.62 ? lit : col}"`
+   + ` fill-opacity="${(0.55 + t * 0.45).toFixed(2)}"`
+   + ` style="animation-delay:${(-g() * 2.4).toFixed(2)}s,${(-g() * 5.2).toFixed(2)}s"/>`;
+ }
+ return out;
+}
+
 function wavePath(x, y, len, amp, phase) {
  const seg = len / 4; let d = `M${(x - len / 2).toFixed(1)} ${y.toFixed(1)}`;
  for (let i = 0; i < 4; i++) {
@@ -163,7 +271,14 @@ function menhir(x, y, h, w, seed, opt) {
 // having its own private copy of the number six is exactly the drift it names.
 function stoneGroup(x, y, k, who, power, live, crs) {
  const base = live ? (who === 0 ? "#E4DCC0" : "#DCD4C0") : "#7E8079";
- let s = `<ellipse cx="${x}" cy="${y + u(9)}" rx="${u(12)}" ry="${u(3.4)}" fill="#000" opacity=".26"/>`;
+ // The courses and the sparkle stay vector in every mode. Courses are drawn
+ // from a count that runs 0..n with no ceiling, so they cannot be a sprite
+ // without capping a rule at whatever the art happens to hold; the sparkle
+ // animates. Only the megaliths themselves switch — which is right, because
+ // the silhouette is the state and the silhouette is what is being tested.
+ const key = !live ? "stone.dead" : (power >= 12 ? "stone.big." : "stone.live.") + who;
+ let s = ART.has(key) ? ""
+  : `<ellipse cx="${x}" cy="${y + u(9)}" rx="${u(12)}" ry="${u(3.4)}" fill="#000" opacity=".26"/>`;
  // The courses the people have put on it: a stepped plinth under the stone, one
  // low wide slab a course, widest at the bottom. Drawn under everything else so
  // the stone itself sits on top of what was built up to it, and drawn on a dead
@@ -185,16 +300,20 @@ function stoneGroup(x, y, k, who, power, live, crs) {
  // stone reads as a taller thing and not as a stone with a box beside it.
  const lift = u((crs || 0) * 3.2);
  y -= lift;
- for (let i = 0; i < 3; i++)
-  s += menhir(x - u(11) + i * u(11) + (r() - 0.5) * u(3), y + u(8) - (i === 1 ? u(2) : 0),
-       u(5 + r() * 2.5), u(3.4), k * 0.31 + i, {fill: shift(base, -0.3)});
- if (live && power >= 12) {
-  s += menhir(x - u(6.5), y + u(7), u(15), u(5.5), k * 0.11, {fill: base});
-  s += menhir(x + u(6.5), y + u(7), u(15), u(5.5), k * 0.53, {fill: base});
-  s += `<path d="M${x - u(11)} ${y - u(8)} L${x + u(11)} ${y - u(9.4)} L${x + u(11)} ${y - u(5.6)}
-        L${x - u(11)} ${y - u(4.4)} Z" fill="${shift(base, .1)}"/>`;
- } else s += menhir(x, y + u(7), u(live ? 17 : 13), u(8), k * 0.07,
-      {fill: base, lean: live ? 0 : 0.20, crack: !live});
+ const sp = ART.sprite(key, x, y);
+ if (sp) s += sp;
+ else {
+  for (let i = 0; i < 3; i++)
+   s += menhir(x - u(11) + i * u(11) + (r() - 0.5) * u(3), y + u(8) - (i === 1 ? u(2) : 0),
+        u(5 + r() * 2.5), u(3.4), k * 0.31 + i, {fill: shift(base, -0.3)});
+  if (live && power >= 12) {
+   s += menhir(x - u(6.5), y + u(7), u(15), u(5.5), k * 0.11, {fill: base});
+   s += menhir(x + u(6.5), y + u(7), u(15), u(5.5), k * 0.53, {fill: base});
+   s += `<path d="M${x - u(11)} ${y - u(8)} L${x + u(11)} ${y - u(9.4)} L${x + u(11)} ${y - u(5.6)}
+         L${x - u(11)} ${y - u(4.4)} Z" fill="${shift(base, .1)}"/>`;
+  } else s += menhir(x, y + u(7), u(live ? 17 : 13), u(8), k * 0.07,
+       {fill: base, lean: live ? 0 : 0.20, crack: !live});
+ }
  if (live) { const sp = SPARK[who];
   s += twinkle(x - u(13), y - u(6), u(2.6), sp[0], r())
      + twinkle(x + u(12), y - u(12), u(2.2), sp[1], r())
@@ -205,13 +324,17 @@ function stoneGroup(x, y, k, who, power, live, crs) {
 // The people. Blessed ground shows people — few, upright, scattered. Farmland
 // shows work — more of them, bent, aligned to the rows. Same species, different
 // relationship to the ground.
-function person(fx, fy, h, col) {
+function person(fx, fy, h, col, own) {
+ const sp = ART.sprite("person." + own, fx, fy, {scale: h / u(1)});
+ if (sp) return sp;
  return `<ellipse cx="${fx}" cy="${fy + u(0.4)}" rx="${u(2)}" ry="${u(0.7)}" fill="#000" opacity=".28"/>`
   + `<g stroke="#1A1508" stroke-width="${u(0.45)}" stroke-linejoin="round" fill="${col}">`
   + `<path d="M${fx - h * 1.5} ${fy} L${fx - h * 0.9} ${fy - u(4.2)} L${fx + h * 0.9} ${fy - u(4.2)}
       L${fx + h * 1.5} ${fy} Z"/><circle cx="${fx}" cy="${fy - u(5.4)}" r="${u(1.15)}"/></g>`;
 }
-function stooped(fx, fy, col, flip) {
+function stooped(fx, fy, col, flip, own) {
+ const sp = ART.sprite("stooped." + own, fx, fy, {flip: !!flip});
+ if (sp) return sp;
  const d = flip ? -1 : 1;
  return `<ellipse cx="${fx}" cy="${fy + u(0.4)}" rx="${u(2.4)}" ry="${u(0.7)}" fill="#000" opacity=".26"/>`
   + `<g stroke="#1A1508" stroke-width="${u(0.5)}" stroke-linejoin="round" stroke-linecap="round" fill="${col}">`
@@ -224,6 +347,10 @@ function stooped(fx, fy, col, flip) {
 function boundaryStone(x, y, own, seed) {
  const col = COL[own], r = rng(seed + 1.3);
  const ox = x + u(-7 + r() * 4), oy = y + u(6.5), st = mix("#CFC4A6", col, 0.46);
+ // The sprite takes the same jittered offset, so switching sets moves the art
+ // and not the kudurru — which is what makes two sets comparable on one board.
+ const sp = ART.sprite("kudurru." + own, ox, oy);
+ if (sp) return sp;
  return `<ellipse cx="${ox}" cy="${oy + u(0.6)}" rx="${u(3.8)}" ry="${u(1.1)}" fill="#000" opacity=".32"/>`
   + `<path d="M${ox - u(2.9)} ${oy} L${ox - u(2.6)} ${oy - u(8)} Q${ox} ${oy - u(10)} ${ox + u(2.6)} ${oy - u(8)}
       L${ox + u(2.9)} ${oy} Z" fill="${st}" stroke="#1A1508" stroke-width="${u(0.7)}"/>`
@@ -247,7 +374,24 @@ function banner(x, yTop, h, col, seed) {
 }
 // Four stages, and the stage is read from the size of the complex. Under
 // seventy-seven there is no temple at all, which is the point of the custom.
-function temple(x, y, b, col, seed) {
+function temple(x, y, b, col, seed, own) {
+ // Banners stay vector even when the complex is a sprite: they animate, and a
+ // still flag on a board where everything else moves is worse than no flag.
+ // They matter more now than they did — a cut settlement is stone and thatch
+ // and carries no faction colour of its own, so the banner and the raised
+ // border are the whole of what says whose place this is.
+ const sp = ART.sprite(ART.variantKey("settle." + b, rng(seed + 3.9)()), x, y)
+         || ART.sprite("temple." + b + "." + own, x, y);
+ // One banner from a village, two from a town, and the city's stand out on the
+ // flanks of the hex it fills. The thresholds are band indices as the engine
+ // numbers them, 1..4 — they used to read 2 and 3 against a scale that starts
+ // at 1, so a city flew no flag at all: the one tile on the board where nothing
+ // else was left to say whose it was.
+ if (sp) return sp
+  + (b >= 2 ? banner(x + u(11), y - u(4), u(12.5), col, seed) : "")
+  + (b === 3 ? banner(x - u(14), y - u(8), u(13), col, seed + 3) : "")
+  + (b >= 4 ? banner(x - u(17), y - u(9), u(15), col, seed + 3)
+            + banner(x + u(17), y - u(9), u(15), col, seed + 7) : "");
  const stone = mix(P.stone, col, 0.30), lit = shift(stone, .20), dark = shift(stone, -.34),
        deep = "#2A2114", trim = shift(col, -.1);
  const slab = (x0, x1, yT, yB) =>
@@ -330,55 +474,104 @@ function tileArt(t, k) {
  let s = `<path class="hx" d="${hexPath(x, y)}" fill="${fill}" stroke="${P.seam}"
    stroke-width="${u(0.7).toFixed(1)}" data-k="${k}"/>`;
 
+ // Ground texture, when the set carries one: grain laid over the state colour,
+ // never instead of it.
+ //
+ // This is the one place the sprite work touches the rule `concept.md` calls
+ // load-bearing — *fill is the land* — and the art-direction README has
+ // measured luminance numbers behind it. Replacing the fill with a texture
+ // would throw those away: blessed forest and wild forest would become the same
+ // picture. So the flat fill is drawn first and still decides the colour, and
+ // the texture goes over it at TEXA, which costs some contrast but keeps the
+ // ordering. The number is measured, not chosen — see the README.
+ //
+ // Drawn as a second path rather than as the fill of `.hx` because `.hx` is the
+ // click target and carries `data-k`; this one takes no pointer events so the
+ // hit test still lands on the tile underneath.
+ const tex = ART.texture(t.t === "hill" ? "plain" : (t.st === "reck" || tilled ? "reck" : t.t));
+ if (tex && t.t !== "water")
+  s += `<path d="${hexPath(x, y)}" fill="${tex}" opacity="${TEXA}" pointer-events="none"/>`;
+
  if (t.t === "water") s += water(x, y, t.seed);
- if (t.t === "mount")
-  s += `<path d="M${x - u(12)} ${y + u(8)} L${x - u(3)} ${y - u(9)} L${x + u(3)} ${y - u(1)}
-        L${x + u(7)} ${y - u(7)} L${x + u(13)} ${y + u(8)} Z" fill="${shift(P.land.mount, .16)}"/>`
-    + `<path d="M${x - u(3)} ${y - u(9)} L${x + u(1)} ${y - u(2)} L${x - u(6)} ${y + u(2)} Z" fill="${shift(P.land.mount, .5)}"/>`
-    + `<path d="M${x - u(3)} ${y - u(9)} L${x - u(12)} ${y + u(8)} L${x - u(5)} ${y + u(8)} Z" fill="${shift(P.land.mount, -.3)}"/>`;
+ if (t.t === "mount") s += mountMark(x, y, t.seed);
  if (t.t === "forest" && t.st !== "reck" && !t.set) {
   const col = blessed ? P.treeBless : P.tree, dk = shift(col, -.35);
-  s += conifer(x - u(6) + r() * u(2), y + u(7), 10, 4.4, col, dk)
-     + conifer(x + u(5) - r() * u(2), y + u(5), 8.5, 3.8, col, dk)
-     + conifer(x + r() * u(3), y + u(10), 7.5, 3.4, col, dk);
+  // A cut clump is a whole stand of trees with its own arrangement, so one
+  // goes on the tile. Scattering three would be scattering three woods. The
+  // three r() calls still happen either way — the same rule as the furrows,
+  // because everything downstream of here draws from the same stream.
+  const jitter = [r(), r(), r()];
+  const clump = ART.sprite(ART.variantKey("forest", rng(t.seed + 8.3)()), x, y);
+  s += clump || (conifer(x - u(6) + jitter[0] * u(2), y + u(7), 10, 4.4, col, dk, blessed)
+     + conifer(x + u(5) - jitter[1] * u(2), y + u(5), 8.5, 3.8, col, dk, blessed)
+     + conifer(x + jitter[2] * u(3), y + u(10), 7.5, 3.4, col, dk, blessed));
  }
- if (t.t === "hill" && t.st !== "reck" && !t.set) {
-  const col = blessed ? shift(P.bless.hill, -.40) : shift(P.land.hill, -.34);
-  s += `<path d="M${x - u(11)} ${y + u(7)} q${u(5.5)} ${u(-11)} ${u(11)} 0 Z" fill="${col}"/>`
-    + `<path d="M${x - u(1)} ${y + u(8)} q${u(5)} ${u(-13)} ${u(11)} 0 Z" fill="${shift(col, .20)}"/>`
-    + `<path d="M${x - u(11)} ${y + u(7)} q${u(5.5)} ${u(-11)} ${u(11)} 0" fill="none"
-       stroke="${shift(col, -.3)}" stroke-width="${u(0.9)}"/>`;
- }
+ if (t.t === "hill" && t.st !== "reck" && !t.set) s += hillMark(x, y, blessed, t.seed);
  // Farmland: strips of different crop, some green, some fallow, angled by
  // faction. Strips stay inside 0.64·SZ so they rotate without leaving the hex.
  if (t.st === "reck" || tilled) {
   const own = t.set ? t.set.own : t.own, ang = own === 0 ? -32 : 30;
   const gap = u(5.4), top = y - u(8.6), hgt = u(3.1);
+  // The crop stream is drawn whether or not it is used. Four calls to r() go
+  // into choosing strip colours, and the field hands are placed from the same
+  // stream immediately afterwards — so skipping the strips in sprite mode would
+  // move every worker on every farm, and the two modes would no longer be the
+  // same board wearing different clothes. Consume, then decide.
+  const strip = [];
+  for (let i = 0; i < 4; i++)
+   strip.push({c: P.crops[Math.floor(r() * P.crops.length)],
+               wd: (i === 0 || i === 3) ? u(17) : u(22)});
+  // The cut furrows carry their own angle — the rows already run on a diagonal
+  // — so they are neither rotated here nor baked to the two seat angles. The
+  // seats are told apart by mirroring, which reverses the direction the rows
+  // run and is exact on a pixel sprite in a way a rotation never is.
+  //
+  // And a settlement's tile shows the settlement. Where a set carries field
+  // art, the ground under a temple is left as bare fill: the patch competes
+  // with the building standing on it and reads as clutter rather than as
+  // farmland. The fill is still `P.reck`, so the tile has not stopped saying
+  // what it is — only the mark is dropped, which is the fill rule doing its job.
+  const furKey = ART.variantKey("furrow", rng(t.seed + 5.1)());
+  const bare = t.set && ART.has(furKey);
+  const fur = bare ? null : ART.sprite(furKey, x, y, {flip: own === 1});
+  if (fur) s += fur;
   s += `<g transform="rotate(${ang} ${x.toFixed(1)} ${y.toFixed(1)})">`;
-  for (let i = 0; i < 4; i++) {
-   const c = P.crops[Math.floor(r() * P.crops.length)], wd = (i === 0 || i === 3) ? u(17) : u(22);
-   s += `<rect x="${(x - wd / 2).toFixed(1)}" y="${(top + i * gap).toFixed(1)}" width="${wd.toFixed(1)}"
-         height="${hgt.toFixed(1)}" rx="${u(1).toFixed(1)}" fill="${c}" opacity=".9"/>`
-     + `<rect x="${(x - wd / 2).toFixed(1)}" y="${(top + i * gap + hgt).toFixed(1)}" width="${wd.toFixed(1)}"
+  if (!fur && !bare) strip.forEach((sp, i) => {
+   s += `<rect x="${(x - sp.wd / 2).toFixed(1)}" y="${(top + i * gap).toFixed(1)}" width="${sp.wd.toFixed(1)}"
+         height="${hgt.toFixed(1)}" rx="${u(1).toFixed(1)}" fill="${sp.c}" opacity=".9"/>`
+     + `<rect x="${(x - sp.wd / 2).toFixed(1)}" y="${(top + i * gap + hgt).toFixed(1)}" width="${sp.wd.toFixed(1)}"
          height="${u(1.1).toFixed(1)}" fill="#000" opacity=".16"/>`;
-  }
+  });
   if (!t.set) { const n = 2 + Math.floor(r() * 3), col = shift(COL[own], -.14);
-   for (let i = 0; i < n; i++)
-    s += stooped(x + u(-8 + r() * 16), y + u(-6.4 + Math.floor(r() * 4) * 5.4) + u(3.1), col, r() < 0.4);
+   for (let i = 0; i < n; i++) {
+    // Drawn from the stream either way — see the note above. A set that omits
+    // people wants an empty field, not vector figures standing in its furrows.
+    const fx = x + u(-8 + r() * 16), fy = y + u(-6.4 + Math.floor(r() * 4) * 5.4) + u(3.1),
+          fl = r() < 0.4;
+    if (!ART.omits("stooped")) s += stooped(fx, fy, col, fl, own);
+   }
   }
   s += `</g>`;
-  if (!t.set) s += boundaryStone(x, y, own, t.seed);
+  if (!t.set && !ART.omits("kudurru")) s += boundaryStone(x, y, own, t.seed);
  }
  // An untaught settlement still sparkles: they are few, and they can still hear.
  if (blessed && (!t.set || !tilled)) {
-  const sp = SPARK[(t.set ? t.set.own : t.own) === 0 ? 0 : 1];
-  s += twinkle(x - u(9) + r() * u(4), y - u(7) + r() * u(3), u(4.4), sp[0], r())
-     + twinkle(x + u(7) - r() * u(4), y - u(1) + r() * u(4), u(3.4), sp[1], r())
-     + twinkle(x - u(3) + r() * u(6), y + u(8) - r() * u(3), u(3.9), sp[2], r())
-     + twinkle(x + u(2) + r() * u(5), y - u(9) + r() * u(3), u(2.6), sp[0], r());
+  const own2 = (t.set ? t.set.own : t.own) === 0 ? 0 : 1, sp = SPARK[own2];
+  // The four arguments are drawn from the stream whether or not the four stars
+  // are used, so that a set which restyles the sparkle does not move everything
+  // downstream of it. Consume, then decide — the same rule as the furrows.
+  const star = [[x - u(9) + r() * u(4), y - u(7) + r() * u(3), u(4.4), sp[0], r()],
+                [x + u(7) - r() * u(4), y - u(1) + r() * u(4), u(3.4), sp[1], r()],
+                [x - u(3) + r() * u(6), y + u(8) - r() * u(3), u(3.9), sp[2], r()],
+                [x + u(2) + r() * u(5), y - u(9) + r() * u(3), u(2.6), sp[0], r()]];
+  s += ART.opt("sparks") === "points" ? sparkPoints(x, y, own2, t.seed)
+     : star.map(a => twinkle.apply(null, a)).join("");
   const nf = r() < 0.42 ? 2 : 1;              // wild folk — presentation, see OP-18
-  for (let i = 0; i < nf; i++)
-   s += person(x + u(1.5 + i * 5.5 + r() * 3), y + u(7.5 - r() * 2.5), u(0.9 + r() * 0.25), COL[t.own]);
+  for (let i = 0; i < nf; i++) {
+   const px = x + u(1.5 + i * 5.5 + r() * 3), py = y + u(7.5 - r() * 2.5),
+         ph = u(0.9 + r() * 0.25);
+   if (!ART.omits("person")) s += person(px, py, ph, COL[t.own], t.own);
+  }
  }
  return s;
 }
@@ -462,6 +655,12 @@ function maybeHandOver() {
 }
 
 function render() {
+ // Sprites are measured in game units, so they need to be told what a unit is
+ // worth in screen pixels before anything asks for one. Told rather than
+ // assumed, because U is derived from SZ and SZ is allowed to change - the
+ // same reason the interface asks the engine for numbers instead of keeping
+ // its own copies.
+ ART.unit(U);
  const G = FG.G, TUNE = FG.TUNE, ME = SEAT, THEM = other(SEAT);
  const R = reach(ME), S = score(), walk = Object.keys(R).length - 1;
  // 1.19. Where the herds are, and where the one you have picked up can walk to.
@@ -532,7 +731,11 @@ function render() {
  // what a click is. Cached against everything tileArt and boundaries actually
  // read, so this stays a pure function of state and owns no rules.
  let over = "", scrim = "";
- const key = G.T.map(t => t.t + t.st + (t.own === null ? "-" : t.own)
+ // The art mode belongs in this key for exactly the reason everything else
+ // does: `tileArt` reads it. Leave it out and switching sets appears to do
+ // nothing at all until the board next changes on its own, which reads as a
+ // broken switch rather than as a stale cache and costs an hour to find.
+ const key = ART.mode() + "|" + G.T.map(t => t.t + t.st + (t.own === null ? "-" : t.own)
    + (t.set ? "s" + t.set.own + Math.round(t.set.pop) + (t.set.taught ? "T" : "")
               + (t.set.tabu ? "X" : "") + (t.set.ring ? "R" + t.set.ring.by : "") : "")).join("")
    + "|" + G.stones.map(a => a.join(",")).join("/");
@@ -565,7 +768,7 @@ function render() {
   // A forbidden place: a closed ring, and no fields, ever again.
   if (t.set.tabu) over += `<path d="${hexPath(x, y, SZ - u(6))}" fill="none"
     stroke="${P.ink}" stroke-width="${u(1.4)}" opacity=".5" pointer-events="none"/>`;
-  over += `<g pointer-events="none">${temple(x, y - u(2), b, COL[t.set.own], t.seed)}
+  over += `<g pointer-events="none">${temple(x, y - u(2), b, COL[t.set.own], t.seed, t.set.own)}
    <text x="${x}" y="${y + SZ - u(3.5)}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
    font-size="${u(10).toFixed(1)}" font-weight="600" fill="${P.ink}" stroke="#000"
    stroke-width="${u(2.4)}" paint-order="stroke" stroke-opacity=".6">${Math.round(t.set.pop)}</text></g>`;
@@ -609,14 +812,18 @@ function render() {
    over += `<line x1="${x}" y1="${y}" x2="${dx}" y2="${dy}" stroke="${col}" pointer-events="none"
     stroke-width="${u(1.1)}" stroke-dasharray="${u(1.4)} ${u(6)}" stroke-linecap="round" opacity=".5"/>`;
   }
-  over += `<g pointer-events="none">
+  // The beasts switch; the count, the held-here mark and the dotted line do
+  // not. Anything carrying a number stays vector in every mode - a sprite
+  // cannot hold a digit that changes every year.
+  const beasts = ART.sprite("herd." + h.own, x, y) || `
    <ellipse cx="${x}" cy="${y + u(9.6)}" rx="${u(8)}" ry="${u(2.2)}" fill="#000" opacity=".28"/>
    <path d="M${x - u(9)} ${y + u(3)} q${u(3)} ${u(-11)} ${u(9)} ${u(-8)} q${u(6)} ${u(-3)} ${u(9)} ${u(8)} Z"
     fill="${col}" stroke="#000" stroke-width="${u(0.9)}"/>
    <path d="M${x - u(7)} ${y - u(5)} q${u(-3)} ${u(-4)} ${u(1)} ${u(-5)}" fill="none" stroke="#000"
     stroke-width="${u(1.1)}" stroke-linecap="round" opacity=".8"/>
    <path d="M${x + u(7)} ${y - u(5)} q${u(3)} ${u(-4)} ${u(-1)} ${u(-5)}" fill="none" stroke="#000"
-    stroke-width="${u(1.1)}" stroke-linecap="round" opacity=".8"/>
+    stroke-width="${u(1.1)}" stroke-linecap="round" opacity=".8"/>`;
+  over += `<g pointer-events="none">${beasts}
    ${h.held > 0 ? `<circle cx="${x}" cy="${y - u(12)}" r="${u(3)}" fill="${P.ink}" opacity=".8"/>` : ""}
    <text x="${x}" y="${y + u(1)}" text-anchor="middle" font-family="IBM Plex Sans Condensed,sans-serif"
    font-size="${u(8).toFixed(1)}" font-weight="700" fill="#12181A">${Math.round(h.n)}</text></g>`;
@@ -650,13 +857,57 @@ function render() {
   const kerb = [-13, -7.5, 7.5, 13].map(dx =>
    `<rect x="${x + u(dx) - u(1.6)}" y="${y + u(3.4)}" width="${u(3.2)}" height="${u(4.4)}"
      rx="${u(0.8)}" fill="#2A2420" stroke="#000" stroke-width="${u(0.6)}"/>`).join("");
-  over += `<g pointer-events="none">
+  over += `<g pointer-events="none">${ART.sprite("kurgan." + t.kur, x, y) || `
    <ellipse cx="${x}" cy="${y + u(7)}" rx="${u(15)}" ry="${u(3)}" fill="#000" opacity=".3"/>
    <path d="M${x - u(15)} ${y + u(6)} q${u(15)} ${u(-15)} ${u(30)} 0 Z" fill="#4A3E30"
     stroke="#000" stroke-width="${u(1)}"/>
    <path d="M${x - u(11)} ${y + u(2.5)} q${u(11)} ${u(-8)} ${u(22)} 0" fill="none" stroke="${col}"
     stroke-width="${u(1.6)}" opacity=".9" stroke-linecap="round"/>
-   ${kerb}</g>`;
+   ${kerb}`}</g>`;
+ });
+
+ // 1.25. Cairns, and the footprint they committed.
+ //
+ // The footprint is drawn first and drawn as *ground*, because it is ground: a
+ // committed tile is still farmland, still scores, and still belongs to whoever
+ // holds it. What has changed about it is that nobody will ever break it again,
+ // so it gets a hatch across the furrows and a thin edge in the builder's
+ // colour. OP-28 is the whole reason this is on the board at all — the cost of a
+ // cairn is a future, and a future subtracted out of sight is weather.
+ //
+ // Then the cairn itself, as a stepped barrow: one slab a course, riding up on
+ // what has been built to it, the same language the stone courses use in 1.20.
+ // The crest carries the builder's colour, and the sole tallest in the valley —
+ // the only one holding anything back — carries it doubled.
+ G.T.forEach((t, k) => {
+  if (t.cmt === undefined || t.cmt === null) return;
+  const m = FG.T(t.cmt) && FG.T(t.cmt).mnd;
+  if (!m) return;
+  const [x, y] = px(t.c, t.r), col = COL[m.own];
+  over += `<g pointer-events="none" opacity=".55">${
+   [-8, 0, 8].map(dy =>
+    `<path d="M${x - u(13)} ${y + u(dy)} l${u(26)} 0" stroke="${col}" stroke-width="${u(0.9)}"
+      stroke-dasharray="${u(2.5)} ${u(3.5)}" fill="none"/>`).join("")}</g>`;
+ });
+
+ G.T.forEach((t, k) => {
+  if (!t.mnd) return;
+  const [x, y] = px(t.c, t.r), col = COL[t.mnd.own];
+  const h = t.mnd.h, sole = FG.soleTallest(t.mnd.own) && FG.tallestCairn() === h;
+  // One slab a course, narrowing as it goes up. Height is footprint, so the
+  // drawing says how much country is underneath it.
+  const steps = [];
+  for (let i = 0; i < h; i++) {
+   const w = 15 - i * 1.7, yy = 6 - i * 2.6;
+   steps.push(`<rect x="${x - u(w)}" y="${y + u(yy - 2.6)}" width="${u(w * 2)}" height="${u(2.8)}"
+     rx="${u(0.7)}" fill="#4A3E30" stroke="#000" stroke-width="${u(0.7)}"/>`);
+  }
+  over += `<g pointer-events="none">
+   <ellipse cx="${x}" cy="${y + u(7)}" rx="${u(16)}" ry="${u(3)}" fill="#000" opacity=".35"/>
+   ${steps.join("")}
+   <path d="M${x - u(15 - (h - 1) * 1.7)} ${y + u(6 - (h - 1) * 2.6 - 2.6)} l${u((15 - (h - 1) * 1.7) * 2)} 0"
+    stroke="${col}" stroke-width="${u(sole ? 2.6 : 1.4)}" opacity="${sole ? 1 : .75}" stroke-linecap="round"/>
+   </g>`;
  });
 
  // the two powers, as figures
@@ -681,7 +932,7 @@ function render() {
    <circle cx="${x}" cy="${y}" r="${u(17)}" fill="none" stroke="${col}" stroke-width="${u(1.9)}"
     stroke-dasharray="${u(5)} ${u(3.4)}" opacity=".95"/>
    <ellipse cx="${x}" cy="${y + u(9.6)}" rx="${u(7.5)}" ry="${u(2.2)}" fill="#000" opacity="${sh}"/>
-   ${w === 0 ? figureF(x, y, col) : figureM(x, y, col)}</g>`;
+   ${ART.sprite("figure." + w, x, y) || (w === 0 ? figureF(x, y, col) : figureM(x, y, col))}</g>`;
  });
 
  // Three layers, written independently. Replacing the land is ~3,400 nodes for
@@ -689,7 +940,14 @@ function render() {
  // token or arming an intervention touches only the cheap two.
  const m = $("map");
  if (landStale) {
+  // The sprite definitions are written on the same occasions the land is, which
+  // is exactly when they can go stale — a change of art mode is in that cache
+  // key. They sit as a direct child of the <svg> rather than inside the land's
+  // <g>: legal either way, but defs nested in a group is the unusual shape, and
+  // every layer above references them by id, so the conventional place is the
+  // one least likely to meet a renderer that disagrees.
   m.innerHTML = '<title>The contested valley</title><desc>Hex map with marching columns.</desc>'
+    + ART.defs()
     + `<g>${LAND.html}</g><g id="mscrim"></g><g id="mover"></g>`;
  }
  $("mscrim").innerHTML = scrim;
@@ -735,33 +993,13 @@ function render() {
   };
  });
 
- // on the road
- const road = [];
- G.armies.forEach(a => {
-  const steps = (() => {
-   let c = a.at, n = 0;
-   while (c !== a.to && n < 40) { const s = walkStep(c, a.to); if (s === undefined) return null; c = s; n++; }
-   return n;
-  })();
-  road.push(`<li><span class="${a.own === ME ? "b1" : "warn"}">${a.own === ME ? "your levy" : "their levy"} · ${Math.round(a.n)} strong</span>
-   <span>${steps === null ? "no road" : steps + " year" + (steps === 1 ? "" : "s") + " away"}</span></li>`);
- });
- G.refugees.forEach(f => road.push(`<li><span class="b2">${f.own === ME ? "your people on the road" : "their people"} · ${Math.round(f.n)}</span>
-   <span>${f.at === f.to ? "arriving" : "walking"}</span></li>`));
- // 1.19. Herds belong in this list and not in the settlement list beside it,
- // which is the whole point of them: they are people on the move, they hold no
- // ground, and the list of places has nowhere to put them.
- G.herds.forEach(h => {
-  const steps = (() => {
-   let c = h.at, n = 0;
-   while (c !== h.to && n < 60) { const s = FG.herdStep(c, h.to, h.own); if (s === undefined) return null; c = s; n++; }
-   return n;
-  })();
-  road.push(`<li><span class="b2">${h.own === ME ? "your herds" : "their herds"} · ${Math.round(h.n)}</span>
-   <span>${h.held > 0 ? "raising a mound" : steps === null ? "no way through"
-     : steps === 0 ? "grazing" : steps + " year" + (steps === 1 ? "" : "s") + " out"}</span></li>`);
- });
- $("march").innerHTML = road.join("") || '<li style="color:var(--faint);border:none">nobody is marching</li>';
+ // What used to stand in a column beside the board — who is marching, which
+ // stones are yours, which settlements are largest — is gone, and gone rather
+ // than hidden. Every one of those lists was a second telling of something the
+ // map already draws: a levy is a wedge on the road it is walking, a herd is a
+ // ring of beasts with its count on it, a settlement carries its own population,
+ // and a stone is a stone. The board is the instrument; a panel that repeats it
+ // costs the board the height it is drawn in. See the note on .play.
 
  // interventions
  const lostN = lostCount(ME), bg = bigCount(ME), hg = hugeCount(ME),
@@ -867,30 +1105,6 @@ function render() {
    <span><i style="background:${COL[THEM]}"></i>${pvp() ? SEATNAME[THEM] : "them"}</span>
    <span><i style="background:#C9A24A"></i>where you can walk</span>`;
 
- // 1.20 / 1.21. What each stone is, in its own words. `FG.stoneWorks` rather than
- // `Pw < 6`, because a grown stone needs less than six and the interface must not
- // keep a second copy of that number. A stone that has gone quiet now says what it
- // does instead, which is the whole of OP-13 in four words.
- $("st").innerHTML = G.stones[ME].map((k, i) => {
-  const Pw = region(k, ME).length, live = FG.stoneWorks(k, ME);
-  const c = FG.R2.stonesGrow ? FG.courses(k) : 0;
-  const mound = FG.T(k).kur !== undefined && FG.T(k).kur !== null;
-  const what = live ? "holds one back"
-    : mound ? "a grave now"
-    : FG.R2.deadOrders ? "orders carry from it"
-    : "gone quiet";
-  return `<li><span class="${live ? "b1" : "dead"}">stone ${i + 1} — ${what}</span>
-   <span>${Pw} tiles${c ? " · " + c + " course" + (c > 1 ? "s" : "") : ""} · ${
-     live ? "reach " + stoneRange(Pw) : (FG.R2.deadOrders && !mound) ? "orders " + FG.R2TUNE.orderRange : "reach 0"
-   }</span></li>`;
- }).join("") || '<li style="color:var(--faint);border:none">none raised</li>';
-
- $("sl").innerHTML = G.T.filter(t => t.set).sort((a, b) => b.set.pop - a.set.pop)
-  .slice(0, 10).map(t => {
-   const [n, b] = band(t.set.pop);
-   const mark = t.set.tabu ? " · forbidden" : t.set.ring ? " · closed in" : t.set.done ? " · spent" : "";
-   return `<li><span class="b${b}">${t.set.own === ME ? "" : "their "}${n}${mark}</span><span>${Math.round(t.set.pop)}</span></li>`;
-  }).join("") || '<li style="color:var(--faint);border:none">none yet</li>';
 
  // The chronicle is written from the left-hand seat and says "you" about it.
  // In a two-player game that is somebody else's chronicle half the time, so it
@@ -900,10 +1114,10 @@ function render() {
  const L = $("log");
  L.innerHTML = G.log.slice(-45).map(l => `<p class="${l.cls}"><b>y${l.t}</b>${l.x}</p>`).join("");
  L.scrollTop = L.scrollHeight;
- // OP-23. The chronicle is folded shut and stays however the player left it —
- // render() used to force it open every frame, which meant it could not be put
- // away. Only the label is written from here now.
- $("logsum").textContent = pvp() ? "what happened · told from the left hand" : "what happened";
+ // Behind a door now rather than folded into the sidebar, so what is written
+ // from here is the dialog's heading. Still labelled in a two-player game,
+ // because the chronicle says "you" about the left hand either way — see OP-21.
+ $("chrontitle").textContent = pvp() ? "what happened · told from the left hand" : "what happened";
 
  // 1.23 / OP-14. Nothing left of you: no move, no act, no intervention, for the
  // rest of the game. `a` is what every button in the action row already reads, so
@@ -997,7 +1211,7 @@ function finish() {
    ${S[who].tot} points: ${S[who].h} blessed, ${S[who].c} farmland, ${S[who].s} settled.
    Blessing peaked at ${peak} in year ${pt}. Ended with ${DIVINE.length - lostCount(who)} of six
    wonders${FG.R2.taughtLoss ? ", " + FG.taughtCount(who) + " taught to till" : ""}
-   and ${civicOpen(who).length} of three works.</p>`;
+   and ${civicOpen(who).length} of ${CIVIC.length} works.</p>`;
  };
 
  if (two) {
@@ -1020,7 +1234,7 @@ function finish() {
  <p>${S[0].tot} to ${S[1].tot} against <b>${doc}</b>. ${S[0].h} blessed, ${S[0].c} farmland,
  ${S[0].s} settled. Your blessing peaked at ${H.reduce((m, o, i) => o.s[0].h > m[0] ? [o.s[0].h, i + 1] : m, [0, 0])[0]}
  in year ${H.reduce((m, o, i) => o.s[0].h > m[0] ? [o.s[0].h, i + 1] : m, [0, 0])[1]}.
- You ended with ${DIVINE.length - lostCount(0)} of six wonders and ${civicOpen(0).length} of three works.
+ You ended with ${DIVINE.length - lostCount(0)} of six wonders and ${civicOpen(0).length} of ${CIVIC.length} works.
  ${mt ? mt + " tiles of the valley are mountain that was not there when you came. " : ""}
  There ${walk === 1 ? "was one tile" : "were " + walk + " tiles"} you could still walk into.</p>
  <p style="color:var(--faint);font-size:14px;margin-top:12px">The question: when a levy was on the
@@ -1069,6 +1283,7 @@ const R2LABEL = {
  barren3:"withered ground stays barren three years", exitLane:"the fields never quite close over",
  herds:"a people may be taught to keep herds, and then they walk",
  roam:"herds go where they will, and no hand reaches them",
+ cairn:"the settled raise monuments, and pay for them in furrows",
  dreamTeach:"you may teach where you are heard, at 10% of you", 
  dreamWorks:"a work beyond your hearing costs 10% of you"
 };
@@ -1096,6 +1311,52 @@ function r2restart() { r2sync(); ARM = null; ARMACT = null; ARMHERD = null; SEAT
 r2w.querySelectorAll("[data-r2]").forEach(i => {
  i.onchange = () => { FG.R2[i.dataset.r2] = i.checked; r2restart(); };
 });
+// ------------------------------------------------------------- the art switch
+//
+// Deliberately not a restart. Every other control in this dialog changes what a
+// year *is* and therefore has to start one; this one changes nothing the engine
+// can see, and the entire point of it is that you can flip between two looks
+// with the same stones on the same ground in the same year. A comparison where
+// the board moves is not a comparison.
+const artw = $("artmode");
+function artsync() {
+ artw.querySelectorAll("[data-art]").forEach(i => { i.checked = i.dataset.art === ART.mode(); });
+ const r = ART.res();
+ $("artnote").textContent = ART.note(ART.mode())
+  + (r ? "  ·  " + r + (r === 1 ? " source pixel" : " source pixels") + " to a game unit." : "");
+ crispApply();
+}
+// The thing that decides whether this reads as 1994 or as a blurry upscale.
+// The board is `width:100%` over a fixed viewBox, so its scale is whatever the
+// window gives it and almost never a whole number - which means one source
+// pixel covers 2.37 screen pixels, `pixelated` rounds each one on its own, and
+// you get a grid where some pixels are three across and their neighbours are
+// two. Still, that is sloppy; moving, it crawls. So this offers to give up a
+// little width in exchange for a whole-number scale.
+//
+// Off by default, and it must stay off by default: on a narrow window the
+// snapped width is a large step down, and a slightly soft board that fills the
+// screen is the better trade there. It is a choice, like AUTOPASS.
+function crispApply() {
+ const m = $("map"), on = $("crisp") && $("crisp").checked;
+ if (!on) { m.style.maxWidth = ""; return; }
+ const natural = m.parentElement.clientWidth || BW;
+ const w = ART.crispWidth(natural, BW, SZ, 24);
+ m.style.maxWidth = w ? w + "px" : "";
+}
+ART.modes().forEach(k => {
+ const l = document.createElement("label");
+ l.innerHTML = `<input type="radio" name="artmode" data-art="${k}">`
+  + `<span style="color:var(--dim)">${ART.label(k)}</span>`;
+ artw.appendChild(l);
+});
+artw.querySelectorAll("[data-art]").forEach(i => {
+ i.onchange = () => { ART.mode(i.dataset.art); artsync(); render(); };
+});
+if ($("crisp")) $("crisp").onchange = crispApply;
+addEventListener("resize", crispApply);
+artsync();
+
 $("r2off").onclick = () => { FG.R2all(false); r2restart(); };
 // A-16 again. `R2reset` is the thing that says *the game*, and since August 2026
 // the game is every built rule on — so this asks the engine for the set rather
@@ -1157,6 +1418,10 @@ $("autopass").onchange = e => { AUTOPASS = e.target.checked; };
 const openDlg = d => { if (d.showModal) d.showModal(); else d.setAttribute("open", ""); };
 $("aboutopen").onclick = () => openDlg($("about"));
 $("termsopen").onclick = () => openDlg($("terms"));
+// The chronicle scrolls to the bottom when it is opened rather than on every
+// frame — it is only on screen when somebody asked for it.
+$("chronopen").onclick = () => { openDlg($("chron"));
+ const L = $("log"); L.scrollTop = L.scrollHeight; };
 
 // The map's own viewBox, so the geometry above is the single source of it.
 $("map").setAttribute("viewBox", `0 0 ${BW.toFixed(0)} ${BH.toFixed(0)}`);

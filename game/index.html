@@ -15,13 +15,11 @@
  --rbless:#A96BF0;--rust:#C4443A;--moss:#94A03E;
 }
 *{box-sizing:border-box}
-body{margin:0;padding:0 20px 70px;background:var(--ground);color:var(--ink);
+body{margin:0;padding:0 18px 16px;background:var(--ground);color:var(--ink);
  font-family:'Spectral',Georgia,serif;font-weight:300;font-size:15.5px;line-height:1.6}
-/* Wide enough that the 1272px board gets its full width beside the 330px
-   sidebar, so a hex is drawn at the 50px it was authored for. Narrower screens
-   scale the SVG down gracefully; below 1180 the columns stack and the board
-   takes the full width. */
-.wrap{max-width:1660px;margin:0 auto}
+/* No sidebar any more, so no width to reserve for one. The board is the page.
+   See the note on .play for why this is not the constraint that matters. */
+.wrap{max-width:none;margin:0 auto}
 header{padding:12px 0 9px;border-bottom:1px solid var(--line)}
 h1{font-size:22px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:lowercase}
 .sub{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:11px;letter-spacing:.22em;
@@ -35,6 +33,18 @@ h1{font-size:22px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:l
    of a year, and a control that changes the game should not be below the fold
    under "your stones". OP-21. */
 .hd{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+/* The tallies moved up here from a strip under the board. They are eight short
+   numbers and they were costing the map a whole row of height — which is the
+   only dimension the board is actually short of. */
+/* Brand and doors take equal shares of what is left so the tallies land on the
+   page's centre line rather than merely between two things of unequal width. */
+.hd .brand{flex:1 1 0;min-width:0}
+.hd .doors{flex:1 1 0;justify-content:flex-end}
+.hd .bar{flex:0 0 auto;border-bottom:0;margin:0;justify-content:center;
+ gap:0 4px;row-gap:0}
+.hd .bar .c{flex:0 0 auto;padding:0 9px;min-width:0;text-align:center}
+.hd .bar .c .v{font-size:17px;line-height:1.15}
+@media(max-width:1100px){.hd .bar{justify-content:flex-start}}
 .seat{flex:0 1 auto;min-width:290px;max-width:350px}
 .seat .lab{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:9.5px;letter-spacing:.2em;
  text-transform:uppercase;color:var(--faint);margin-bottom:6px}
@@ -45,28 +55,68 @@ h1{font-size:22px;font-weight:400;margin:0;letter-spacing:.14em;text-transform:l
 .q{max-width:68ch;color:var(--dim);margin:10px 0 20px;font-size:15px}
 .q b{font-weight:400;color:var(--ink)}
 .q .hh{color:var(--bless)}.q .rr{color:var(--reck)}
-.cols{display:grid;grid-template-columns:1fr 330px;gap:32px;align-items:start}
-/* OP-23. 1180 caught a 10.9-inch iPad Air exactly and missed an 11-inch Pro by
-   fourteen points, so that device kept two columns and drew a 792px board —
-   hexes at 31 for art authored at 50. Every tablet stacks now. */
-@media(max-width:1280px){.cols{grid-template-columns:1fr}}
-/* And height, not width, is what actually binds on a tablet. An 11-inch iPad in
-   landscape is 1194 × 834 points, of which about 745 is viewport; a full-width
-   board is 650 of them and the header, bar, key, two control rows and hint line
-   need about 275. So the playing column is capped by the height available and
-   the hexes shrink, rather than the controls going off the bottom. 1.775 is the
-   board's own aspect, BW/BH in ui.js. */
-/* `width:100%` is load-bearing and was not here before, which was a latent bug
-   that only surfaced when the chip rows were restacked. `margin:0 auto` on a
-   grid item makes it shrink-to-fit rather than stretch, so this column has
-   always sized itself to its widest child's max-content and merely *looked*
-   right because the old single chip row was wider than the cap. Restacked into
-   four rows the widest child became the six wonder chips at 803px, and the board
-   silently dropped from 994 to 803 on a laptop — a 19% smaller board, caused by
-   a layout change two hundred pixels away. With this, the cap above is what
-   decides the width, which is what it was always written to do. */
-.play{width:100%;max-width:min(1272px,max(880px,calc((100vh - 340px) * 1.775)));margin:0 auto}
-@supports (height:100svh){.play{max-width:min(1272px,max(880px,calc((100svh - 340px) * 1.775)))}}
+.cols{display:block}
+/* The one thing worth knowing about this page's layout: **the board is limited
+   by height, not width.** Its aspect is 1.775 — BW/BH in ui.js — and a laptop
+   window is nearer 2.0, so what binds is the vertical space left after the
+   chrome, and the width to either side of it is spare. Every row removed from
+   above or below the board is worth 1.775 pixels of width; a column removed
+   beside it is worth none. Deleting the old 330px sidebar bought the map
+   nothing on its own, which is the fact that sent the controls sideways.
+
+   With the palettes beside the board, what is left above and below it is a
+   header and a hint line — so the allowance is 125px rather than the 340 it was
+   when four control rows and a tally strip sat underneath. The board now grows
+   until the palettes stop it rather than until the chrome does, and the two
+   constraints are close enough together that neither is wasted.
+
+   No cap on its own width. The SVG upscales cleanly and past its authored 1272
+   a hex is simply drawn larger than the 50px the art was cut for, which is the
+   point of asking for a bigger board. */
+.play{width:100%;margin:0 auto}
+.boardcol{width:100%;max-width:calc((100vh - 125px) * 1.775);margin:0 auto}
+@supports (height:100svh){.boardcol{max-width:calc((100svh - 125px) * 1.775)}}
+/* The palettes. Two columns of buttons either side of the board, and the sides
+   mean something: on the left what a year *is* — the act you take and the
+   wonder you spend yourself on — and on the right what that buys, the teaching
+   and the works. The board's whole ratchet reads left to right across the page.
+
+   It is also the layout that gives the board the most room. Controls stacked
+   under the board cost height, and height is the only dimension the board is
+   short of; beside it they cost width, which the board's 1.775 aspect leaves
+   over. The columns are allowed to shrink to 88px before the board does,
+   because a wrapped two-line button is a smaller loss than a smaller board. */
+.deck{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:0 20px;
+ align-items:start}
+/* 112 is measured against the other constraint rather than against the labels.
+   The height allowance leaves room for a board about 1460px wide; every pixel
+   the four columns take beyond that is a pixel off the board. At 112 the
+   palettes come to roughly 508px including gaps and the board lands near 1376 —
+   just inside what height would have allowed, so neither constraint is wasted.
+   The longest labels wrap to two lines at this width, which is the intended
+   trade: a wrapped button costs nothing, a smaller board costs everything. */
+.palette{display:grid;grid-template-columns:repeat(2,minmax(86px,112px));gap:14px 10px}
+.palette .col{min-width:0}
+.palette .under{grid-column:1 / -1}
+.palette .ivlab{display:block;margin-bottom:6px;
+ padding-bottom:5px;border-bottom:1px solid var(--soft)}
+/* Stacked, not flowed. A palette column is a list of things you may do, and a
+   list reads down. */
+.palette .chips{flex-direction:column;flex-wrap:nowrap;gap:5px;align-items:stretch}
+.palette button{width:100%;text-align:left;padding:7px 9px;font-size:10px;
+ letter-spacing:.07em;line-height:1.28;white-space:normal;overflow-wrap:break-word}
+.palette button.main{padding:9px}
+.palette .tally{margin:9px 0 0}
+.chartbox{margin-top:16px}
+.chartbox .key{margin-top:8px}
+/* Under 1180 the palettes have nowhere to go, so the board takes the full width
+   and they fall back to flowing rows underneath it. */
+@media(max-width:1180px){
+ .deck{grid-template-columns:1fr}
+ .palette{grid-template-columns:1fr 1fr;gap:14px 18px;margin-top:14px}
+ .palette .chips{flex-direction:row;flex-wrap:wrap}
+ .palette button{width:auto;font-size:11.5px;letter-spacing:.13em}
+}
 h2{font-family:'IBM Plex Sans Condensed',sans-serif;font-weight:600;font-size:10.5px;
  letter-spacing:.24em;text-transform:uppercase;color:var(--dim);margin:0 0 10px;
  padding-bottom:7px;border-bottom:1px solid var(--soft)}
@@ -113,6 +163,8 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
  text-transform:uppercase;color:var(--faint);display:flex;gap:12px;flex-wrap:wrap;margin-top:9px}
 .key i{display:inline-block;width:11px;height:11px;vertical-align:-1px;margin-right:5px;border-radius:2px}
 .log{max-height:170px;overflow-y:auto;border-left:1px solid var(--soft);padding-left:13px}
+/* In a dialog it has the room the sidebar never gave it. */
+#chron .log{max-height:min(62vh,540px)}
 .log p{margin:0 0 6px;font-size:14px;color:var(--dim)}
 .log b{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;letter-spacing:.1em;
  color:var(--faint);margin-right:7px;font-weight:500}
@@ -170,7 +222,6 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid 
 .ivlab{font-family:'IBM Plex Sans Condensed',sans-serif;font-size:9.5px;letter-spacing:.2em;
  text-transform:uppercase;color:var(--faint)}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
-.chipwrap{display:flex;flex-wrap:wrap;gap:5px 13px;align-items:center;min-width:0}
 .chip{padding:6px 10px;font-size:10.5px;letter-spacing:.11em;border-color:var(--soft)}
 .chip sup{font-size:9px;margin-left:5px;color:var(--faint);vertical-align:super}
 .chip.tch{color:var(--moss)}.chip.div{color:var(--bless)}.chip.civ{color:var(--reck)}
@@ -235,8 +286,13 @@ dialog.dlg::backdrop{background:rgba(6,8,5,.74)}
 <body><div class="wrap">
 <header>
  <div class="hd">
-  <div><h1>Fading Gods</h1><div class="epig">You can only be remembered by the thing that deafens you.</div></div>
-  <div class="doors"><button id="aboutopen">what this is</button><button id="termsopen">the terms</button></div>
+  <div class="brand"><h1>Fading Gods</h1><div class="epig">You can only be remembered by the thing that deafens you.</div></div>
+  <!-- The tallies, in the header rather than in a strip of their own under the
+       title. Height is the board's only scarce dimension — see .play — and this
+       row was costing it about seventy pixels of width. -->
+  <div class="bar" id="bar"></div>
+  <div class="doors"><button id="aboutopen">what this is</button><button
+   id="chronopen">what happened</button><button id="termsopen">the terms</button></div>
  </div>
 </header>
 
@@ -295,85 +351,118 @@ at the end of them wins. You will end holding everything you can build and nothi
    <div class="r2" id="r2"></div>
    <div class="tally" style="margin-top:8px">Changing any of these restarts the year one on the
     same map, so the two rule sets can be compared on the same ground.</div></div>
+ <!-- The art switch. It is in "the terms" rather than in its own door because
+      it is the same category of object as the rules panel: something you flip
+      to compare two versions of the game on one board. Unlike the rules, it
+      does *not* restart - the whole value of it is that the board underneath
+      does not move, so the only thing that changes between two looks is the
+      look. See concept/art-direction/sprites/README.md. -->
+ <div class="blk"><h2>how it is drawn</h2>
+   <div class="r2" id="artmode"></div>
+   <div class="tally" id="artnote" style="margin-top:8px"></div>
+   <label class="cb"><input type="checkbox" id="crisp"><span>snap the board to whole
+    pixels — narrower, but the sprites stop shimmering</span></label>
+ </div>
  <div class="blk"><h2>knobs</h2><div class="tune" id="tune"></div>
    <button id="restart" style="margin-top:6px">Restart with these</button></div>
 </dialog>
+<!-- The chronicle. Off the board rather than gone: it is the only thing the old
+     sidebar carried that the map cannot say for itself, and forty years of it is
+     the record of the game. Behind a door because it is read after the fact, not
+     during a decision. -->
+<dialog id="chron" class="dlg">
+ <form method="dialog"><button class="x">close</button></form>
+ <h2 class="dh" id="chrontitle">what happened</h2>
+ <div class="log" id="log"></div>
+</dialog>
+
 <div class="cols">
 <div class="play">
-  <div class="bar" id="bar"></div>
-  <!-- OP-21. Whose year it is, in that seat's own colour, across the full width
-       of the board. On a shared screen this is the only thing standing between
-       one player and somebody else's year, so it is not a label in a panel. -->
-  <div class="turnbar" id="turnbar" style="display:none"></div>
-  <svg class="map" id="map" viewBox="0 0 1272 717" role="img">
-    <title>The contested valley</title><desc>Hex map. Fill shows the land — woodland, blessed woodland, farmland, mountains, settlements. A raised border runs around each contiguous stretch of one power's ground. Blessed ground carries wild folk and a faction-coloured sparkle; farmland carries boundary stones, furrows angled by faction, and people bent to the rows. Marching armies and columns of refugees are drawn as moving tokens.</desc>
-  </svg>
-  <div class="key">
+ <!-- OP-23, revised again. The four control groups moved from four rows under
+      the board to four columns flanking it, two a side, and the sides carry the
+      argument: on the left is what a year *is* — the act you take, and the
+      wonder you spend yourself to work — and on the right is what it buys, the
+      teaching and the works. The ratchet the whole game runs on now reads left
+      to right across the page, which no arrangement of rows ever said.
+
+      It is also what gives the board its room. Beside the board the controls
+      cost width, which its 1.775 aspect leaves spare; under it they cost
+      height, which is the one dimension it is short of. See the note on .deck. -->
+ <div class="deck">
+
+  <div class="palette">
+   <div class="col" id="rowact">
+    <span class="ivlab">action</span><span class="chips acts">
+     <button id="bless">Bless</button><button id="stone">Raise a stone</button>
+     <button id="found">Found</button><button id="split">Split</button
+     ><!-- 1.19. Only there when the rule is, and hidden rather than disabled: a
+          permanently greyed button teaches a player that the palette has dead
+          things in it. Send is not an act and never spends the year — a herd
+          never stops hearing you, and that is the whole compensation for their
+          counting nothing. Stop and Raise a mound are acts, and both are done
+          standing on the herd itself.
+          The labels were measured short when this was a row and nine buttons
+          had to fit one line. In a column they may wrap, so the constraint is
+          gone — but they stay short, because a palette of two-line buttons is
+          harder to scan than the row ever was. -->
+     <button id="drive">Send them on</button
+     ><button id="stopherd">Stop here</button
+     ><button id="mound">Mound it</button>
+     <button id="pass">Do nothing</button><button id="end" class="main">End year</button>
+    </span>
+   </div>
+   <div class="col" id="rowdivine">
+    <span class="ivlab">wonders</span><span class="chips" id="divine"></span>
+   </div>
+   <!-- The legend belongs under the left palette: it explains the fills, and
+        the fills are what the acts above it change. -->
+   <div class="under key">
     <span><i style="background:#3C5A2C;border:1px solid #1E2A1C"></i>woodland</span>
     <span><i style="background:#88A448;border:1px solid #1E2A1C"></i>blessed</span>
     <span><i style="background:#C9A24A;border:1px solid #1E2A1C"></i>farmland</span>
     <span><i style="background:#7A7166;border:1px solid #1E2A1C"></i>mountain</span>
     <span><i style="border:2px solid #7CF04A"></i>yours</span>
     <span><i style="border:2px solid #A96BF0"></i>theirs</span>
+   </div>
   </div>
-  <!-- OP-23, revised. Four labelled rows rather than one act row and one
-       flowing chip row, in the order the game happens in: what you do, what you
-       still have, the thing that trades one for the other, what that buys. The
-       act row gains a label so that it is one of the four rather than a
-       different kind of object above them. -->
-  <div class="ivrow" id="rowact">
-   <span class="ivlab">action</span><span class="chips acts">
-    <button id="bless">Bless</button><button id="stone">Raise a stone</button>
-    <button id="found">Found</button><button id="split">Split</button
-    ><!-- 1.19. Only there when the rule is, and hidden rather than disabled: a
-         permanently greyed button in the action row teaches a player that the
-         row has dead things in it. Send is not an act and never spends the
-         year — a herd never stops hearing you, and that is the whole
-         compensation for their counting nothing. Stop and Raise a mound are
-         acts, and both are done standing on the herd itself.
-         The labels are short because they were measured: nine buttons wrap the
-         action row onto a second line, and the four labelled rows are the
-         layout. "Send the herds · Let them stop · Raise a mound" is 74px and
-         two lines; this is 36px and one. The descriptions live on the hint
-         line, which is where every other description in this build lives.
-    --><button id="drive">Send them on</button
-    ><button id="stopherd">Stop here</button
-    ><button id="mound">Mound it</button>
-    <button id="pass">Do nothing</button><button id="end" class="main">End year</button>
-   </span>
+
+  <div class="boardcol">
+   <!-- OP-21. Whose year it is, in that seat's own colour, across the full width
+        of the board. On a shared screen this is the only thing standing between
+        one player and somebody else's year, so it is not a label in a panel. -->
+   <div class="turnbar" id="turnbar" style="display:none"></div>
+   <svg class="map" id="map" viewBox="0 0 1272 717" role="img">
+     <title>The contested valley</title><desc>Hex map. Fill shows the land — woodland, blessed woodland, farmland, mountains, settlements. A raised border runs around each contiguous stretch of one power's ground. Blessed ground carries wild folk and a faction-coloured sparkle; farmland carries boundary stones, furrows angled by faction, and people bent to the rows. Marching armies and columns of refugees are drawn as moving tokens.</desc>
+   </svg>
+   <div class="hintline" id="hint"></div>
+   <div id="done"></div>
   </div>
-  <div class="ivrow" id="rowdivine">
-   <span class="ivlab">wonders</span><span class="chips" id="divine"></span>
+
+  <div class="palette">
+   <div class="col" id="rowteach">
+    <span class="ivlab">teach</span><span class="chips" id="teach"></span>
+   </div>
+   <!-- The tally sits under the works rather than on a line of its own, and
+        outside #civic because render() rewrites that element's innerHTML
+        wholesale — anything parked inside it is destroyed on the first frame. -->
+   <div class="col" id="rowcivic">
+    <span class="ivlab">works</span><span class="chips" id="civic"></span>
+    <span class="tally" id="tally"></span>
+   </div>
+   <!-- The one thing the board cannot say for itself: the shape of forty years.
+        Everything else that stood in a column beside it is gone, because the map
+        already said it — a levy is a wedge on the road it walks, a settlement
+        carries its own population, a stone is a stone. -->
+   <div class="under chartbox">
+    <svg id="chart" width="100%" viewBox="0 0 300 130" role="img">
+     <title>Score over time</title><desc>Your total, their total, and how far you can walk, across the years.</desc></svg>
+    <div class="key" id="ckey"></div>
+   </div>
   </div>
-  <div class="ivrow" id="rowteach">
-   <span class="ivlab">teach</span><span class="chips" id="teach"></span>
-  </div>
-  <!-- The tally sits beside the works rather than on a fifth line of its own,
-       and outside #civic because render() rewrites that element's innerHTML
-       wholesale — anything parked inside it is destroyed on the first frame. -->
-  <div class="ivrow" id="rowcivic">
-   <span class="ivlab">works</span><span class="chipwrap">
-    <span class="chips" id="civic"></span><span class="tally" id="tally"></span></span>
-  </div>
-  <div class="hintline" id="hint"></div>
-  <div id="done"></div>
+
+ </div>
 </div>
-
-<div>
-  <div class="blk"><h2>on the road</h2><ul class="sl" id="march"></ul></div>
-  <div class="blk"><h2>the two of you</h2>
-   <svg id="chart" width="100%" viewBox="0 0 300 130" role="img">
-    <title>Score over time</title><desc>Your total, their total, and how far you can walk, across the years.</desc></svg>
-   <div class="key" id="ckey"></div>
-  </div>
-  <div class="blk"><h2>your stones</h2><ul class="sl" id="st"></ul></div>
-  <div class="blk"><h2>settlements</h2><ul class="sl" id="sl"></ul></div>
-  <details class="blk" id="logwrap"><summary id="logsum">what happened</summary>
-   <div class="log" id="log"></div></details>
-
-
 </div>
-</div></div>
 
 <!-- One engine, loaded here and by sim/harness.js. Classic scripts, not ES
      modules: modules will not load over file:// and this file has to stay
@@ -386,5 +475,12 @@ at the end of them wins. You will end holding everything you can build and nothi
 <script src="../engine/actions.js"></script>
 <script src="../engine/tick.js"></script>
 <script src="../engine/ai.js"></script>
+<!-- The art switch, then the sets it switches between. art.js must come first:
+     the generated files call FGART.set() at load. Both sets are base64 inside
+     the script rather than loose PNGs, so this still works when the file is
+     double-clicked - the same reason none of these are modules. -->
+<script src="art.js"></script>
+<script src="sprites-a.js"></script>
+<script src="sprites-b.js"></script>
 <script src="ui.js"></script>
 </body></html>

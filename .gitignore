@@ -1,1 +1,14 @@
 node_modules/
+__pycache__/
+
+# Source art. Excluded on purpose: ~105 MB of PNGs, and the repository does not
+# need them to run the game — what the game loads is the cut sets in
+# game/sprites-*.js, which are committed. Only concept/art-direction/sprites/
+# build.py reads this folder, and it stops with an explanation if it is missing.
+# Keep it backed up somewhere: without it the sets cannot be rebuilt.
+design/Artwork/
+
+# Working files for that art — Paint.NET sources and camera dumps. Same
+# reasoning; nothing in the build reads them.
+concept/Artwork-inspiration/*.pdn
+concept/Artwork-inspiration/IMG_*.PNG

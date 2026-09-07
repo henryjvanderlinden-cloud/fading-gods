@@ -85,7 +85,46 @@ each contiguous stretch of one power's ground rather than around every tile,
 Bronze Age temple complexes that grow through four stages, and the two powers
 drawn as figures rather than tokens.
 
-Three things in `ui.js` are worth knowing before changing it:
+**And it is now on a switch.** *The terms* → **how it is drawn** offers the
+vector renderer and two sprite sets, and unlike everything else in that dialog
+it does not restart: the board, the year and the stones stay where they are, so
+the only thing that changes between two looks is the look. Nothing about the
+land is sprited — the fill and the boundaries carry the one load-bearing visual
+rule and have measured contrast numbers behind them — and nothing carrying a
+number, animating, or drawn from an unbounded count is either. The argument,
+the costs, and how to add a set are in `concept/art-direction/sprites/README.md`.
+
+**The board is limited by height, not width.** Its aspect is 1.775 — `BW/BH` in
+`ui.js` — and a laptop window is nearer 2.0, so what binds is always the vertical
+space left after the chrome. This is the single most useful fact about the
+layout, and it is counter-intuitive: deleting the 330px sidebar bought the map
+nothing on its own. **Every row removed from above or below the board is worth
+1.775 pixels of width; a column removed beside it is worth none.** That is why
+the tallies moved into the header, why the marching / stones / settlements
+panels went (the board already draws all three), and why the graph and the
+legend sit beside the control rows — in space the board's aspect cannot use.
+
+So the four control groups are now four **columns flanking the board**, two a
+side, and the sides carry the argument: on the left what a year *is* — the act
+you take, and the wonder you spend yourself to work — and on the right what it
+buys, the teaching and the works. The ratchet the game runs on reads left to
+right across the page, which no arrangement of rows ever said. The legend sits
+under the left pair because it explains the fills the acts above it change; the
+graph sits under the right pair, being the one thing the board cannot say for
+itself.
+
+The palette columns are capped at 112px, and that number is measured against the
+*other* constraint rather than against the labels: the height allowance leaves
+room for a board about 1460px wide, so every pixel the four columns take beyond
+that comes off the board. At 112 they total about 508px and the board lands near
+1376 — just inside what height would have allowed, so neither constraint is
+wasted. The longest labels wrap to two lines, which is the intended trade.
+
+Measured on a 1920 × 1080 screen: the board was 1083px wide with the sidebar,
+1269 with the numbers moved into the header, and about 1376 now — hexes at 54px
+against the 50px the art was cut for.
+
+Five things in `ui.js` are worth knowing before changing it:
 
 - **Some of the board moves, and none of it has to.** Sparkle on blessed ground,
   flying banners, travelling water. Ownership is on the boundary, settlement
@@ -95,7 +134,15 @@ Three things in `ui.js` are worth knowing before changing it:
 - **A still screenshot understates the build.** Judge it running.
 - **The map is three layers and the land is cached.** See `architecture.md`.
   Anything drawn from state that `tileArt` or `boundaries` reads must be included
-  in the cache key in `render()`, or it will not redraw.
+  in the cache key in `render()`, or it will not redraw. The art mode is in that
+  key for exactly this reason: leave it out and the switch appears to do nothing
+  until the board next changes on its own, which reads as a broken control
+  rather than as a stale cache.
+- **Every mark opens by asking `art.js` for a sprite.** `FGART.sprite` returns
+  `null` in vector mode and for any key a set has not filled in, so each call
+  site is `ART.sprite(...) || theVectorMark(...)` and the vector is still the
+  default rather than a fallback. A half-finished sprite set shows vectors
+  through the gaps instead of holes.
 
 Wild folk on blessed ground and field hands on farmland are **presentation over
 `t.st`, not a mechanic** — no rule puts anyone anywhere. OP-18 is the version

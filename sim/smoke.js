@@ -766,6 +766,133 @@ console.log("\nand then the hand comes off");
  console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
 }
 
+console.log("\nthe cairn, and what it costs to keep one");
+{
+ const before = fail;
+ const {K, T, ring} = FG;
+ function blank() {
+  FG.resetTune(); FG.R2reset();
+  FG.createGame({you: null, them: "passive", seed: 1});
+  FG.G.T.forEach(t => { t.t = "plain"; t.f = 1; t.st = "wild"; t.own = null; t.set = null;
+                        t.bar = 0; t.kur = null; t.mnd = null; t.cmt = null; });
+  FG.G.stones = [[], []]; FG.G.armies = []; FG.G.refugees = []; FG.G.herds = []; FG.G.log = [];
+  FG.G.record = 0;
+  FG.G.p[0].pos = K(4, 4); FG.G.p[1].pos = K(12, 4);
+ }
+ const settle = (c, r, who, pop, taught) => {
+  const t = T(K(c, r));
+  t.set = FG.newSet(pop, who); t.set.taught = taught === undefined ? true : !!taught;
+  t.st = "wild"; t.own = null; return t;
+ };
+ const furrow = (c, r, who) => { const t = T(K(c, r)); t.st = "reck"; t.own = who; return t; };
+ // A settlement with a field of its own ploughed all round it, which is the
+ // ordinary case and the one every check below starts from.
+ const town = (c, r, who) => {
+  settle(c, r, who, 300, true);
+  ring(K(c, r), 2).forEach(x => { if (x !== K(c, r)) furrow(T(x).c, T(x).r, who); });
+  return K(c, r);
+ };
+
+ // --- the price floor, and that it is a record and not a height ---------
+ blank(); town(4, 4, 0);
+ ok("the first cairn is one course", FG.cairnNeed() === 1);
+ ok("and it may be aimed at the town's own fields", FG.targets("cairn", 0).length > 0);
+ FG.doIntervene("cairn", FG.targets("cairn", 0)[0], 0);
+ const c1 = FG.cairns(0);
+ ok("it stands, one course, one tile of footprint",
+    c1.length === 1 && c1[0].h === 1 && T(c1[0].k).mnd.tiles.length === 1);
+ ok("the record rose with it", FG.G.record === 1);
+ ok("and the next one must be taller", FG.cairnNeed() === 2);
+
+ // The record is the point of the rule: knock it down and the price stays.
+ T(c1[0].k).mnd = null;
+ ok("levelling it does not make the next one cheap again", FG.cairnNeed() === 2);
+
+ // --- what it costs is the settlement's future, and it is spatial -------
+ blank(); const tk = town(4, 4, 0); FG.G.record = 2;
+ const sp = T(tk).set.spent;
+ const aim = FG.targets("cairn", 0)[0];
+ FG.doIntervene("cairn", aim, 0);
+ ok("a three-course cairn commits three connected tiles",
+    T(aim).mnd.h === 3 && T(aim).mnd.tiles.length === 3);
+ ok("the footprint is charged to the town's thirty", T(tk).set.spent === sp + 3);
+ ok("and every tile of it is marked on the board",
+    T(aim).mnd.tiles.every(x => T(x).cmt === aim));
+ ok("the ground stays farmland and goes on scoring",
+    T(aim).mnd.tiles.every(x => T(x).st === "reck" && T(x).own === 0));
+
+ // --- what it buys, and only for the sole tallest -----------------------
+ blank(); town(4, 4, 0); settle(9, 4, 1, 300, true);
+ const before1 = FG.lostCount(0);
+ FG.doIntervene("cairn", FG.targets("cairn", 0)[0], 0);
+ ok("the sole tallest holds a wonder back", FG.lostCount(0) === Math.max(0, before1 - 1));
+ ok("and the other power is not holding it", FG.soleTallest(1) === false);
+
+ // A tie holds nothing — the clause the whole rule turns on. Build the rival a
+ // cairn of the same height by hand, since the record would otherwise force
+ // theirs higher.
+ blank(); const ta = town(4, 4, 0), tb = town(10, 4, 1);
+ FG.doIntervene("cairn", FG.targets("cairn", 0)[0], 0);
+ FG.G.record = 0;                       // let them match rather than exceed
+ FG.doIntervene("cairn", FG.targets("cairn", 1)[0], 1);
+ ok("two cairns of a height, and neither holds anything",
+    FG.soleTallest(0) === false && FG.soleTallest(1) === false);
+ ok("which is what makes answering one worth doing",
+    FG.tallestCairn() === 1 && FG.cairns(0).length === 1 && FG.cairns(1).length === 1);
+
+ // --- bigger is more exposed, and it is the same sentence as bigger -----
+ blank(); const tc = town(4, 4, 0); FG.G.record = 3;
+ const big = FG.targets("cairn", 0)[0];
+ FG.doIntervene("cairn", big, 0);
+ const foot = T(big).mnd.tiles.slice();
+ ok("four courses, four tiles to break", foot.length === 4);
+ // Un-plough one tile of the footprint — a Wither, a herd, anything at all.
+ const victim = foot[foot.length - 1];
+ T(victim).st = "wild"; T(victim).own = null;
+ FG.endYear();
+ ok("one tile off the plough and the whole thing comes down", T(big).mnd === null);
+ ok("the rest of the footprint is released", foot.every(x => !T(x).cmt));
+ ok("but the record does not fall with it", FG.G.record === 4);
+
+ // --- and it survives the country going over ----------------------------
+ blank(); const td = town(4, 4, 0);
+ FG.doIntervene("cairn", FG.targets("cairn", 0)[0], 0);
+ ok("it holds a wonder while the town is yours", FG.soleTallest(0) === true);
+ T(td).set.own = 1;                     // the levy arrives, the place changes hands
+ ok("and it still holds it when the town is theirs", FG.soleTallest(0) === true);
+ ok("the other power gains nothing by taking the ground", FG.soleTallest(1) === false);
+
+ // --- the gates: taught, not forbidden, and with a future left to spend --
+ blank(); settle(4, 4, 0, 300, false);
+ ring(K(4, 4), 2).forEach(x => { if (x !== K(4, 4)) furrow(T(x).c, T(x).r, 0); });
+ ok("an untaught place may not raise one", FG.targets("cairn", 0).length === 0);
+
+ blank(); const te = town(4, 4, 0); T(te).set.tabu = true;
+ ok("nor a forbidden one", FG.targets("cairn", 0).length === 0);
+
+ blank(); const tf = town(4, 4, 0); T(tf).set.spent = FG.TUNE.budget.v;
+ ok("nor one that has already spent its whole life",
+    FG.targets("cairn", 0).length === 0);
+
+ // --- the footprint may not be laid over anything, or anywhere ----------
+ blank(); const tg2 = town(4, 4, 0); FG.G.record = 5;
+ ok("a footprint that will not fit is not offered",
+    FG.targets("cairn", 0).every(k => FG.cairnFoot(tg2, k, 0, FG.cairnNeed())));
+
+ blank(); town(4, 4, 0);
+ const far = FG.targets("cairn", 0);
+ ok("and never further out than the fields that town works",
+    far.every(k => ring(K(4, 4), FG.R2TUNE.cairnRad).includes(k)));
+
+ // --- with the flag off, none of it exists ------------------------------
+ blank(); FG.R2.cairn = false; town(4, 4, 0);
+ ok("flag off: no cairn is offered", FG.targets("cairn", 0).length === 0);
+ ok("flag off: nothing holds a wonder back", FG.soleTallest(0) === false);
+ FG.R2reset();
+
+ console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
+}
+
 console.log("\nthe baseline is still exact");
 {
  const before = fail;
@@ -805,7 +932,13 @@ console.log("\nthe baseline is still exact");
  // baseline array above did not move at all, which is the point: `fade` is off
  // under `R2all(false)`, so the guard cannot reach the pre-batch game by
  // construction rather than by luck.
- const NOW = ["21:126", "75:144", "114:126", "120:123", "42:165", "129:60", "72:94", "57:104"];
+ // Re-frozen 31 August 2026 for **1.25**, the cairn. One seed of eight moved —
+ // 72:94 to 87:75 on seed 6 — and that is the expected shape rather than a weak
+ // result: `bands` never teaches, so it never opens a work, so it can never
+ // raise one, and the whole of the movement is `cities` in the other seat
+ // spending a work on a monument instead of on a clearance. The pre-batch array
+ // above did not move at all, which is the check that matters.
+ const NOW = ["21:126", "75:144", "114:126", "120:123", "42:165", "129:60", "87:75", "57:104"];
  FG.R2reset();
  for (let s = 0; s < NOW.length; s++)
   ok("the shipped game is unchanged, seed " + s, play("bands", "cities", s) === NOW[s],
@@ -830,13 +963,15 @@ console.log("\nthe baseline is still exact");
  // ground, found nothing in either rank, and put the roofs back up in the same
  // year — handing away a town and a wonder for nothing. Wandering restores it to
  // 90:69. The two arrays above did not move at all, which is the point.
- const ROAM = ["90:69", "72:94", "90:72", "120:108", "132:84", "75:89", "63:64", "126:105"];
+ // Re-frozen 31 August 2026 for 1.25. Three of eight moved, all of them games in
+ // which `cities` had a work to spend and something to spend it on.
+ const ROAM = ["90:69", "81:88", "93:60", "120:108", "132:84", "78:93", "63:64", "126:105"];
  FG.R2reset();
  for (let s = 0; s < ROAM.length; s++)
   ok("the roaming game is unchanged, seed " + s, play("storm", "cities", s) === ROAM[s],
      `got ${play("storm", "cities", s)}, want ${ROAM[s]}`);
 
- const STEERED = ["90:71", "72:94", "90:72", "120:108", "132:84", "75:107", "66:85", "126:105"];
+ const STEERED = ["90:71", "81:88", "93:60", "120:108", "132:84", "75:107", "66:85", "126:105"];
  FG.R2reset(); FG.R2.roam = false;
  for (let s = 0; s < STEERED.length; s++)
   ok("and the steered game underneath it, seed " + s, play("storm", "cities", s) === STEERED[s],
@@ -866,9 +1001,15 @@ try {
  });
 
  const win = dom.window;
- ["engine/constants.js", "engine/hex.js", "engine/map.js", "engine/state.js",
-  "engine/rules.js", "engine/actions.js", "engine/tick.js", "engine/ai.js",
-  "game/ui.js"].forEach(p => win.__load(p));
+ // Read the script list out of the page rather than repeating it here. The
+ // hardcoded copy went stale the first time a script was added — art.js — and
+ // the failure was "the build threw", four layers from the cause. A second
+ // list of the same thing does not drift visibly; it stops being updated and
+ // goes on looking right, which is the A-16 lesson in miniature.
+ const srcs = [...dom.window.document.querySelectorAll("script[src]")]
+  .map(s => s.getAttribute("src").replace(/^\.\.\//, "").replace(/^(?!engine\/)/, "game/"));
+ ok("the page lists its own scripts", srcs.length >= 9, srcs.length + " tags");
+ srcs.forEach(p => win.__load(p));
 
  const doc = win.document;
  ok("engine reached the page", !!win.FG && !!win.FG.G);
@@ -876,8 +1017,62 @@ try {
     `${doc.querySelectorAll(".hx").length} hexes`);
  ok("the year is shown", /year/i.test(doc.getElementById("bar").textContent));
  ok("wonders are listed", doc.getElementById("divine").children.length === 6);
- ok("works are listed", doc.getElementById("civic").children.length === 3);
+ ok("works are listed", doc.getElementById("civic").children.length === FG.CIVIC.length);
  ok("knobs were built", doc.getElementById("tune").querySelectorAll("input[type=range]").length === 11);
+
+ // --- the art switch -----------------------------------------------------
+ //
+ // Three things are worth checking and they are not the obvious one. Whether
+ // a sprite is prettier than a vector is not testable and is not the point;
+ // whether switching sets *changes the drawing without changing the game* is
+ // both, and it is the property the whole comparison rests on.
+ const ART = win.FGART;
+ const modes = ART.modes();
+ ok("the art switch offers svg and the sprite sets", modes.length >= 3, modes.join(", "));
+ // The build opens in the first sprite set that registers, not in svg. svg is
+ // still the baseline the comparison rests on and still what a missing sprite
+ // falls through to — it is just no longer what a player meets first.
+ ok("the build opens in a sprite set", ART.mode() === modes[1], ART.mode());
+ ok("svg is still offered", modes[0] === "svg");
+
+ const artRadios = doc.getElementById("artmode").querySelectorAll("[data-art]");
+ ok("every mode has a control", artRadios.length === modes.length);
+
+ // The land layer is cached against a key. If the art mode is missing from
+ // that key, switching appears to do nothing until the board next changes on
+ // its own — a broken switch, not a stale cache, as far as anyone looking at
+ // it can tell. This is the check that catches that.
+ const boardOf = () => doc.getElementById("map").innerHTML;
+ const pick = m => { const r = [...artRadios].find(x => x.dataset.art === m);
+                     r.checked = true; r.onchange(); };
+ const stateOf = () => JSON.stringify(win.FG.score()) + "|" + win.FG.G.turn;
+ const stateBefore = stateOf();
+
+ // Start from svg explicitly rather than from whatever the build opened in.
+ // An earlier version took the opening board as the baseline, which was fine
+ // while the build opened in svg and silently compared fine against itself the
+ // day it stopped — three checks that had quietly become tautologies. A test
+ // should say which state it is in, not inherit one.
+ pick("svg");
+ const svgBoard = boardOf();
+ ok("svg mode puts no images on the board", !/<image/.test(svgBoard));
+
+ const drawings = new Set([svgBoard]);
+ modes.slice(1).forEach(m => {
+  pick(m);
+  ok("switching to " + m + " redraws the board", boardOf() !== svgBoard);
+  ok(m + " puts images on the board",
+     /<image[^>]+image-rendering:pixelated/.test(boardOf()));
+  drawings.add(boardOf());
+ });
+ ok("the three modes draw three different boards", drawings.size === modes.length,
+    drawings.size + " distinct");
+ ok("switching the art changed nothing the engine can see", stateOf() === stateBefore);
+
+ // Back to svg, and it has to come back to exactly what it was — otherwise the
+ // fallback is not a fallback, it is a fourth look.
+ pick("svg");
+ ok("returning to svg restores the original drawing", boardOf() === svgBoard);
 
  // play it through the buttons, exactly as a person would
  const startTotal = win.FG.score().reduce((a, s) => a + s.tot, 0);
@@ -1186,6 +1381,143 @@ try {
  ok("a two-player game plays out", G().over, `stopped at year ${G().turn}`);
  ok("the two-seat ending names the seats",
     /left hand|right hand/.test(doc.getElementById("done").textContent));
+
+ // --- cut variants, and the one property that matters about them ----------
+ //
+ // A mark may hold several cut pieces — four mountains — and which one a tile
+ // gets comes off the tile's own seed. The seed is the whole point. The land
+ // layer is a cache that rebuilds whenever anything on the board changes, so a
+ // variant picked any other way would reshuffle the entire range every time
+ // somebody blessed a tile on the far side of the map. That would look like a
+ // rendering fault, would be impossible to screenshot twice, and is exactly the
+ // kind of thing that survives review because nobody renders the same board
+ // twice on purpose. So: render it twice on purpose.
+ //
+ // Mountains are not generated onto any map — they exist only where the wonder
+ // has put them — so this raises three ranges through the engine's own
+ // `doIntervene` rather than writing "mount" onto tiles, which would be a board
+ // the game cannot produce.
+ win.FG.createGame({them: "cities", seed: 6});
+ [30, 58, 86].forEach(k => win.FG.doIntervene("mountains", k, 0));
+ const peaks = win.FG.G.T.filter(t => t.t === "mount").length;
+ ok("the wonder raised a range to look at", peaks >= 5, peaks + " mountain tiles");
+
+ const artRadio = m => [...doc.getElementById("artmode").querySelectorAll("[data-art]")]
+  .find(x => x.dataset.art === m);
+ const fine = artRadio("fine");
+ if (fine) {
+  fine.checked = true; fine.onchange();
+  const first = doc.getElementById("map").innerHTML;
+  const imagesIn = h => (h.match(/<image[^>]*>/g) || []);
+  const shot = imagesIn(first);
+  ok("the cut mountains reached the board", shot.length > 0, shot.length + " images");
+
+  // And what the set omits is actually absent from the drawing, not merely
+  // declared. Vector people would otherwise stand in the sprite fields.
+  ok("no people are drawn in a set that omits them",
+     !/#fg-(person|stooped)-/.test(first));
+
+  // Rebuild the land from scratch and it has to come back identical.
+  //
+  // Going out to svg and back is what forces that: the art mode is in the land
+  // cache key, so this discards the cached layer and re-runs every mark. A
+  // weaker version of this check pushed a line into the chronicle instead,
+  // which is not in the key — so the cache handed the same string straight back
+  // and the assertion passed without the variant logic running at all. A
+  // determinism check that cannot fail is worse than no check.
+  artRadio("svg").checked = true; artRadio("svg").onchange();
+  fine.checked = true; fine.onchange();
+  ok("a mountain keeps its shape across a full rebuild",
+     doc.getElementById("map").innerHTML === first);
+
+  // And the four are actually four: distinct hrefs among the mountain images.
+  const srcs = new Set(shot.map(t => (t.match(/href="([^"]{0,80})/) || [])[1]));
+  ok("the range is not one peak stamped over and over", srcs.size >= 3,
+     srcs.size + " distinct sprites drawn");
+
+  // Furrows carry a signal the mountains do not: the direction the rows run
+  // says whose field it is. The cut art already has its angle in it, so the
+  // seats are separated by a mirror rather than by rotation — and a mirror is
+  // exact on a pixel sprite where a rotation never is.
+  //
+  // Two ways this breaks silently, so two checks: one set used unmirrored for
+  // both seats, which leaves every farm looking equally owned; and a mirror
+  // that moves the patch off the tile it belongs to, which is what a flip does
+  // if it is taken about the wrong axis.
+  const ART2 = win.FGART;
+  const wasMode = ART2.mode();
+  ART2.mode("fine");
+  const plain = ART2.sprite("furrow.0", 300, 200);
+  const flipped = ART2.sprite("furrow.0", 300, 200, {flip: true});
+  ok("the furrows reached the set", !!plain);
+  if (plain && flipped) {
+   ok("mirroring gives the other seat a different field", plain !== flipped);
+   ok("the mirror is taken about the tile, not the origin",
+      /translate\(600\.0,0\) scale\(-1,1\)/.test(flipped), flipped.slice(0, 60));
+   // The rows must not be turned as well as mirrored: a rotation would show up
+   // as a matrix or a rotate(), and there is deliberately neither.
+   ok("furrows are mirrored and never rotated", !/rotate\(|matrix\(/.test(flipped));
+  }
+  // Ground textures are a fill, not a mark, and they are laid in board
+  // coordinates rather than per hex — that is what stops the same crop being
+  // stamped on every tile of a terrain. Checked here because a pattern that
+  // quietly became objectBoundingBox would still draw, and would still look
+  // like ground, and would repeat identically in all 126 hexes.
+  ok("the ground textures reached the set", !!ART2.texture("forest"));
+  const dd = ART2.defs();
+  ok("textures are emitted as patterns", /<pattern[^>]+id="fg-tex-forest"/.test(dd));
+  ok("the texture is laid in board coordinates, not per hex",
+     /<pattern[^>]+patternUnits="userSpaceOnUse"/.test(dd));
+  ok("a texture is never handed out as a sprite", ART2.sprite("tex.forest", 0, 0) === null);
+
+  // Omission has to mean "draw nothing", not "fall back to the vector". Those
+  // are opposite instructions and everywhere else in this file absence means
+  // the second one — so a set with no people cut yet says so explicitly, and
+  // this is the check that the saying-so is obeyed rather than ignored.
+  // Hills come in two piles and the pile says whether the ground is blessed —
+  // green for blessed, dry for wild. That is the distinction the whole ratchet
+  // runs on, and on hills the fills carry it worst of anywhere on the board, so
+  // this is the mark doing what the fill cannot. If one pile were ever empty
+  // the build would fall back to the unnumbered procedural hump for that state
+  // and the two would silently stop being told apart.
+  // Every band the engine can hand to `temple()` must have art. This is the
+  // check that would have caught the off-by-one it replaces: the sprites were
+  // keyed 0..3 to match the branches inside the drawing code, while `FG.band`
+  // returns 1..4 — so `temple.0` was cut and never asked for, and `temple.4`
+  // was asked for and never cut. Every city on every board fell through to the
+  // vector renderer, which draws a city and a town identically. Nothing threw.
+  // The top of the settlement ladder simply stopped existing.
+  //
+  // Asked of the engine rather than written out, so it stays true if the bands
+  // are ever renumbered.
+  const bands = [...new Set([1, 76, 77, 149, 150, 799, 800, 5000]
+    .map(p => win.FG.band(p)[1]))];
+  ok("the engine has four settlement bands", bands.length === 4, bands.join(","));
+  bands.forEach(b => ok("band " + b + " has settlement art",
+     ART2.has("settle." + b + ".0") || ART2.has("temple." + b + ".0")));
+
+  ok("blessed hills are cut", ART2.has("hill.bless.0"));
+  ok("wild hills are cut", ART2.has("hill.0"));
+  ok("the two hills are different pictures",
+     ART2.sprite("hill.0", 0, 0) !== ART2.sprite("hill.bless.0", 0, 0));
+  // Hills spread, mountains rise — a mountain is impassable and a hill is not,
+  // so the silhouettes must not converge.
+  const box = k => { const m = /width="([\d.]+)" height="([\d.]+)"/
+    .exec(ART2.sprite(k, 0, 0)); return m && [+m[1], +m[2]]; };
+  const hb = box("hill.0"), mb = box("mount.0");
+  if (hb && mb) ok("a hill is wider than it is tall, a mountain is not",
+     hb[0] / hb[1] > 2 && mb[0] / mb[1] < 1.6,
+     `hill ${(hb[0] / hb[1]).toFixed(1)}:1, mountain ${(mb[0] / mb[1]).toFixed(1)}:1`);
+
+  ok("the sprite sets declare that they have no people", ART2.omits("person")
+     && ART2.omits("stooped"));
+  ok("svg mode omits nothing", (() => { ART2.mode("svg");
+     const v = ART2.omits("person"); ART2.mode("fine"); return !v; })());
+  ART2.mode(wasMode);
+
+  const svgRadio = artRadio("svg");
+  svgRadio.checked = true; svgRadio.onchange();
+ }
 
  console.log(`  ${fail === before ? "all checks passed" : (fail - before) + " failed"}`);
 } catch (e) {

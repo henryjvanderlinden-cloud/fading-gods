@@ -25,6 +25,7 @@ workshop below is now a place to try changes, not the place to see the result.
 | `nine-boards.png` | Contact sheet: three directions × three years. |
 | `the-arc.png` | The rejected cool-blessing proposal, at years 9, 27 and 40. |
 | `outline-modes.png`, `faction-colours.png` | Superseded, kept as the record of two decisions. |
+| `sprites/` | Whether the marks should be pixels instead of vectors. **Open, not settled** — three modes on a switch in the build, and a README arguing what the comparison is for. |
 
 **Direction B — warm throughout — is chosen.** The measurements below argued for C
 and were overruled, which is the right way round: the numbers said B separates
